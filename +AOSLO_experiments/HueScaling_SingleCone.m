@@ -364,6 +364,8 @@ while(runExperiment ==1)
     % check if present stimulus button was pressed
     elseif strcmp(resp, kb_StimConst)
         if PresentStimulus == 1
+            % play sound to indicate start of stimulus
+            sound(cos(90:0.75:180))
             % 100% for most experiments unless set otherwise with intensity
             % variable at top of file.
             trialIntensity = intensities_sequence_rand(trial);
