@@ -1,5 +1,5 @@
-function [] = plot_video_intensity()
-    % plot_video_intensity()
+function [] = plot_intensity()
+    % plot_intensity()
     % -------------------------------------
     %
     % Select a video from file. Video is read in and the mean intensity of
