@@ -62,7 +62,7 @@ function Mov = generate_mov(CFG)
     aom0pow(:) = 0;
 
     aom2pow = ones(size(aom1seq));
-    aom2pow(:) = 100; % 0.25 in ColorNaming_ConeSelection.m
+    aom2pow(:) = 0.25;
     aom2locx = zeros(size(aom1seq));
     aom2locy = zeros(size(aom1seq));
     aom2offx = zeros(size(aom1seq));
@@ -83,12 +83,12 @@ function Mov = generate_mov(CFG)
 
     Mov.aom0seq = aom0seq;
     % Mov.aom0seq = ones(size(aom0seq,2)); %comment when running online
-    Mov.aom1seq = aom1seq;
     Mov.aom0pow = aom0pow;
-
-    Mov.aom1pow = aom1pow;
     Mov.aom0locx = aom0locx;
     Mov.aom0locy = aom0locy;
+    
+    Mov.aom1seq = aom1seq;
+    Mov.aom1pow = aom1pow;
     Mov.aom1offx = aom1offx;
     Mov.aom1offy = aom1offy;
 

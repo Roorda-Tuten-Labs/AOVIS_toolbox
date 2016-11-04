@@ -55,7 +55,9 @@ if isstruct(CFG) == 1;
         set_VideoParams_PsyfileName();  
 
         % !! Not sure why this is called again
-        hAomControl = getappdata(0,'hAomControl');
+        % hAomControl = getappdata(0,'hAomControl');
+        
+        % Not entirely sure what this does
         Parse_Load_Buffers(1);
 
         % change appearance of AOM control window
@@ -87,7 +89,6 @@ kb_ans5 = CFG.ans5;  kb_ans5_label = CFG.ans5_label;
 
 kb_NotSeen = CFG.ans6;
 kb_AbortConst = CFG.ans7;
-
 %kb_ans8 = CFG.ans8;  
 %kb_ans8_label = CFG.ans8_label;
 
@@ -97,20 +98,20 @@ ntrials   = CFG.ntrials;
 
 dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
-
 % ------------------------------------------------------------- %
+
 % Get TCA offsets
 tca_red = [CFG.red_x_offset CFG.red_y_offset];
 %tca_green = [CFG.green_x_offset CFG.green_y_offset];
 tca_red = tca_red.*[-1,+1] ;  % [-1,-1] on ColorNaming_ConeSelction.m
 
-% Select cone locations
+% ---- Select cone locations ---- %
 [offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
     tca_red, VideoParams.rootfolder, CFG);
 num_locations = size(offsets_x_y,1);
 offsets_x_y = offsets_x_y - repmat([X_cross_loc, Y_cross_loc],num_locations,1);
 
-%%%%%%% THIS SECTION FOR SETTING INTENSITIES %%%%%%%%%
+% ---- THIS SECTION FOR SETTING INTENSITIES ---- %
 sequence = reshape(ones(ntrials,1)*(1:num_locations),1,num_locations*ntrials);
 sequence_with_intensities = repmat(sequence,1,length(intensities));
 
@@ -122,18 +123,15 @@ intensities_sequence = reshape(intensities_sequence,1, ...
 randids_with_intensity = randperm(numel(sequence_with_intensities));
 sequence_rand = sequence_with_intensities(randids_with_intensity);
 intensities_sequence_rand =  intensities_sequence(randids_with_intensity);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% -----------------------------------------
 
-
-%%%%%% Setup response matrix %%%%%%%
+% ---- Setup response matrix ---- %
 response_matrix = {};
 response_matrix.trials = zeros(ntrials * num_locations, 1);
 response_matrix.coneids = zeros(length(sequence_rand), 1);
 response_matrix.offsets = zeros(length(sequence_rand), 2);
 response_matrix.intensities = zeros(length(sequence_rand), 1); 
-
 response_matrix.uniqueoffsets = offsets_x_y;
-
 response_matrix.answer = zeros(ntrials * num_locations * length(intensities),...
     Nscale);
 
@@ -165,7 +163,7 @@ Mov.suppress = 0;
 Mov.pfx = fprefix;
 
 % ------ Add TCA to the offsets ------ %
-offset_matrix_with_TCA = offsets_x_y + repmat(tca_red,num_locations,1);
+offset_matrix_with_TCA = offsets_x_y + repmat(tca_red, num_locations, 1);
 
 % Set up AOM TCA offset mats
 aom1offx_mat = zeros(length(Mov.aom1seq), length(Mov.aom1seq), num_locations);
@@ -173,8 +171,8 @@ aom1offy_mat = zeros(length(Mov.aom1seq), length(Mov.aom1seq), num_locations);
 
 %%% Change back when using offsets from stabilized cone movie %%%
 for loc = 1:num_locations
-    aom1offx_mat(:,:,loc) = offset_matrix_with_TCA(loc,1);
-    aom1offy_mat(:,:,loc) = offset_matrix_with_TCA(loc,2);
+    aom1offx_mat(:, :, loc) = offset_matrix_with_TCA(loc, 1);
+    aom1offy_mat(:, :, loc) = offset_matrix_with_TCA(loc, 2);
 end
  
 % % TCA  check
@@ -202,10 +200,9 @@ while(runExperiment ==1)
         runExperiment = 0;
         uiresume;
         TerminateExp;
-
         message = ['Off - Experiment Aborted - Trial ' num2str(trial) ' of '...
                    num2str(CFG.ntrials)];
-        set(handles.aom1_state, 'String',message);
+        set(handles.aom1_state, 'String', message);
             
     % check if present stimulus button was pressed
     elseif strcmp(resp, kb_StimConst)
@@ -225,25 +222,14 @@ while(runExperiment ==1)
                 StimParams.eframe = 4;
                 StimParams.fext = 'bmp';
                 Parse_Load_Buffers(0);
-            end                    
-            
-            % !!
-            % !! Looks like bitnumber and laser_sel are not in use !!
-            % !!
-            laser_sel = 0;
-            if SYSPARAMS.realsystem == 1 && SYSPARAMS.board == 'm'
-                bitnumber = round(8191*(2*trialIntensity-1));
-            else
-                bitnumber = round(trialIntensity*1000);
             end
 
             % ---- set movie parameters to be played by aom ---- %
-            %Mov.aom1pow(:) = 1; 
-            %Mov.aom0pow(:) = 1;
+            % Select AOM power
             Mov.aom1pow(:) = intensities_sequence_rand(trial);
             Mov.aom0pow(:) = 1;
 
-            % tell the aom about the offset (includes TCA and cone location)
+            % tell the aom about the offset (TCA + cone location)
             Mov.aom1offx = aom1offx_mat(1, :, sequence_rand(trial));
             Mov.aom1offy = aom1offy_mat(1, :, sequence_rand(trial));
 
@@ -332,7 +318,7 @@ while(runExperiment ==1)
                 TerminateExp;
                 message = ['Off - Experiment Aborted - Trial ' ...
                     num2str(trial) ' of ' num2str(CFG.ntrials)];
-                set(handles.aom1_state, 'String',message);
+                set(handles.aom1_state, 'String', message);
         
             else                
                 % All other keys are not valid.
@@ -418,15 +404,14 @@ function createStimulus(trialIntensity, stimsize, stimshape)
         stim_im(1:end,1:end) = 1;
 
     elseif strcmp(stimshape, 'circle')
-
-        xp =  -fix(stimsize/2)  : fix(stimsize/2);
+        xp =  -fix(stimsize / 2)  : fix(stimsize / 2);
         [x, y] = meshgrid(xp);
-        stim_im = (x.^2 + y.^2) <= (round(stimsize/2)).^2; 
+        stim_im = (x .^ 2 + y .^ 2) <= (round(stimsize / 2)) .^ 2; 
     end
 
-    stim_im = stim_im.*trialIntensity;    
+    stim_im = stim_im .* trialIntensity;    
 
-    %Make cross     
+    %Make cross in IR channel to record stimulus location
     ir_im = ones(21, 21);
     ir_im(:,9:13)=0;
     ir_im(9:13,:)=0;
@@ -439,24 +424,24 @@ function createStimulus(trialIntensity, stimsize, stimshape)
         cd(fullfile(pwd, 'tempStimulus'));
     end
 
-    blank_im = zeros(10,10);
-    imwrite(stim_im,'frame2.bmp');
-    imwrite(blank_im,'frame3.bmp');
-    imwrite(ir_im,'frame4.bmp');
+    blank_im = zeros(10, 10);
+    imwrite(stim_im, 'frame2.bmp');
+    imwrite(blank_im, 'frame3.bmp');
+    imwrite(ir_im, 'frame4.bmp');
     cd ..;
 
 end     
 
 function startup
-    dummy=ones(10,10);
-    if isdir(fullfile(pwd,'tempStimulus')) == 0;
-        mkdir(fullfile(pwd,'tempStimulus'));
-        cd(fullfile(pwd,'tempStimulus'));
-        imwrite(dummy,'frame2.bmp');
+    dummy=ones(10, 10);
+    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
+        mkdir(fullfile(pwd, 'tempStimulus'));
+        cd(fullfile(pwd, 'tempStimulus'));
+        imwrite(dummy, 'frame2.bmp');
     else
-        cd(fullfile(pwd,'tempStimulus'));
+        cd(fullfile(pwd, 'tempStimulus'));
         delete ('*.*');
-        imwrite(dummy,'frame2.bmp');
+        imwrite(dummy, 'frame2.bmp');
     end
     cd ..;
 end
