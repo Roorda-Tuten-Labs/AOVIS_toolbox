@@ -1,5 +1,6 @@
-function [offsets_x_y, X_cross_loc, Y_cross_loc] = select_cone_gui()
-
+function [offsets_x_y, X_cross_loc, Y_cross_loc] = select_cone_gui(...
+    tca, rootfolder, CFG)
+    
     % get user input about cone locations
     choice = questdlg('Would you like to use last offsets', ...
          'New or repeat', ...
@@ -21,22 +22,22 @@ function [offsets_x_y, X_cross_loc, Y_cross_loc] = select_cone_gui()
       case 'New offsets from old/new movie'
 
         % name of folder with offsets
-        folder_name = fullfile(VideoParams.rootfolder, subject_initials, filesep);
+        folder_name = fullfile(rootfolder, CFG.subject, filesep);
 
         % gen new offsets
         [offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.cone_select(...
-            tca_red, cone_selection_method, folder_name);
+            tca, CFG.cone_selection, folder_name);
 
         % check for dir, name and save offsets for later
         if ~isdir('color_naming_offsets')
             mkdir('color_naming_offsets');
         end
         offset_filename = fullfile('.', 'color_naming_offsets', ...
-                           [subject_initials, '_offsets_',...
+                           [CFG.subject, '_offsets_',...
                            strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':',''), ...
                            '.mat']);                                       
         save(offset_filename,'offsets_x_y', 'X_cross_loc', 'Y_cross_loc', ...
-             'tca_red');
+             'tca');
 
     end
  

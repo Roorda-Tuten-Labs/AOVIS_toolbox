@@ -3,9 +3,9 @@ function [img_map, offset_cropped] = auto_cone_select(img_crop, rect_position)
     xcorr_threshold = 0.6;
     cone_size = 5; %odd number please
 
-    [conex coney] = meshgrid(-floor(cone_size/2) : floor(cone_size/2));
+    [conex, coney] = meshgrid(-floor(cone_size/2) : floor(cone_size/2));
     cone = double( exp(-(conex.^2 + coney.^2) / (cone_size/2).^2 ));
-    xcorr    = normxcorr2_mex(cone, img_crop, 'same');
+    xcorr = normxcorr2f(cone, img_crop);
     [x,y] = find(xcorr > xcorr_threshold);
     
     max_num = xcorr(sub2ind(size(xcorr),x,y));
@@ -25,7 +25,7 @@ function [img_map, offset_cropped] = auto_cone_select(img_crop, rect_position)
                             floor(size(cone,1)/2) , floor(size(cone,2)) ...
                             floor(size(cone,1))]);
 
-        [duplicates row_indices] = setdiff(all_maxs_sorted(:,3),to_compare(:));
+        [duplicates, row_indices] = setdiff(all_maxs_sorted(:,3),to_compare(:));
         all_maxs_sorted_new = sortrows(all_maxs_sorted(row_indices,:),-3);
         all_maxs_sorted = all_maxs_sorted_new;
         jj = jj + 1;

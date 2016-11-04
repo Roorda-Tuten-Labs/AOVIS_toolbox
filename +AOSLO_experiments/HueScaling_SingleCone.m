@@ -99,9 +99,14 @@ dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
 
 % ------------------------------------------------------------- %
+% Get TCA offsets
+tca_red = [CFG.red_x_offset CFG.red_y_offset];
+%tca_green = [CFG.green_x_offset CFG.green_y_offset];
+tca_red = tca_red.*[-1,+1] ;  % [-1,-1] on ColorNaming_ConeSelction.m
 
 % Select cone locations
-[offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui();
+[offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
+    tca_red, VideoParams.rootfolder, CFG);
 num_locations = size(offsets_x_y,1);
 offsets_x_y = offsets_x_y - repmat([X_cross_loc, Y_cross_loc],num_locations,1);
 
@@ -122,14 +127,15 @@ intensities_sequence_rand =  intensities_sequence(randids_with_intensity);
 
 %%%%%% Setup response matrix %%%%%%%
 response_matrix = {};
-response_matrix.trials = zeros(ntrials*num_locations,1);
-response_matrix.coneids = zeros(length(sequence_rand),1);
-response_matrix.offsets = zeros(length(sequence_rand),2);
-response_matrix.intensities = zeros(length(sequence_rand),1); 
+response_matrix.trials = zeros(ntrials * num_locations, 1);
+response_matrix.coneids = zeros(length(sequence_rand), 1);
+response_matrix.offsets = zeros(length(sequence_rand), 2);
+response_matrix.intensities = zeros(length(sequence_rand), 1); 
 
 response_matrix.uniqueoffsets = offsets_x_y;
 
-response_matrix.answer = zeros(ntrials*num_locations*length(intensities),Nscale);
+response_matrix.answer = zeros(ntrials * num_locations * length(intensities),...
+    Nscale);
 
 % Save param values for later
 exp_parameters = {};
@@ -159,10 +165,6 @@ Mov.suppress = 0;
 Mov.pfx = fprefix;
 
 % ------ Add TCA to the offsets ------ %
-tca_red   = [CFG.red_x_offset CFG.red_y_offset];
-%tca_green = [CFG.green_x_offset CFG.green_y_offset];
-tca_red = tca_red.*[-1,+1] ;  % [-1,-1] on ColorNaming_ConeSelction.m
-
 offset_matrix_with_TCA = offsets_x_y + repmat(tca_red,num_locations,1);
 
 % Set up AOM TCA offset mats
