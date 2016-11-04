@@ -8,7 +8,7 @@ if exist(fullfile('Experiments', 'lastBasicCFG.mat'),'file')==2
 end
 
 if (init_load == 0) %load defaults    
-    CFG.initials = 'test';
+    CFG.subject = 'test';
     CFG.pupilsize = 7.0;
     CFG.fieldsize = 1.0;
     CFG.presentdur = 500;
