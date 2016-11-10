@@ -2,27 +2,50 @@ function Mov = generate_mov(CFG)
 
     startframe = 3;
     fps = 30;
-    presentdur = CFG.presentdur / 1000; % CFG.presentdur in msec
-    stimdur = round(fps * presentdur); %how long is the presentation
-    %numframes = fps*CFG.videodur;
-    %endframe = startframe + stimdur - 1; 
+    
+    % CFG.presentdur in msec
+    presentdur = CFG.presentdur / 1000; 
+    % how long is the presentation (in frames)
+    stimdur = round(fps * presentdur); 
 
-    framenum = 2; %the index of your bitmap
-    framenum2 = 3;
-    %framenum3 = 4;
+    % the index of your bitmap
+    framenum0 = 2; % blank square
+    framenum1 = 4; % stimulus
+    framenum2 = 3; % cross
+    
 
-    aom1seq = [zeros(1,startframe-1), ...
-               ones(1,stimdur).*framenum, zeros(1,30-startframe+1-stimdur)];
-    aom1pow = ones(size(aom1seq)); % usual
+     %%%%%%%%%%%% AOM0 (IR) parameters %%%%%%%%%%%%%%%%
+   
+    % This vector tells the aom which image to play during each frame
+    aom0seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum0, ...
+        zeros(1, 30 - startframe + 1 - stimdur)];
+    
+    % Set location relative to IR raster. (0,0) in middle of raster?
+    aom0locx = zeros(size(aom0seq));
+    aom0locy = zeros(size(aom0seq));
+    
+    % This sets the power for each frame
+    aom0pow = ones(size(aom0seq));
+    aom0pow(:) = 0;
+    
+    % ---------- AOM1 parameters ---------- %
+    % This vector tells the aom which image to play during each frame
+    aom1seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum1, ...
+        zeros(1, 30 - startframe + 1 - stimdur)];
+    % This sets the power for each frame
+    aom1pow = ones(size(aom1seq));
     aom1pow(:) = 1; % usual
-
-    % --------- Ram was aiming to make a ramping stimulus?? ---------- %
+    aom1offx = zeros(size(aom1seq));
+    aom1offy = zeros(size(aom1seq));
+    
+    % Ram was aiming to make a ramping stimulus??
+    %
     % aom1pow = zeros(size(aom1seq));
     % Flat top increment
     % aom1pow (find(aom1seq)) = 1;
 
     % Flat top decrement
-    % length_decrement = floor(stimdur/2) ;
+    % length_decrement = floor(stimdur / 2) ;
     % if rem(length_decrement,2) == 0 
     %     length_decrement = length_decrement - 1;
     % end
@@ -33,56 +56,36 @@ function Mov = generate_mov(CFG)
     % aom1seq = aom1pow; 
     % aom1seq = aom1seq.*framenum; 
 
-    %Increasing linear
+    % Increasing linear
     % slope = 1; 
     % temp = (slope/stimdur).*(0:round(stimdur/slope));
     % aom1pow(startframe:startframe + round(stimdur/slope)) = temp;
     % aom1seq = aom1pow; 
     % aom1seq(find(aom1seq)) = framenum;
     % trialIntensity = aom1pow;
-    % ----------------------------------------------------- %
 
-    aom1offx = zeros(size(aom1seq));
-    aom1offy = zeros(size(aom1seq));
-
-    %%%%%%%%%%%% AOM0 (IR) parameters %%%%%%%%%%%%%%%%
-
-    % aom0seq = ones(size(aom1seq));
-    % aom0seq = zeros(size(aom1seq));
-    % aom0seq = [zeros(1,cueframe-1) ones(1,stimdur).* ...
-    %    framenum3 zeros(1,30-startframe+1-stimdur)];
-    aom0seq = [zeros(1,startframe-1) ones(1,stimdur).* ...
-        framenum2 zeros(1,30-startframe+1-stimdur)];
-    aom2seq = [zeros(1,startframe-1) ones(1,stimdur).* ...
-        framenum2 zeros(1,30-startframe+1-stimdur)];
-
-    aom0locx = zeros(size(aom1seq));
-    aom0locy = zeros(size(aom1seq));
-    aom0pow = ones(size(aom1seq));
-    aom0pow(:) = 0;
-
+    % ---------- AOM2 parameters ---------- %
+    aom2seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum2, ... 
+        zeros(1, 30 - startframe + 1 - stimdur)];
+    
     aom2pow = ones(size(aom1seq));
     aom2pow(:) = 0.25;
-    aom2locx = zeros(size(aom1seq));
-    aom2locy = zeros(size(aom1seq));
     aom2offx = zeros(size(aom1seq));
-    aom2offx(:) = 100;
+    aom2offx(:) = 0;
     aom2offy = zeros(size(aom1seq));
-    aom2offy(:) = 100;
+    aom2offy(:) = 0;
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % ------------------------------------ %
 
-    gainseq = CFG.gain * ones(size(aom1seq));
-    angleseq = zeros(size(aom1seq));
-    stimbeep = zeros(size(aom1seq));
+    gainseq = CFG.gain * ones(size(aom1seq)); % tracking gain
+    angleseq = zeros(size(aom1seq)); % not sure what angle does
+    stimbeep = zeros(size(aom1seq)); % don't know if this is used
     stimbeep(startframe+stimdur-1) = 1;
-    %stimbeep = [zeros(1,startframe+stimdur-1) 1 zeros(1,30-startframe-stimdur+2)];
 
     % ------ Set up movie parameters ------ %
     Mov.duration = CFG.videodur*fps;
 
     Mov.aom0seq = aom0seq;
-    % Mov.aom0seq = ones(size(aom0seq,2)); %comment when running online
     Mov.aom0pow = aom0pow;
     Mov.aom0locx = aom0locx;
     Mov.aom0locy = aom0locy;
@@ -93,10 +96,7 @@ function Mov = generate_mov(CFG)
     Mov.aom1offy = aom1offy;
 
     Mov.aom2seq = aom2seq;
-    % Mov.aom2seq = zeros(size(aom2seq,2)); %comment when running online
     Mov.aom2pow = aom2pow;
-    Mov.aom2locx = aom2locx;
-    Mov.aom2locy = aom2locy;
     Mov.aom2offx = aom2offx;
     Mov.aom2offy = aom2offy;
 

@@ -1,7 +1,7 @@
 function CFG = HueScaling_CFG_load()
 
 if exist(fullfile('Experiments', 'lastBasicCFG.mat'),'file')==2
-    CFG = load(fullfile('Experiments', 'lastBasicCFG.mat'));
+    load(fullfile('Experiments', 'lastBasicCFG.mat'));
     CFG.comment = ' ';
     init_load = 1;
     %setappdata(hAomControl, 'CFG', CFG);
@@ -15,6 +15,8 @@ if (init_load == 0) %load defaults
     
     CFG.ntrials = 10;
     CFG.gain = 1.0;
+    
+    CFG.nscale = 1;
     
     CFG.stimsize  = 3;
    

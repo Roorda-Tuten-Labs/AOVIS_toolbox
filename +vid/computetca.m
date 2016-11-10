@@ -32,6 +32,7 @@ function computetca(sub)
 % =====
 % Code was adjusted by BPS in 2016 to accomodate new orientation of fast
 % and slow scanners.
+import img.dftregistration
 
 if nargin==0; %checks for subfield option
     sub=1;
