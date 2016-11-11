@@ -196,7 +196,7 @@ PresentStimulus = 1;
 GetResponse = 0;
 good_trial = 0;
 set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
-
+                
 % Start the experiment
 while(runExperiment ==1)
     uiwait;
