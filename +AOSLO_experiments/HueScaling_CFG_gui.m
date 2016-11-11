@@ -6,7 +6,7 @@ function CFG = HueScaling_CFG_gui()
     import AOSLO_experiments.*
     
     CFG = AOSLO_experiments.HueScaling_CFG_load();
-    
+    disp(CFG);
     %  Construct the components
     
     % ---- Figure handle

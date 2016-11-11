@@ -76,19 +76,19 @@ kb_StimConst = 'space';
 kb_BadConst = 'return';
 
 % ------- these options were set in dialog option box ---------- %
-kb_ans1 = CFG.ans1;  
-kb_ans1_label = CFG.ans1_label;
-kb_ans2 = CFG.ans2;  
-kb_ans2_label = CFG.ans2_label;
-kb_ans3 = CFG.ans3;  
-kb_ans3_label = CFG.ans3_label;
-kb_ans4 = CFG.ans4;  
-kb_ans4_label = CFG.ans4_label;
-kb_ans5 = CFG.ans5;  
-kb_ans5_label = CFG.ans5_label;
+kb_ans1 = '1';  
+kb_ans1_label = 'red';
+kb_ans2 = '2';  
+kb_ans2_label = 'green';
+kb_ans3 = '3';  
+kb_ans3_label = 'blue';
+kb_ans4 = '4';  
+kb_ans4_label = 'yellow';
+kb_ans5 = '5';  
+kb_ans5_label = 'white';
 
-kb_NotSeen = CFG.ans6;
-kb_AbortConst = CFG.ans7;
+kb_NotSeen = '7';
+kb_AbortConst = 'escape';
 
 dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
@@ -251,7 +251,7 @@ while(runExperiment ==1)
                 
                 % use selected starting locations and randomly walk from
                 % there
-                rand_ind = randi([4, 28], n_on_frames, 1);
+                rand_ind = randi([4, 29], n_on_frames, 1);
 %                 [xloc, yloc] = generate_random_walk(3, ...
 %                     aom1offy_mat(1, 1, sequence_rand(trial)), ...
 %                     aom1offy_mat(1, 1, sequence_rand(trial)), n_on_frames);
