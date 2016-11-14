@@ -27,59 +27,57 @@ function Mov = generate_mov(CFG)
     % This sets the power for each frame
     aom0pow = ones(size(aom0seq));
     aom0pow(:) = 0;
-    
-    % ---------- AOM1 parameters ---------- %
-    % This vector tells the aom which image to play during each frame
-    aom1seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum1, ...
+
+    % ---------- AOM2 parameters ---------- %
+    aom1seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum2, ... 
         zeros(1, 30 - startframe + 1 - stimdur)];
-    % This sets the power for each frame
+    
     aom1pow = ones(size(aom1seq));
-    aom1pow(:) = 1; % usual
+    aom1pow(:) = 0.0;
     aom1offx = zeros(size(aom1seq));
     aom1offy = zeros(size(aom1seq));
     
+    % ---------- aom2 parameters ---------- %
+    % This vector tells the aom which image to play during each frame
+    aom2seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum1, ...
+        zeros(1, 30 - startframe + 1 - stimdur)];
+    % This sets the power for each frame
+    aom2pow = ones(size(aom2seq));
+    aom2pow(:) = 1; % usual
+    aom2offx = zeros(size(aom2seq));
+    aom2offy = zeros(size(aom2seq));
+    
     % Ram was aiming to make a ramping stimulus??
     %
-    % aom1pow = zeros(size(aom1seq));
+    % aom2pow = zeros(size(aom2seq));
     % Flat top increment
-    % aom1pow (find(aom1seq)) = 1;
+    % aom2pow (find(aom2seq)) = 1;
 
     % Flat top decrement
     % length_decrement = floor(stimdur / 2) ;
     % if rem(length_decrement,2) == 0 
     %     length_decrement = length_decrement - 1;
     % end
-    % aom1pow (startframe : startframe + (stimdur-length_decrement)/2 - 1) = 1;
-    % aom1pow(startframe + (stimdur-length_decrement)/2  : startframe + ...
+    % aom2pow (startframe : startframe + (stimdur-length_decrement)/2 - 1) = 1;
+    % aom2pow(startframe + (stimdur-length_decrement)/2  : startframe + ...
     %   (stimdur-length_decrement)/2  + length_decrement -1) = 0;
-    % aom1pow (endframe - (stimdur - length_decrement)/2 + 1:endframe) = 1;
-    % aom1seq = aom1pow; 
-    % aom1seq = aom1seq.*framenum; 
+    % aom2pow (endframe - (stimdur - length_decrement)/2 + 1:endframe) = 1;
+    % aom2seq = aom2pow; 
+    % aom2seq = aom2seq.*framenum; 
 
     % Increasing linear
     % slope = 1; 
     % temp = (slope/stimdur).*(0:round(stimdur/slope));
-    % aom1pow(startframe:startframe + round(stimdur/slope)) = temp;
-    % aom1seq = aom1pow; 
-    % aom1seq(find(aom1seq)) = framenum;
-    % trialIntensity = aom1pow;
-
-    % ---------- AOM2 parameters ---------- %
-    aom2seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum2, ... 
-        zeros(1, 30 - startframe + 1 - stimdur)];
-    
-    aom2pow = ones(size(aom1seq));
-    aom2pow(:) = 0.25;
-    aom2offx = zeros(size(aom1seq));
-    aom2offx(:) = 0;
-    aom2offy = zeros(size(aom1seq));
-    aom2offy(:) = 0;
+    % aom2pow(startframe:startframe + round(stimdur/slope)) = temp;
+    % aom2seq = aom2pow; 
+    % aom2seq(find(aom2seq)) = framenum;
+    % trialIntensity = aom2pow;
 
     % ------------------------------------ %
 
-    gainseq = CFG.gain * ones(size(aom1seq)); % tracking gain
-    angleseq = zeros(size(aom1seq)); % not sure what angle does
-    stimbeep = zeros(size(aom1seq)); % don't know if this is used
+    gainseq = CFG.gain * ones(size(aom2seq)); % tracking gain
+    angleseq = zeros(size(aom2seq)); % not sure what angle does
+    stimbeep = zeros(size(aom2seq)); % don't know if this is used
     stimbeep(startframe+stimdur-1) = 1;
 
     % ------ Set up movie parameters ------ %

@@ -105,29 +105,28 @@ tca_red = [CFG.red_x_offset CFG.red_y_offset];
 % translate image space to stimulus space (invert directions).
 tca_red = tca_red .*  [-1, -1];
 
-% green is not used
-% tca_green = [CFG.green_x_offset CFG.green_y_offset];
-% tca_green = tca_green .*  [-1, -1];
+tca_green = [CFG.green_x_offset CFG.green_y_offset];
+tca_green = tca_green .*  [-1, -1];
 
 % ---- Select cone locations ---- %
 [offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
-    tca_red, VideoParams.rootfolder, CFG);
+    tca_green, VideoParams.rootfolder, CFG);
 CFG.num_locations = size(offsets_x_y,1);
 
 offsets_x_y = offsets_x_y - repmat([X_cross_loc, Y_cross_loc],...
     CFG.num_locations,1);
 
 % ------ Add TCA to the offsets ------ %
-offset_matrix_with_TCA = offsets_x_y + repmat(tca_red, CFG.num_locations, 1);
+offset_matrix_with_TCA = offsets_x_y + repmat(tca_green, CFG.num_locations, 1);
 
 % Set up AOM TCA offset mats
-aom1offx_mat = zeros(length(Mov.aom1seq), length(Mov.aom1seq), CFG.num_locations);
-aom1offy_mat = zeros(length(Mov.aom1seq), length(Mov.aom1seq), CFG.num_locations);
+aom2offx_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), CFG.num_locations);
+aom2offy_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), CFG.num_locations);
 
 %%% Change back when using offsets from stabilized cone movie %%%
 for loc = 1:CFG.num_locations
-    aom1offx_mat(:, :, loc) = offset_matrix_with_TCA(loc, 1);
-    aom1offy_mat(:, :, loc) = offset_matrix_with_TCA(loc, 2);
+    aom2offx_mat(:, :, loc) = offset_matrix_with_TCA(loc, 1);
+    aom2offy_mat(:, :, loc) = offset_matrix_with_TCA(loc, 2);
 end
 
 % % TCA  check
@@ -237,29 +236,29 @@ while(runExperiment ==1)
 
             % ---- set movie parameters to be played by aom ---- %
             % Select AOM power
-            Mov.aom1pow(:) = intensities_sequence_rand(trial);
+            Mov.aom2pow(:) = intensities_sequence_rand(trial);
             Mov.aom0pow(:) = 1;
 
             % tell the aom about the offset (TCA + cone location)
-            Mov.aom1offx = aom1offx_mat(1, :, sequence_rand(trial));
-            Mov.aom1offy = aom1offy_mat(1, :, sequence_rand(trial));
+            Mov.aom2offx = aom2offx_mat(1, :, sequence_rand(trial));
+            Mov.aom2offy = aom2offy_mat(1, :, sequence_rand(trial));
 
             if random_walk == 1
                 % find frames that have intensities set to greater than 0
-                on_frames = Mov.aom1seq > 0;
+                on_frames = Mov.aom2seq > 0;
                 n_on_frames = sum(on_frames);
                 
                 % use selected starting locations and randomly walk from
                 % there
-                rand_ind = randi([4, 29], n_on_frames, 1);
+                rand_ind = randi([4, 28], n_on_frames, 1);
 %                 [xloc, yloc] = generate_random_walk(3, ...
-%                     aom1offy_mat(1, 1, sequence_rand(trial)), ...
-%                     aom1offy_mat(1, 1, sequence_rand(trial)), n_on_frames);
+%                     aom2offy_mat(1, 1, sequence_rand(trial)), ...
+%                     aom2offy_mat(1, 1, sequence_rand(trial)), n_on_frames);
                 
-                % update offsets sent to aom1
-                Mov.aom1seq(on_frames) = rand_ind;
-%                 Mov.aom1offx(on_frames) = xloc;
-%                 Mov.aom1offy(on_frames) = yloc;
+                % update offsets sent to aom2
+                Mov.aom2seq(on_frames) = rand_ind;
+%                 Mov.aom2offx(on_frames) = xloc;
+%                 Mov.aom2offy(on_frames) = yloc;
                 
             end
             
