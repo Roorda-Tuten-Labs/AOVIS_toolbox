@@ -14,7 +14,6 @@ import AOSLO_experiments.*
 intensities = 1; %[0.5, 0.75, 1];
 nintensities = length(intensities);
 
-random_walk = 1;
 % ------------------------------------------- %
 
 % set some variable to global. most of these are first modified 
@@ -159,7 +158,7 @@ SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 % --------------------------------------------------- %
 % --------------- Begin Experiment ------------------ %
 % --------------------------------------------------- %
-if random_walk == 1
+if CFG.random_flicker == 1
     stim.createRandomStimulus(1, CFG.stimsize);
 end
 
@@ -195,7 +194,7 @@ while(runExperiment ==1)
             % variable at top of file.
             trialIntensity = intensities_sequence_rand(trial);
             % generate stimulus based on size, shape and intensity.
-            if ~random_walk
+            if ~CFG.random_flicker
                 stim.createStimulus(trialIntensity, CFG.stimsize, CFG.stimshape);
             end
             
@@ -204,7 +203,7 @@ while(runExperiment ==1)
                 StimParams.stimpath = dirname;
                 StimParams.fprefix = fprefix;
                 StimParams.sframe = 2;
-                if random_walk == 1
+                if CFG.random_flicker == 1
                     StimParams.eframe = 28;
                 else
                     StimParams.eframe = 4;
@@ -222,7 +221,7 @@ while(runExperiment ==1)
             Mov.aom2offx = aom2offx_mat(1, :, sequence_rand(trial));
             Mov.aom2offy = aom2offy_mat(1, :, sequence_rand(trial));
 
-            if random_walk == 1
+            if CFG.random_flicker == 1
                 % find frames that have intensities set to greater than 0
                 on_frames = Mov.aom2seq > 0;
                 n_on_frames = sum(on_frames);
@@ -333,7 +332,7 @@ while(runExperiment ==1)
             
             if repeat_trial_flag < 1
                 % if not repeat trial:
-                if resp_count < CFG.nscale && seen_flag
+                if resp_count <= CFG.nscale && seen_flag
                     uiwait;
                     % get next response
                     resp = get(handles.aom_main_figure,'CurrentKey');

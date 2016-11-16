@@ -19,7 +19,7 @@ if init_load == 0 %load defaults
     CFG.nscale = 1;
     
     CFG.stimsize  = 3;
-   
+    CFG.random_flicker = 0;
     CFG.stimshape = 'square';
     CFG.cone_selection = 'manual';
     
