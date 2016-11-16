@@ -2,6 +2,7 @@ function [offsets_x_y, X_cross_loc, Y_cross_loc] = cone_select(tca_offsets,...
     cone_selection_method, folder_name)
             
 import color_naming.*
+import vid.*
 
 %open movie
 %find the most recent movie saved in the subject initials folder.
@@ -11,7 +12,7 @@ import color_naming.*
            
 if strcmp(filename(end-3:end),'.tif')
     % if loading in an already stabilized image.
-    img = im2double(imread([path, filename], 'tif'));
+    img_s = im2double(imread([path, filename], 'tif'));
     % xy locations stored at end of the file name.
     X_cross_loc = str2num(filename(end-10:end-8));
     Y_cross_loc = str2num(filename(end-6:end-4));
@@ -21,7 +22,7 @@ elseif strcmp(filename(end-3:end),'.avi')
     [X_cross_loc, Y_cross_loc, framenums_withcross] = color_naming.find_cross([path,filename])
     
     % then if crosses are found, produce stabilized movie (sumnorm)
-    img = color_naming.sumframe_from_stabilized_movie(path, filename, framenums_withcross,...
+    img_s = vid.sumframe_from_stabilized_movie(path, filename, framenums_withcross,...
                                          X_cross_loc, Y_cross_loc);
 end
 
@@ -43,7 +44,7 @@ ROI_search = [(X_cross_loc + tca_x - 3 * max_ROI_width / 2), ...
        3 * max_ROI_width, 3 * max_ROI_height];
 
 % cut the image down to speed up search   
-img_crop = imcrop(img, ROI_search);
+img_crop = imcrop(img_s, ROI_search);
 [m, n] = size(img_crop);
 rect_x = floor((n/2) - ROI(3)/2);
 rect_y = floor((m/2) - ROI(4)/2);
@@ -97,6 +98,6 @@ selected_cones_filename = [path, (filename(1:end-4)), 'selected_cones_' ...
 
 imwrite(img_map,selected_cones_filename,'png');
 
-offsets_x_y = color_naming.inverse_image_crop(img, img_crop,ROI_search, fliplr(offset_cropped));
+offsets_x_y = img.inverse_image_crop(img_s, img_crop,ROI_search, fliplr(offset_cropped));
 
 

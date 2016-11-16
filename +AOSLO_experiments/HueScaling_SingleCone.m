@@ -1,8 +1,10 @@
 function HueScaling_SingleCone
 % import external library functions
 import color_naming.*
+import aoms.*
 import util.*
 import plots.*
+import stim.*
 import AOSLO_experiments.*
 
 % --------------- Parameters --------------- %
@@ -19,17 +21,13 @@ random_walk = 1;
 % by AOMcontrol.m
 global SYSPARAMS StimParams VideoParams; %#ok<NUSED>
 
-% get a handle to the gui so that we can change its appearance later
-if exist('handles','var') == 0;
-    handles = guihandles;
-end
-
-% This is a subroutine located at the end of this file. Generates some
-% default stimuli
-startup;
 
 % get experiment config data stored in appdata for 'hAomControl'
 hAomControl = getappdata(0,'hAomControl');
+
+% This is a subroutine located at the end of this file. Generates some
+% default stimuli
+stim.create_default_stim();
 
 % now wait for ui to load
 CFG = AOSLO_experiments.HueScaling_CFG_gui();
@@ -38,7 +36,7 @@ CFG.angle = 0;
 
 if isstruct(CFG) == 1;
     if CFG.ok == 1
-        StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);  % CFG.stimpath;
+        StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);
         VideoParams.vidprefix = CFG.vidprefix;
 
         if CFG.record == 1;
@@ -50,25 +48,20 @@ if isstruct(CFG) == 1;
         
         % sets VideoParam variables
         set_VideoParams_PsyfileName();  
-
-        set(handles.aom1_state, 'String', 'Configuring Experiment...');
         
         % Appears to load stimulus into buffer. Called here with parameter
         % set to 1. This seems to load some default settings. Later calls
         % send user defined settings via netcomm.
         Parse_Load_Buffers(1);
 
-        % change appearance of AOM control window   
-        set(handles.image_radio1, 'Enable', 'off');
-        set(handles.seq_radio1, 'Enable', 'off');
-        set(handles.im_popup1, 'Enable', 'off');
-        set(handles.display_button, 'String', 'Running Exp...');
-        set(handles.display_button, 'Enable', 'off');
-        set(handles.aom1_state, 'String', 'On - Experiment Mode - Running Experiment');
     else
         return;
     end
 end
+
+
+% get handle to aom gui
+handles = aom.setup_aom_gui();
 
 % setup the keyboard constants and response mappings from config
 kb_StimConst = 'space';
@@ -95,7 +88,7 @@ fprefix = StimParams.fprefix;
 % ------------------------------------------------------------- %
 
 % ---- Setup Mov structure ---- %
-Mov = color_naming.generate_mov(CFG);
+Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
@@ -111,9 +104,8 @@ CFG.num_locations = size(stim_offsets_xy,1);
 cross_xy = [X_cross_loc, Y_cross_loc];
 
 % ---- Apply TCA offsets to cone locations ---- %
-[aom2offx_mat, aom2offy_mat] = color_naming.apply_TCA_offsets_to_locs(...
+[aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
     tca_green(1, :), cross_xy, stim_offsets_xy, length(Mov.aom2seq));
-
 
 % ---- Set intensities ---- %
 % this section is essentially meaningless if intensities above is only a
@@ -168,7 +160,7 @@ SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 % --------------- Begin Experiment ------------------ %
 % --------------------------------------------------- %
 if random_walk == 1
-    createRandomStimulus(1, CFG.stimsize);
+    stim.createRandomStimulus(1, CFG.stimsize);
 end
 
 % Set initial while loop conditions
@@ -204,7 +196,7 @@ while(runExperiment ==1)
             trialIntensity = intensities_sequence_rand(trial);
             % generate stimulus based on size, shape and intensity.
             if ~random_walk
-                createStimulus(trialIntensity, CFG.stimsize, CFG.stimshape);
+                stim.createStimulus(trialIntensity, CFG.stimsize, CFG.stimshape);
             end
             
             % update system params with stim info
@@ -406,96 +398,5 @@ save(fullfile(VideoParams.videofolder, filename), 'AllData');
 % plot data
 color_naming.plot_color_naming(AllData);
 
-% ---------------------------------- %
-% ---------- Subroutines ----------- %
-% ---------------------------------- %
-function createRandomStimulus(trialIntensity, stimsize)
-    
-    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
-        mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
-    end
-
-    frameN = 4;
-    % 5x5 grid of possible locations for stim.
-    for xx = 1:stimsize:stimsize * 5
-        for yy = 1:stimsize:stimsize * 5
-            stim_im0 = zeros(stimsize * 5, stimsize * 5);
-            % set squares to 1 intensity
-            stim_im0(xx:xx + stimsize - 1, yy:yy + stimsize - 1) = 1;
-
-            stim_im0 = stim_im0 .* trialIntensity;    
-            
-            imwrite(stim_im0, ['frame' num2str(frameN) '.bmp']);
-            frameN = frameN + 1;
-        end
-    end
-    
-    % Make cross in IR channel to record stimulus location
-    ir_im0 = ones(21, 21);
-    ir_im0(:, 9:13) = 0;
-    ir_im0(9:13, :) = 0;
-    
-    blank_im0 = zeros(10, 10);
-    
-    imwrite(blank_im0, 'frame2.bmp');
-    imwrite(ir_im0, 'frame3.bmp');
-    
-    cd ..;
-end  
-
-function createStimulus(trialIntensity, stimsize, stimshape)
-
-    if strcmp(stimshape, 'square')
-        stim_im = zeros(stimsize, stimsize);
-        stim_im(1:end,1:end) = 1;
-
-    elseif strcmp(stimshape, 'circle')
-        xp =  -fix(stimsize / 2)  : fix(stimsize / 2);
-        [x, y] = meshgrid(xp);
-        stim_im = (x .^ 2 + y .^ 2) <= (round(stimsize / 2)) .^ 2; 
-    end
-
-    stim_im = stim_im .* trialIntensity;    
-
-    %Make cross in IR channel to record stimulus location
-    ir_im = ones(21, 21);
-    ir_im(:,9:13)=0;
-    ir_im(9:13,:)=0;
-
-    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
-        mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
-    end
-
-    blank_im = zeros(10, 10);
-    
-    imwrite(blank_im, 'frame2.bmp');
-    imwrite(ir_im, 'frame3.bmp');
-    imwrite(stim_im, 'frame4.bmp');
-    
-    cd ..;
-
-end     
-
-function startup
-    dummy=ones(10, 10);
-    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
-        mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-        imwrite(dummy, 'frame2.bmp');
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
-        delete ('*.*');
-        imwrite(dummy, 'frame2.bmp');
-    end
-    cd ..;
-end
 
 end

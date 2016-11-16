@@ -1,7 +1,8 @@
 function TestOffsetMapping
 % import external library functions
-import color_naming.*
 import util.*
+import aom.*
+import stim.*
 
 % --------------- Parameters --------------- %
 
@@ -18,7 +19,7 @@ end
 
 % This is a subroutine located at the end of this file. Generates some
 % default stimuli
-startup;
+stim.create_default_stim;
 
 % get experiment config data stored in appdata for 'hAomControl'
 hAomControl = getappdata(0,'hAomControl');
@@ -64,13 +65,12 @@ if isstruct(CFG) == 1;
 end
 
 
-
 dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
 % ------------------------------------------------------------- %
 
 % ---- Setup Mov structure ---- %
-Mov = color_naming.generate_mov(CFG);
+Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
@@ -81,10 +81,6 @@ tca_green = [0 0; -20 20; 20 20; -20 -20; 20 -20];
 cross_xy = [0 0];
 stim_xy = [0 0];
 sequence_length = length(Mov.aom2seq);
-
-%[aom2offx_mat, aom2offy_mat] = color_naming.apply_TCA_offsets_to_locs(...
-%    tca_green(1, :), cross_xy, stim_xy, sequence_length);
-
 
 % Turn ON AOMs
 SYSPARAMS.aoms_state(1)=1;
@@ -110,7 +106,7 @@ kb_LeftArrow = 'leftarrow';
 kb_RightArrow = 'rightarrow';
 
 % generate stimulus based on size, shape and intensity.
-createStimulus(1, CFG.stimsize, CFG.stimshape);
+stim.createStimulus(1, CFG.stimsize, CFG.stimshape);
 % Start the experiment
 while(runExperiment ==1)
     uiwait;
@@ -148,7 +144,7 @@ while(runExperiment ==1)
             Mov.aom0pow(:) = 1;
 
             % for testing change the TCA depending on trial number
-            [aom2offx_mat, aom2offy_mat] = apply_TCA_offsets_to_locs(...
+            [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
                 tca_green(trial, :), cross_xy, stim_xy, sequence_length);
 
             % tell the aom about the offset (TCA + cone location)
@@ -230,56 +226,5 @@ end
 % ---------------------------------- %
 % ---------- Subroutines ----------- %
 % ---------------------------------- %
-
-function createStimulus(trialIntensity, stimsize, stimshape)
-
-    if strcmp(stimshape, 'square')
-        stim_im = zeros(stimsize, stimsize);
-        stim_im(1:end,1:end) = 1;
-
-    elseif strcmp(stimshape, 'circle')
-        xp =  -fix(stimsize / 2)  : fix(stimsize / 2);
-        [x, y] = meshgrid(xp);
-        stim_im = (x .^ 2 + y .^ 2) <= (round(stimsize / 2)) .^ 2; 
-    end
-
-    stim_im = stim_im .* trialIntensity;    
-
-    %Make cross in IR channel to record stimulus location
-    ir_im = ones(21, 21);
-    ir_im(:,9:13)=0;
-    ir_im(9:13,:)=0;
-
-    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
-        mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
-    end
-
-    blank_im = zeros(10, 10);
-    
-    imwrite(blank_im, 'frame2.bmp');
-    imwrite(ir_im, 'frame3.bmp');
-    imwrite(stim_im, 'frame4.bmp');
-    
-    cd ..;
-
-end     
-
-function startup
-    dummy=ones(10, 10);
-    if isdir(fullfile(pwd, 'tempStimulus')) == 0;
-        mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-        imwrite(dummy, 'frame2.bmp');
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
-        delete ('*.*');
-        imwrite(dummy, 'frame2.bmp');
-    end
-    cd ..;
-end
 
 end
