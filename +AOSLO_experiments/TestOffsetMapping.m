@@ -27,6 +27,7 @@ hAomControl = getappdata(0,'hAomControl');
 CFG = AOSLO_experiments.HueScaling_CFG_load();
 CFG.videodur = 1.0;
 CFG.angle = 0;
+CFG.ntrials = 1;
 
 if isstruct(CFG) == 1;
     if CFG.ok == 1
@@ -74,32 +75,15 @@ Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
     
-% ---- Get TCA offsets ---- %
-tca_red = [0 0];
-% translate image space to stimulus space (invert directions).
-tca_red = tca_red .*  [-1, -1];
+% ---- Apply TCA offsets ---- %
 
-tca_green = [0 0];
-tca_green = tca_green .*  [-1, -1];
+tca_green = [0 0; -20 20; 20 20; -20 -20; 20 -20];
+cross_xy = [0 0];
+stim_xy = [0 0];
+sequence_length = length(Mov.aom2seq);
 
-X_loc = [-25 25 -25 25];
-Y_loc = [25 25 -25 -25];
-
-offsets_x_y = [X_loc Y_loc] - repmat([0, 0], size(X_loc),1);
-
-% ------ Add TCA to the offsets ------ %
-offset_matrix_with_TCA = offsets_x_y + repmat(tca_green, size(offsets_x_y, 1), 1);
-
-% ---- Select locations ---- %
-% Set up AOM TCA offset mats
-aom2offx_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), size(offsets_x_y, 1));
-aom2offy_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), size(offsets_x_y, 1));
-
-%%% Change back when using offsets from stabilized cone movie %%%
-for loc = 1:size(offsets_x_y, 1)
-    aom2offx_mat(:, :, loc) = offset_matrix_with_TCA(loc, 1);
-    aom2offy_mat(:, :, loc) = offset_matrix_with_TCA(loc, 2);
-end
+%[aom2offx_mat, aom2offy_mat] = color_naming.apply_TCA_offsets_to_locs(...
+%    tca_green(1, :), cross_xy, stim_xy, sequence_length);
 
 
 % Turn ON AOMs
@@ -121,7 +105,7 @@ set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
 
 kb_AbortConst = 'escape';
 kb_StimConst = 'space';
-kb_Repeat = 'enter';
+kb_Repeat = 'return';
 kb_LeftArrow = 'leftarrow';
 kb_RightArrow = 'rightarrow';
 
@@ -139,12 +123,12 @@ while(runExperiment ==1)
         uiresume;
         TerminateExp;
         message = ['Off - Experiment Aborted - Trial ' num2str(trial) ' of '...
-                   num2str(CFG.ntrials)];
+                   num2str(size(tca_green, 1))];
         set(handles.aom1_state, 'String', message);
             
     % check if present stimulus button was pressed
     elseif strcmp(resp, kb_StimConst)
-        if PresentStimulus == 1
+        if PresentStimulus == 1 && trial <= size(tca_green, 1)
             % play sound to indicate start of stimulus
             sound(cos(90:0.75:180))
 
@@ -163,20 +147,24 @@ while(runExperiment ==1)
             Mov.aom2pow(:) = 1;
             Mov.aom0pow(:) = 1;
 
+            % for testing change the TCA depending on trial number
+            [aom2offx_mat, aom2offy_mat] = apply_TCA_offsets_to_locs(...
+                tca_green(trial, :), cross_xy, stim_xy, sequence_length);
+
             % tell the aom about the offset (TCA + cone location)
-            Mov.aom2offx = aom2offx_mat(1, :, trial);
-            Mov.aom2offy = aom2offy_mat(1, :, trial);
+            Mov.aom2offx = aom2offx_mat(1, :, :);
+            Mov.aom2offy = aom2offy_mat(1, :, :);
             
             % change the message displayed in status bar
             message = ['Running Experiment - Trial ' num2str(trial) ...
-                       ' of ' num2str(CFG.ntrials * CFG.num_locations)];
+                       ' of ' num2str(size(tca_green, 1))];
             Mov.msg = message;
             Mov.seq = '';
             
             % send the Mov structure to app data
             setappdata(hAomControl, 'Mov', Mov);
             
-            VideoParams.vidname = [CFG.vidprefix '_' sprintf('%03d',trial)];
+            VideoParams.vidname = [CFG.vidprefix '_' sprintf('%03d', trial)];
 
             % use the Mov structure to play a movie
             PlayMovie;
@@ -207,30 +195,29 @@ while(runExperiment ==1)
             message1 = [Mov.msg ' Repeat trial']; 
 
         elseif strcmp(resp, kb_LeftArrow)
-            message1 = [Mov.msg ' trial: ' num2str(trial)];
             trial = trial - 1;
+            PresentStimulus = 1;
+            message1 = [Mov.msg ' trial: ' num2str(trial)];
             
         elseif strcmp(resp, kb_RightArrow)
-            message1 = [Mov.msg ' trial: ' num2str(trial)];
             trial = trial + 1;
-            
-        elseif strcmp(resp, kb_StimConst)
             PresentStimulus = 1;
+            message1 = [Mov.msg ' trial: ' num2str(trial)];
             
-        % if abort key triggered, end experiment safely.
-        elseif strcmp(resp, kb_AbortConst);
-            runExperiment = 0;
-            uiresume;
-            TerminateExp;
-            message = ['Off - Experiment Aborted - Trial ' ...
-                num2str(trial) ' of ' num2str(CFG.ntrials)];
-            set(handles.aom1_state, 'String', message);
-
         else                
             % All other keys are not valid.
             message1 = [Mov.msg ' ' resp ' not valid response key'];
         end
 
+        if trial > size(tca_green, 1)
+            PresentStimulus = 0;
+            TerminateExp;
+            uiresume;
+            message = ['Off - Experiment Aborted - Trial ' ...
+                num2str(trial) ' of ' num2str(size(tca_green, 1))];
+            set(handles.aom1_state, 'String', message);
+        end
+        
         % display user response.
         set(handles.aom1_state, 'String', message1);
 

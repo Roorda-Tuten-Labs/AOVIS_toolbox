@@ -100,38 +100,20 @@ Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
 
-% ---- Get TCA offsets ---- %
-tca_red = [CFG.red_x_offset CFG.red_y_offset];
-% translate image space to stimulus space (invert directions).
-tca_red = tca_red .*  [-1, -1];
-
+% ---- Find user specified TCA ---- %
 tca_green = [CFG.green_x_offset CFG.green_y_offset];
-tca_green = tca_green .*  [-1, -1];
 
 % ---- Select cone locations ---- %
-[offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
+[stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
     tca_green, VideoParams.rootfolder, CFG);
-CFG.num_locations = size(offsets_x_y,1);
 
-offsets_x_y = offsets_x_y - repmat([X_cross_loc, Y_cross_loc],...
-    CFG.num_locations,1);
+CFG.num_locations = size(stim_offsets_xy,1);
+cross_xy = [X_cross_loc, Y_cross_loc];
 
-% ------ Add TCA to the offsets ------ %
-offset_matrix_with_TCA = offsets_x_y + repmat(tca_green, CFG.num_locations, 1);
+% ---- Apply TCA offsets to cone locations ---- %
+[aom2offx_mat, aom2offy_mat] = color_naming.apply_TCA_offsets_to_locs(...
+    tca_green(1, :), cross_xy, stim_offsets_xy, length(Mov.aom2seq));
 
-% Set up AOM TCA offset mats
-aom2offx_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), CFG.num_locations);
-aom2offy_mat = zeros(length(Mov.aom2seq), length(Mov.aom2seq), CFG.num_locations);
-
-%%% Change back when using offsets from stabilized cone movie %%%
-for loc = 1:CFG.num_locations
-    aom2offx_mat(:, :, loc) = offset_matrix_with_TCA(loc, 1);
-    aom2offy_mat(:, :, loc) = offset_matrix_with_TCA(loc, 2);
-end
-
-% % TCA  check
-% offsets_x_y = [0 0];
-% num_locations = size(offsets_x_y,1);
 
 % ---- Set intensities ---- %
 % this section is essentially meaningless if intensities above is only a
@@ -155,7 +137,7 @@ response_matrix.trials = zeros(CFG.ntrials * CFG.num_locations, 1);
 response_matrix.coneids = zeros(length(sequence_rand), 1);
 response_matrix.offsets = zeros(length(sequence_rand), 2);
 response_matrix.intensities = zeros(length(sequence_rand), 1); 
-response_matrix.uniqueoffsets = offsets_x_y;
+response_matrix.uniqueoffsets = stim_offsets_xy;
 response_matrix.answer = zeros(CFG.ntrials * CFG.num_locations * ...
     nintensities, CFG.nscale);
 
@@ -388,8 +370,8 @@ while(runExperiment ==1)
             response_matrix.trials (trial) = trial;
             response_matrix.coneids (trial) = sequence_rand(trial);
             response_matrix.answer(trial,:) = trial_response_vector;
-            response_matrix.offsets(trial,:) = [offsets_x_y(...
-                sequence_rand(trial),1) offsets_x_y(sequence_rand(trial),2)];
+            response_matrix.offsets(trial,:) = [stim_offsets_xy(...
+                sequence_rand(trial),1) stim_offsets_xy(sequence_rand(trial),2)];
             response_matrix.intensities (trial) = intensities_sequence_rand(trial);
 
             sound(cos(0:0.5:90));
