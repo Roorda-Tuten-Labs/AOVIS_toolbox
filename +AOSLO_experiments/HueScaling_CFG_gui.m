@@ -231,7 +231,7 @@ function CFG = HueScaling_CFG_gui()
         CFG.pupilsize = str2double(get(pupilsize,'String'));
         CFG.ntrials = str2double(get(ntrials,'String'));
         CFG.nscale = str2double(get(nscale,'String'));
-        CFG.gain = get(gain,'String');
+        CFG.gain = str2double(get(gain,'String'));
         CFG.stimsize = str2double(get(stimsize,'String'));
         
         CFG.red_x_offset = str2double(get(red_x_offset,'String'));

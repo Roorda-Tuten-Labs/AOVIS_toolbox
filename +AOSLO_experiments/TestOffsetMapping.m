@@ -70,14 +70,15 @@ fprefix = StimParams.fprefix;
 % ------------------------------------------------------------- %
 
 % ---- Setup Mov structure ---- %
+CFG.gain = 0;
+
 Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
-    
 % ---- Apply TCA offsets ---- %
 
-tca_green = [0 0; -20 20; 20 20; -20 -20; 20 -20];
+tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 100;
 cross_xy = [0 0];
 stim_xy = [0 0];
 sequence_length = length(Mov.aom2seq);
