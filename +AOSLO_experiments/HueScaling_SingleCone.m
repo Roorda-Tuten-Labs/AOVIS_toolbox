@@ -1,7 +1,7 @@
 function HueScaling_SingleCone
 % import external library functions
 import color_naming.*
-import aoms.*
+import aom.*
 import util.*
 import plots.*
 import stim.*
