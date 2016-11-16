@@ -177,6 +177,7 @@ exp_parameters.cnames = {kb_ans1_label, kb_ans2_label, kb_ans3_label, ...
     kb_ans4_label, kb_ans5_label};
 
 % Turn ON AOMs
+SYSPARAMS.aoms_state(1)=1;
 SYSPARAMS.aoms_state(2)=1; % SWITCH RED ON
 SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 
@@ -229,7 +230,11 @@ while(runExperiment ==1)
                 StimParams.stimpath = dirname;
                 StimParams.fprefix = fprefix;
                 StimParams.sframe = 2;
-                StimParams.eframe = 29;
+                if random_walk == 1
+                    StimParams.eframe = 28;
+                else
+                    StimParams.eframe = 4;
+                end
                 StimParams.fext = 'bmp';
                 Parse_Load_Buffers(0);
             end
@@ -251,14 +256,9 @@ while(runExperiment ==1)
                 % use selected starting locations and randomly walk from
                 % there
                 rand_ind = randi([4, 28], n_on_frames, 1);
-%                 [xloc, yloc] = generate_random_walk(3, ...
-%                     aom2offy_mat(1, 1, sequence_rand(trial)), ...
-%                     aom2offy_mat(1, 1, sequence_rand(trial)), n_on_frames);
                 
                 % update offsets sent to aom2
                 Mov.aom2seq(on_frames) = rand_ind;
-%                 Mov.aom2offx(on_frames) = xloc;
-%                 Mov.aom2offy(on_frames) = yloc;
                 
             end
             
