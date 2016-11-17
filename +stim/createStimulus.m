@@ -18,18 +18,12 @@ function createStimulus(trialIntensity, stimsize, stimshape)
 
     if isdir(fullfile(pwd, 'tempStimulus')) == 0;
         mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-
-    else
-        cd(fullfile(pwd, 'tempStimulus'));
     end
 
     blank_im = zeros(10, 10);
     
-    imwrite(blank_im, 'frame2.bmp');
-    imwrite(ir_im, 'frame3.bmp');
-    imwrite(stim_im, 'frame4.bmp');
-    
-    cd ..;
+    imwrite(blank_im, fullfile(pwd, 'tempStimulus', 'frame2.bmp'));
+    imwrite(ir_im, fullfile(pwd, 'tempStimulus', 'frame3.bmp'));
+    imwrite(stim_im, fullfile(pwd, 'tempStimulus', 'frame4.bmp'));
 
 end     

@@ -5,6 +5,7 @@ import aom.*
 import stim.*
 
 % --------------- Parameters --------------- %
+randomize_starting_locations = 0;
 
 % ------------------------------------------- %
 
@@ -49,7 +50,6 @@ if isstruct(CFG) == 1;
     end
 end
 
-
 % get handle to aom gui
 handles = aom.setup_aom_gui();
 
@@ -65,21 +65,27 @@ Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
 
+% Select AOM power
+Mov.aom2pow(:) = 1;
+Mov.aom0pow(:) = 1;
+            
 % Use cross for aom0
 Mov.aom0seq(Mov.aom0seq ~= 0) = 3; % 3 is index of cross.
-
-% ---- Apply TCA offsets ---- %
-
-tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 100;
-cross_xy = [0 0];
-stim_xy = [0 0];
-sequence_length = length(Mov.aom2seq);
 
 % Turn ON AOMs
 SYSPARAMS.aoms_state(1)=1;
 SYSPARAMS.aoms_state(2)=1; % SWITCH RED ON
 SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 
+% ---- Apply TCA offsets ---- %
+if randomize_starting_locations
+    tca_green = randi([-25 25], [CFG.ntrials 2]);
+else
+    tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 50;
+end
+cross_xy = [0 0];
+stim_xy = [0 0];
+sequence_length = length(Mov.aom2seq);
 
 % --------------------------------------------------- %
 % --------------- Begin Experiment ------------------ %
@@ -92,29 +98,29 @@ PresentStimulus = 1;
 GetResponse = 0;
 set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
 
+% Set up key bindings
 kb_AbortConst = 'escape';
 kb_StimConst = 'space';
 
-kb_DecrementTrial = 'return';
-kb_IncrementTrial = 'shift';
+kb_DecrementTrial = 'backspace';
+kb_IncrementTrial = 'return';
 
 kb_LeftArrow = 'leftarrow';
 kb_RightArrow = 'rightarrow';
 kb_UpArrow = 'uparrow';
 kb_DownArrow = 'downarrow';
 
-
+% ---- IR stimulus ---- %
+% make 11x11 stimuli
 CFG.stimsize = 11;
-
-% generate stimulus based on size, shape and intensity.
 stim.createStimulus(1, CFG.stimsize, CFG.stimshape);
 
 % Overwrite cross for IR channel so that is size desired here.
-ir_im = stim.create_cross_img(33, 11, true);
-cd(fullfile(pwd, 'tempStimulus'));
-imwrite(ir_im, 'frame3.bmp');
-cd ..;
-    
+ir_im = stim.create_cross_img(CFG.stimsize * 3, CFG.stimsize, true);
+% fill in the center
+ir_im(CFG.stimsize + 1:CFG.stimsize * 2, CFG.stimsize + 1:CFG.stimsize * 2) = 1; 
+imwrite(ir_im, fullfile(pwd, 'tempStimulus', 'frame3.bmp'));
+
 % Start the experiment
 while(runExperiment ==1)
     uiwait;
@@ -147,10 +153,6 @@ while(runExperiment ==1)
             end
 
             % ---- set movie parameters to be played by aom ---- %
-            % Select AOM power
-            Mov.aom2pow(:) = 1;
-            Mov.aom0pow(:) = 1;
-
             % for testing change the TCA depending on trial number
             [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
                 tca_green(trial, :), cross_xy, stim_xy, sequence_length);
@@ -158,6 +160,8 @@ while(runExperiment ==1)
             % tell the aom about the offset (TCA + cone location)
             Mov.aom2offx = aom2offx_mat(1, :, :);
             Mov.aom2offy = aom2offy_mat(1, :, :);
+            
+            disp(Mov.aom2offx(1, 1, 1));
             
             % change the message displayed in status bar
             message = ['Running Experiment - Trial ' num2str(trial) ...
@@ -241,10 +245,12 @@ while(runExperiment ==1)
         set(handles.aom1_state, 'String', message1);
 
     end
-    filename = ['tca_',strrep(strrep(strrep(datestr(now),'-',''),...
-        ' ','x'),':',''),'.mat'];
-    save(fullfile(VideoParams.videofolder, filename), 'tca_green');
     
 end
 
+filename = ['tca_',strrep(strrep(strrep(datestr(now),'-',''), ' ','x'), ...
+    ':',''),'.mat'];
+save(fullfile(VideoParams.videofolder, filename), 'tca_green');
+
 end
+

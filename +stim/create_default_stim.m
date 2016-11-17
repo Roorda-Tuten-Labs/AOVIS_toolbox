@@ -1,17 +1,22 @@
 function create_default_stim
-
-    dummy=ones(10, 10);
+    % create_default_stim
+    %
+    % Create tempStimulus directory if it does not exist or delete existing
+    % files in the directory if it does already exist. Then save a blank
+    % 10x10 increment stimulus.
+    %
+    
+    % blank 10x10 stimulus
+    blank=ones(10, 10);
+    
     if isdir(fullfile(pwd, 'tempStimulus')) == 0;
         mkdir(fullfile(pwd, 'tempStimulus'));
-        cd(fullfile(pwd, 'tempStimulus'));
-        imwrite(dummy, 'frame2.bmp');
+        imwrite(blank, fullfile(pwd, 'tempStimulus', 'frame2.bmp'));
         
     else
-        cd(fullfile(pwd, 'tempStimulus'));
-        delete ('*.*');
-        imwrite(dummy, 'frame2.bmp');
-        
+        % delete any existing bmp files
+        delete(fullfile(pwd, 'tempStimulus', '*.*'));
+        imwrite(blank, 'frame2.bmp');
     end
-    cd ..;
     
 end
