@@ -1,11 +1,11 @@
-function cross = create_cross_img(img_size, cross_size, decrement)
+function cross = create_cross_img(img_size, cross_width, decrement)
 % cross = make_cross_img(img_size, cross_size_pix, decrement)
 % 
 % img_size: in pixels. Must be an odd number or size will be incremented by
 % one to make it so.
 % 
-% cross_size: in pixels. Size of the cross. Also must be an odd number.
-% 
+% cross_width: in pixels. Width of the cross. Also must be an odd number.
+%
 % decrement: false (0), true (1). Decide whether the stimulus is a
 % decrement from ones (i.e. IR channel) or an increment from zeros (for
 % green or red channel). Default is true.
@@ -21,12 +21,12 @@ if mod(img_size, 2) ==0
     img_size = img_size + 1;
 end
 % make sure cross size is odd
-if mod(cross_size, 2) ==0
-    cross_size = cross_size + 1;
+if mod(cross_width, 2) ==0
+    cross_width = cross_width + 1;
 end
 
 middle = ceil(img_size / 2);
-cross_loc = (1:cross_size) + middle;
+cross_loc = (1:cross_width) + middle - ceil(cross_width / 2);
 
 if decrement
     cross = ones(img_size, img_size);

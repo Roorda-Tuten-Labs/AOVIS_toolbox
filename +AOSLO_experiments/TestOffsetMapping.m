@@ -12,27 +12,21 @@ import stim.*
 % by AOMcontrol.m
 global SYSPARAMS StimParams VideoParams; %#ok<NUSED>
 
-% get a handle to the gui so that we can change its appearance later
-if exist('handles','var') == 0;
-    handles = guihandles;
-end
-
-% This is a subroutine located at the end of this file. Generates some
-% default stimuli
-stim.create_default_stim;
-
 % get experiment config data stored in appdata for 'hAomControl'
 hAomControl = getappdata(0,'hAomControl');
 
+% This is a subroutine located at the end of this file. Generates some
+% default stimuli
+stim.create_default_stim();
+
 % now wait for ui to load
-CFG = AOSLO_experiments.HueScaling_CFG_load();
+CFG = AOSLO_experiments.HueScaling_CFG_gui();
 CFG.videodur = 1.0;
 CFG.angle = 0;
-CFG.ntrials = 1;
 
 if isstruct(CFG) == 1;
     if CFG.ok == 1
-        StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);  % CFG.stimpath;
+        StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);
         VideoParams.vidprefix = CFG.vidprefix;
 
         if CFG.record == 1;
@@ -44,26 +38,20 @@ if isstruct(CFG) == 1;
         
         % sets VideoParam variables
         set_VideoParams_PsyfileName();  
-
-        set(handles.aom1_state, 'String', 'Configuring Experiment...');
         
         % Appears to load stimulus into buffer. Called here with parameter
         % set to 1. This seems to load some default settings. Later calls
         % send user defined settings via netcomm.
         Parse_Load_Buffers(1);
 
-        % change appearance of AOM control window   
-        set(handles.image_radio1, 'Enable', 'off');
-        set(handles.seq_radio1, 'Enable', 'off');
-        set(handles.im_popup1, 'Enable', 'off');
-        set(handles.display_button, 'String', 'Running Exp...');
-        set(handles.display_button, 'Enable', 'off');
-        set(handles.aom1_state, 'String', 'On - Experiment Mode - Running Experiment');
     else
         return;
     end
 end
 
+
+% get handle to aom gui
+handles = aom.setup_aom_gui();
 
 dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
@@ -76,6 +64,10 @@ Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
 Mov.pfx = fprefix;
+
+% Use cross for aom0
+Mov.aom0seq(Mov.aom0seq ~= 0) = 3; % 3 is index of cross.
+
 % ---- Apply TCA offsets ---- %
 
 tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 100;
@@ -102,12 +94,27 @@ set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
 
 kb_AbortConst = 'escape';
 kb_StimConst = 'space';
-kb_Repeat = 'return';
+
+kb_DecrementTrial = 'return';
+kb_IncrementTrial = 'shift';
+
 kb_LeftArrow = 'leftarrow';
 kb_RightArrow = 'rightarrow';
+kb_UpArrow = 'uparrow';
+kb_DownArrow = 'downarrow';
+
+
+CFG.stimsize = 11;
 
 % generate stimulus based on size, shape and intensity.
 stim.createStimulus(1, CFG.stimsize, CFG.stimshape);
+
+% Overwrite cross for IR channel so that is size desired here.
+ir_im = stim.create_cross_img(33, 11, true);
+cd(fullfile(pwd, 'tempStimulus'));
+imwrite(ir_im, 'frame3.bmp');
+cd ..;
+    
 % Start the experiment
 while(runExperiment ==1)
     uiwait;
@@ -186,17 +193,32 @@ while(runExperiment ==1)
         % reset trial variable        
         % collect user input.
             
-        if strcmp(resp, kb_Repeat)
-        % Handle press of space bar in the middle of entering a string
-        % of values.
-            message1 = [Mov.msg ' Repeat trial']; 
-
-        elseif strcmp(resp, kb_LeftArrow)
+        if strcmpi(resp, kb_UpArrow)
+            % increment y axis of TCA
+            tca_green(trial, 2) = tca_green(trial, 2) + 1;
+            message1 = [Mov.msg ' increase y TCA'];
+            
+        elseif strcmpi(resp, kb_DownArrow)
+            % decrement y axis of TCA
+            tca_green(trial, 2) = tca_green(trial, 2) - 1;
+            message1 = [Mov.msg ' decrease y TCA'];
+            
+        elseif strcmpi(resp, kb_RightArrow)
+            % increment x axis of TCA
+            tca_green(trial, 1) = tca_green(trial, 1) + 1;
+            message1 = [Mov.msg ' increase x TCA'];
+            
+        elseif strcmpi(resp, kb_LeftArrow)
+            % decrement x axis of TCA
+            tca_green(trial, 1) = tca_green(trial, 1) - 1;
+            message1 = [Mov.msg ' decrease x TCA'];
+            
+        elseif strcmpi(resp, kb_DecrementTrial)
             trial = trial - 1;
             PresentStimulus = 1;
             message1 = [Mov.msg ' trial: ' num2str(trial)];
             
-        elseif strcmp(resp, kb_RightArrow)
+        elseif strcmpi(resp, kb_IncrementTrial)
             trial = trial + 1;
             PresentStimulus = 1;
             message1 = [Mov.msg ' trial: ' num2str(trial)];
@@ -219,7 +241,9 @@ while(runExperiment ==1)
         set(handles.aom1_state, 'String', message1);
 
     end
-
+    filename = ['tca_',strrep(strrep(strrep(datestr(now),'-',''),...
+        ' ','x'),':',''),'.mat'];
+    save(fullfile(VideoParams.videofolder, filename), 'tca_green');
     
 end
 
