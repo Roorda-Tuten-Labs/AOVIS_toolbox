@@ -5,7 +5,7 @@ import aom.*
 import stim.*
 
 % --------------- Parameters --------------- %
-randomize_starting_locations = 0;
+randomize_starting_locations = 1;
 
 % ------------------------------------------- %
 
@@ -28,7 +28,7 @@ CFG.angle = 0;
 if isstruct(CFG) == 1;
     if CFG.ok == 1
         StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);
-        VideoParams.vidprefix = CFG.vidprefix;
+        VideoParams.vidprefix = CFG.initials;
 
         if CFG.record == 1;
             VideoParams.videodur = CFG.videodur;
@@ -78,7 +78,7 @@ SYSPARAMS.aoms_state(2)=1; % SWITCH RED ON
 SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 
 % ---- Apply TCA offsets ---- %
-if randomize_starting_locations
+if randomize_starting_locations == 1
     tca_green = randi([-25 25], [CFG.ntrials 2]);
 else
     tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 50;
@@ -116,13 +116,13 @@ CFG.stimsize = 11;
 stim.createStimulus(1, CFG.stimsize, CFG.stimshape);
 
 % Overwrite cross for IR channel so that is size desired here.
-ir_im = stim.create_cross_img(CFG.stimsize * 3, CFG.stimsize, true);
+ir_im = stim.create_cross_img(CFG.stimsize * 3, CFG.stimsize, false);
 % fill in the center
-ir_im(CFG.stimsize + 1:CFG.stimsize * 2, CFG.stimsize + 1:CFG.stimsize * 2) = 1; 
+%ir_im(CFG.stimsize + 1:CFG.stimsize * 2, CFG.stimsize + 1:CFG.stimsize * 2) = 0; 
 imwrite(ir_im, fullfile(pwd, 'tempStimulus', 'frame3.bmp'));
 
-% Start the experiment
 while(runExperiment ==1)
+% Start the experiment
     uiwait;
     resp = get(handles.aom_main_figure,'CurrentKey');
     disp(resp);
@@ -232,6 +232,7 @@ while(runExperiment ==1)
             message1 = [Mov.msg ' ' resp ' not valid response key'];
         end
 
+        % check if experiment is over
         if trial > size(tca_green, 1)
             PresentStimulus = 0;
             TerminateExp;
@@ -239,6 +240,7 @@ while(runExperiment ==1)
             message = ['Off - Experiment Aborted - Trial ' ...
                 num2str(trial) ' of ' num2str(size(tca_green, 1))];
             set(handles.aom1_state, 'String', message);
+            runExperiment = 0;
         end
         
         % display user response.
