@@ -379,15 +379,12 @@ while(runExperiment ==1)
     end
 end
 
-disp(AllData);
+disp(exp_data);
 
 % save data
 filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
     ' ','x'),':',''),'.mat'];
-if isdir(fullfile(pwd,'Data_Color_Naming')) == 0;
-    mkdir(pwd,'Data_Color_Naming');
-end
-save(fullfile(VideoParams.videofolder, filename), 'AllData');
+save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
 % plot data
 color_naming.plot_color_naming(AllData);
