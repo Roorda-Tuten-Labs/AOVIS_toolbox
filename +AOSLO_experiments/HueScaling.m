@@ -1,4 +1,4 @@
-function HueScaling_SingleCone
+function HueScaling
 % import external library functions
 import color_naming.*
 import aom.*
@@ -36,7 +36,7 @@ CFG.angle = 0;
 if isstruct(CFG) == 1;
     if CFG.ok == 1
         StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);
-        VideoParams.vidprefix = CFG.vidprefix;
+        VideoParams.vidprefix = CFG.initials;
 
         if CFG.record == 1;
             VideoParams.videodur = CFG.videodur;
@@ -123,31 +123,31 @@ sequence_rand = sequence_with_intensities(randids_with_intensity);
 intensities_sequence_rand =  intensities_sequence(randids_with_intensity);
 
 % ---- Setup response matrix ---- %
-response_matrix = {};
-response_matrix.trials = zeros(CFG.ntrials * CFG.num_locations, 1);
-response_matrix.coneids = zeros(length(sequence_rand), 1);
-response_matrix.offsets = zeros(length(sequence_rand), 2);
-response_matrix.intensities = zeros(length(sequence_rand), 1); 
-response_matrix.uniqueoffsets = stim_offsets_xy;
-response_matrix.answer = zeros(CFG.ntrials * CFG.num_locations * ...
+exp_data = {};
+exp_data.trials = zeros(CFG.ntrials * CFG.num_locations, 1);
+exp_data.coneids = zeros(length(sequence_rand), 1);
+exp_data.offsets = zeros(length(sequence_rand), 2);
+exp_data.intensities = zeros(length(sequence_rand), 1); 
+exp_data.uniqueoffsets = stim_offsets_xy;
+exp_data.answer = zeros(CFG.ntrials * CFG.num_locations * ...
     nintensities, CFG.nscale);
 
 % Save param values for later
-exp_parameters = {};
-exp_parameters.experiment = 'Color Naming Basic';
-exp_parameters.subject  = ['Observer: ' CFG.initials];
-exp_parameters.pupil = ['Pupil Size (mm): ' CFG.pupilsize];
-exp_parameters.field = ['Field Size (deg): ' num2str(CFG.fieldsize)];
-exp_parameters.presentdur = ['Presentation Duration (ms): ' num2str(CFG.presentdur)];
-exp_parameters.videoprefix = ['Video Prefix: ' CFG.vidprefix];
-exp_parameters.videodur = ['Video Duration: ' num2str(CFG.videodur)];
-exp_parameters.videofolder = ['Video Folder: ' VideoParams.videofolder];
-exp_parameters.stimsize = CFG.stimsize;
-exp_parameters.ntrials = CFG.ntrials;
-exp_parameters.num_locations = CFG.num_locations;
-exp_parameters.Nscale = CFG.nscale;
-exp_parameters.cnames = {kb_ans1_label, kb_ans2_label, kb_ans3_label, ...
+exp_data.experiment = 'Color Naming Basic';
+exp_data.subject  = ['Observer: ' CFG.initials];
+exp_data.pupil = ['Pupil Size (mm): ' CFG.pupilsize];
+exp_data.field = ['Field Size (deg): ' num2str(CFG.fieldsize)];
+exp_data.presentdur = ['Presentation Duration (ms): ' num2str(CFG.presentdur)];
+exp_data.videoprefix = ['Video Prefix: ' CFG.vidprefix];
+exp_data.videodur = ['Video Duration: ' num2str(CFG.videodur)];
+exp_data.videofolder = ['Video Folder: ' VideoParams.videofolder];
+exp_data.stimsize = CFG.stimsize;
+exp_data.ntrials = CFG.ntrials;
+exp_data.num_locations = CFG.num_locations;
+exp_data.Nscale = CFG.nscale;
+exp_data.cnames = {kb_ans1_label, kb_ans2_label, kb_ans3_label, ...
     kb_ans4_label, kb_ans5_label};
+exp_data.seed = 45245801;
 
 % Turn ON AOMs
 SYSPARAMS.aoms_state(1)=1;
@@ -159,7 +159,10 @@ SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 % --------------- Begin Experiment ------------------ %
 % --------------------------------------------------- %
 if CFG.random_flicker == 1
+    rng(exp_data.seed);
     stim.createRandomStimulus(1, CFG.stimsize);
+else
+    stim.createStimulus(CFG.stimsize, CFG.stimshape);
 end
 
 % Set initial while loop conditions
@@ -169,7 +172,7 @@ PresentStimulus = 1;
 GetResponse = 0;
 good_trial = 0;
 set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
-                
+
 % Start the experiment
 while(runExperiment ==1)
     uiwait;
@@ -189,14 +192,7 @@ while(runExperiment ==1)
     elseif strcmp(resp, kb_StimConst)
         if PresentStimulus == 1
             % play sound to indicate start of stimulus
-            sound(cos(90:0.75:180))
-            % 100% for most experiments unless set otherwise with intensity
-            % variable at top of file.
-            trialIntensity = intensities_sequence_rand(trial);
-            % generate stimulus based on size, shape and intensity.
-            if ~CFG.random_flicker
-                stim.createStimulus(trialIntensity, CFG.stimsize, CFG.stimshape);
-            end
+            sound(cos(90:0.75:180));            
             
             % update system params with stim info
             if SYSPARAMS.realsystem == 1
@@ -213,7 +209,8 @@ while(runExperiment ==1)
             end
 
             % ---- set movie parameters to be played by aom ---- %
-            % Select AOM power
+            % Select AOM power 100% for most experiments unless set 
+            % otherwise with intensity variable at top of file.
             Mov.aom2pow(:) = intensities_sequence_rand(trial);
             Mov.aom0pow(:) = 1;
 
@@ -358,12 +355,12 @@ while(runExperiment ==1)
         if good_trial
             message2 = num2str(trial_response_vector);
             set(handles.aom1_state, 'String',message2);
-            response_matrix.trials (trial) = trial;
-            response_matrix.coneids (trial) = sequence_rand(trial);
-            response_matrix.answer(trial,:) = trial_response_vector;
-            response_matrix.offsets(trial,:) = [stim_offsets_xy(...
+            exp_data.trials (trial) = trial;
+            exp_data.coneids (trial) = sequence_rand(trial);
+            exp_data.answer(trial,:) = trial_response_vector;
+            exp_data.offsets(trial,:) = [stim_offsets_xy(...
                 sequence_rand(trial),1) stim_offsets_xy(sequence_rand(trial),2)];
-            response_matrix.intensities (trial) = intensities_sequence_rand(trial);
+            exp_data.intensities (trial) = intensities_sequence_rand(trial);
 
             sound(cos(0:0.5:90));
             pause(0.2);
@@ -382,8 +379,6 @@ while(runExperiment ==1)
     end
 end
 
-% format data
-AllData = util.catstruct(exp_parameters, response_matrix);
 disp(AllData);
 
 % save data

@@ -1,4 +1,4 @@
-function TestOffsetMapping
+function TCA_psychophysics
 % import external library functions
 import util.*
 import aom.*
@@ -58,8 +58,6 @@ fprefix = StimParams.fprefix;
 % ------------------------------------------------------------- %
 
 % ---- Setup Mov structure ---- %
-CFG.gain = 0;
-
 Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
@@ -77,8 +75,23 @@ SYSPARAMS.aoms_state(1)=1;
 SYSPARAMS.aoms_state(2)=1; % SWITCH RED ON
 SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 
+exp_data = {};
+exp_data.experiment = 'psychophysically measured TCA';
+exp_data.subject = CFG.initials;
+exp_data.pupil = ['Pupil Size (mm): ' CFG.pupilsize];
+exp_data.field = ['Field Size (deg): ' num2str(CFG.fieldsize)];
+exp_data.presentdur = ['Presentation Duration (ms): ' num2str(CFG.presentdur)];
+exp_data.videoprefix = CFG.vidprefix;
+exp_data.videodur = ['Video Duration (s): ' num2str(CFG.videodur)];
+exp_data.videofolder = VideoParams.videofolder;
+exp_data.stimsize = CFG.stimsize;
+exp_data.ntrials = CFG.ntrials;
+exp_data.randomize_starting_locations = randomize_starting_locations;
+exp_data.seed = 45245801;
+
 % ---- Apply TCA offsets ---- %
 if randomize_starting_locations == 1
+    rng(exp_data.seed);
     tca_green = randi([-25 25], [CFG.ntrials 2]);
 else
     tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 50;
@@ -110,10 +123,11 @@ kb_RightArrow = 'rightarrow';
 kb_UpArrow = 'uparrow';
 kb_DownArrow = 'downarrow';
 
+CFG.gain = 0;
 % ---- IR stimulus ---- %
 % make 11x11 stimuli
 CFG.stimsize = 11;
-stim.createStimulus(1, CFG.stimsize, CFG.stimshape);
+stim.createStimulus(CFG.stimsize, CFG.stimshape);
 
 % Overwrite cross for IR channel so that is size desired here.
 ir_im = stim.create_cross_img(CFG.stimsize * 3, CFG.stimsize, false);
@@ -250,9 +264,19 @@ while(runExperiment ==1)
     
 end
 
+exp_data.tca_green = tca_green;
+
 filename = ['tca_',strrep(strrep(strrep(datestr(now),'-',''), ' ','x'), ...
     ':',''),'.mat'];
-save(fullfile(VideoParams.videofolder, filename), 'tca_green');
+save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
+figure; hold on;
+plot(tca_green(:, 1), tca_green(:, 2), 'g.', 'markersize', 14);
+plot(median(tca_green(:, 1)), median(tca_green(:, 2)), 'g+');
+
+disp(tca_green);
+disp(mean(tca_green));
+disp(median(tca_green));
+disp(std(tca_green));
 end
 

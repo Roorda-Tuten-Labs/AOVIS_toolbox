@@ -1,4 +1,4 @@
-function createStimulus(trialIntensity, stimsize, stimshape)
+function createStimulus(stimsize, stimshape)
     import stim.*
     
     if strcmp(stimshape, 'square')
@@ -10,8 +10,6 @@ function createStimulus(trialIntensity, stimsize, stimshape)
         [x, y] = meshgrid(xp);
         stim_im = (x .^ 2 + y .^ 2) <= (round(stimsize / 2)) .^ 2; 
     end
-
-    stim_im = stim_im .* trialIntensity;    
 
     %Make cross in IR channel to record stimulus location
     ir_im = stim.create_cross_img(21, 5, true);
