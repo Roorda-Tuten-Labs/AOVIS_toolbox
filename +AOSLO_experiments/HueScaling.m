@@ -104,7 +104,7 @@ cross_xy = [X_cross_loc, Y_cross_loc];
 
 % ---- Apply TCA offsets to cone locations ---- %
 [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
-    tca_green(1, :), cross_xy, stim_offsets_xy, length(Mov.aom2seq));
+    tca_green(1, :), cross_xy, stim_offsets_xy, length(Mov.aom2seq), CFG.system);
 
 % ---- Set intensities ---- %
 % this section is essentially meaningless if intensities above is only a
@@ -387,7 +387,7 @@ filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
 save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
 % plot data
-color_naming.plot_color_naming(AllData);
+color_naming.plot_color_naming(exp_data);
 
 
 end

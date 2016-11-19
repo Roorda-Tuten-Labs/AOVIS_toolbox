@@ -54,10 +54,11 @@ end
 handles = aom.setup_aom_gui();
 
 dirname = fullfile(StimParams.stimpath, filesep);
-fprefix = StimParams.fprefix;
+fprefix = 'frame'; %StimParams.fprefix;
 % ------------------------------------------------------------- %
 
 % ---- Setup Mov structure ---- %
+CFG.gain = 0; % has to be here before Mov is generated.
 Mov = aom.generate_mov(CFG);
 Mov.dir = dirname;
 Mov.suppress = 0;
@@ -123,10 +124,9 @@ kb_RightArrow = 'rightarrow';
 kb_UpArrow = 'uparrow';
 kb_DownArrow = 'downarrow';
 
-CFG.gain = 0;
 % ---- IR stimulus ---- %
 % make 11x11 stimuli
-CFG.stimsize = 11;
+CFG.stimsize = 51;
 stim.createStimulus(CFG.stimsize, CFG.stimshape);
 
 % Overwrite cross for IR channel so that is size desired here.
@@ -169,7 +169,8 @@ while(runExperiment ==1)
             % ---- set movie parameters to be played by aom ---- %
             % for testing change the TCA depending on trial number
             [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
-                tca_green(trial, :), cross_xy, stim_xy, sequence_length);
+                tca_green(trial, :), cross_xy, stim_xy, sequence_length, ...
+                CFG.system);
 
             % tell the aom about the offset (TCA + cone location)
             Mov.aom2offx = aom2offx_mat(1, :, :);

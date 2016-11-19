@@ -40,6 +40,7 @@ if init_load == 0 %load defaults
     CFG.comment = ' ';
     CFG.record = 1;
     
+    CFG.system = 'aoslo';
     CFG.ok = 1;
     %setappdata(hAomControl, 'CFG', CFG);
 

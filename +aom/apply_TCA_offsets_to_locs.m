@@ -1,5 +1,5 @@
 function [x_mat, y_mat] = apply_TCA_offsets_to_locs(tca_xy, cross_xy, ...
-    stim_xy, sequence_length)
+    stim_xy, sequence_length, system)
     % [x_mat, y_mat] = apply_TCA_offsets_to_locs(tca_xy, cross_xy, stim_xy, 
     %     sequence_length)
     %
@@ -9,7 +9,13 @@ function [x_mat, y_mat] = apply_TCA_offsets_to_locs(tca_xy, cross_xy, ...
     num_locations = size(stim_xy, 1);
 
     % TCA offsets
-    tca_xy = tca_xy .*  [-1, 1];
+    if strcmpi(system, 'tslo')
+        tca_xy = tca_xy .*  [-1, 1];
+    elseif strcmpi(system, 'aoslo')
+        tca_xy = tca_xy .* [1, 1];
+    else
+        error('system not recognized. must be tslo or aoslo');
+    end
 
     % Difference between locations and cross
     offsets_x_y = stim_xy - repmat(cross_xy, num_locations, 1);
