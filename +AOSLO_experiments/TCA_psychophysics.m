@@ -97,6 +97,8 @@ if randomize_starting_locations == 1
 else
     tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 50;
 end
+exp_data.tca_green_start_positions = tca_green;
+
 cross_xy = [0 0];
 stim_xy = [0 0];
 sequence_length = length(Mov.aom2seq);
@@ -241,6 +243,8 @@ while(runExperiment ==1)
             trial = trial + 1;
             PresentStimulus = 1;
             message1 = [Mov.msg ' trial: ' num2str(trial)];
+            % Play sound.
+            sound(sin(0:0.5:90));
             
         else                
             % All other keys are not valid.
@@ -265,19 +269,26 @@ while(runExperiment ==1)
     
 end
 
+% if the trial was aborted, fill in untested trials with nan values
+tca_green(trial - 1 < 1:size(tca_green, 1), :) = NaN;
+
+% add tca to exp_data
 exp_data.tca_green = tca_green;
 
+% save exp_data structure
 filename = ['tca_',strrep(strrep(strrep(datestr(now),'-',''), ' ','x'), ...
     ':',''),'.mat'];
 save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
+% plot results and print some values
 figure; hold on;
 plot(tca_green(:, 1), tca_green(:, 2), 'g.', 'markersize', 14);
 plot(median(tca_green(:, 1)), median(tca_green(:, 2)), 'g+');
 
 disp(tca_green);
-disp(mean(tca_green));
-disp(median(tca_green));
-disp(std(tca_green));
+disp(['mean:   ' num2str(nanmean(tca_green))]);
+disp(['median: ' num2str(nanmedian(tca_green))]);
+disp(['std:    ' num2str(nanstd(tca_green))]);
+
 end
 
