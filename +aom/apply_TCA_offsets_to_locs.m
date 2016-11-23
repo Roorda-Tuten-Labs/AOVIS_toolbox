@@ -13,8 +13,10 @@ function [x_mat, y_mat] = apply_TCA_offsets_to_locs(tca_xy, cross_xy, ...
         tca_xy = tca_xy .*  [-1, 1];
     elseif strcmpi(system, 'aoslo')
         tca_xy = tca_xy .* [1, 1];
+    elseif strcmpi(system, 'brianmac')
+        tca_xy = tca_xy .* [1, -1];
     else
-        error('system not recognized. must be tslo or aoslo');
+        error('system not recognized. must be tslo, aoslo or brianmac');
     end
 
     % Difference between locations and cross

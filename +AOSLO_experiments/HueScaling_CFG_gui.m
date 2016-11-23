@@ -102,13 +102,13 @@ function CFG = HueScaling_CFG_gui()
             'Position', [.65 .7 .275 .10]); 
         
     uicontrol(ph,'Style','text',...
-                'String','comment',...
+                'String','system: aoslo, tslo, etc',...
                 'Units','normalized',...
                 'Position',[.65 .6 .275 .10]);
             
-    comment = uicontrol(ph,'Style','edit',...
+    system = uicontrol(ph,'Style','edit',...
             'Units','normalized',...
-            'String', CFG.comment,...
+            'String', CFG.system,...
             'Position', [.65 .55 .275 .10]);
         
         
@@ -262,25 +262,25 @@ function CFG = HueScaling_CFG_gui()
     get_current_CFG();
     
     function get_current_CFG()
-        CFG.initials = get(initials,'String');
+        CFG.initials = get(initials, 'String');
         CFG.stimshape = get(get(stimshape, 'SelectedObject'), 'Tag');
         CFG.cone_selection = get(get(cone_selection, 'SelectedObject'), 'Tag');
         CFG.random_flicker = str2double(get(get(random_flicker, ...
             'SelectedObject'), 'Tag'));
-        CFG.fieldsize = str2double(get(fieldsize,'String'));
-        CFG.presentdur = str2double(get(presentdur,'String'));
-        CFG.pupilsize = str2double(get(pupilsize,'String'));
-        CFG.ntrials = str2double(get(ntrials,'String'));
-        CFG.nscale = str2double(get(nscale,'String'));
-        CFG.gain = str2double(get(gain,'String'));
-        CFG.stimsize = str2double(get(stimsize,'String'));
+        CFG.fieldsize = str2double(get(fieldsize, 'String'));
+        CFG.presentdur = str2double(get(presentdur, 'String'));
+        CFG.pupilsize = str2double(get(pupilsize, 'String'));
+        CFG.ntrials = str2double(get(ntrials, 'String'));
+        CFG.nscale = str2double(get(nscale, 'String'));
+        CFG.gain = str2double(get(gain, 'String'));
+        CFG.stimsize = str2double(get(stimsize, 'String'));
         
-        CFG.red_x_offset = str2double(get(red_x_offset,'String'));
-        CFG.red_y_offset = str2double(get(red_y_offset,'String'));
-        CFG.green_x_offset = str2double(get(green_x_offset,'String'));
-        CFG.green_y_offset = str2double(get(green_y_offset,'String'));
+        CFG.red_x_offset = str2double(get(red_x_offset, 'String'));
+        CFG.red_y_offset = str2double(get(red_y_offset, 'String'));
+        CFG.green_x_offset = str2double(get(green_x_offset, 'String'));
+        CFG.green_y_offset = str2double(get(green_y_offset, 'String'));
         
-        CFG.comment = get(comment,'String');
+        CFG.system = get(system, 'String');
         
     end
 

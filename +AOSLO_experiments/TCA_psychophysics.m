@@ -4,11 +4,6 @@ import util.*
 import aom.*
 import stim.*
 
-% --------------- Parameters --------------- %
-randomize_starting_locations = 1;
-
-% ------------------------------------------- %
-
 % set some variable to global. most of these are first modified 
 % by AOMcontrol.m
 global SYSPARAMS StimParams VideoParams; %#ok<NUSED>
@@ -24,6 +19,8 @@ stim.create_default_stim();
 CFG = AOSLO_experiments.HueScaling_CFG_gui();
 CFG.videodur = 1.0;
 CFG.angle = 0;
+
+randomize_starting_locations = CFG.random_flicker;
 
 if isstruct(CFG) == 1;
     if CFG.ok == 1
@@ -96,6 +93,9 @@ if randomize_starting_locations == 1
     tca_green = randi([-25 25], [CFG.ntrials 2]);
 else
     tca_green = [0 0; -1 1; 1 1; -1 -1; 1 -1] .* 50;
+    tca_green(:, 1) = tca_green(:, 1) + CFG.green_x_offset;
+    tca_green(:, 2) = tca_green(:, 2) + CFG.green_y_offset;
+    
 end
 exp_data.tca_green_start_positions = tca_green;
 

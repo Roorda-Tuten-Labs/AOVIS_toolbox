@@ -372,7 +372,7 @@ while(runExperiment ==1)
                 set(handles.aom_main_figure, 'keypressfcn','');
                 TerminateExp;
                 message = 'Off - Experiment Complete';
-                set(handles.aom1_state, 'String',message);
+                set(handles.aom1_state, 'String', message);
             end
         end
         PresentStimulus = 1;
