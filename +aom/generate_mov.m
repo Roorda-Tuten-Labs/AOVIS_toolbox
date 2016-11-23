@@ -14,7 +14,7 @@ function Mov = generate_mov(CFG)
     framenum2 = 3; % cross
     
 
-     %%%%%%%%%%%% AOM0 (IR) parameters %%%%%%%%%%%%%%%%
+     % ---------- AOM0 IR parameters ---------- %
    
     % This vector tells the aom which image to play during each frame
     aom0seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum0, ...
@@ -28,7 +28,7 @@ function Mov = generate_mov(CFG)
     aom0pow = ones(size(aom0seq));
     aom0pow(:) = 0;
 
-    % ---------- AOM2 parameters ---------- %
+    % ---------- AOM1 RED parameters ---------- %
     aom1seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum2, ... 
         zeros(1, 30 - startframe + 1 - stimdur)];
     
@@ -37,13 +37,14 @@ function Mov = generate_mov(CFG)
     aom1offx = zeros(size(aom1seq));
     aom1offy = zeros(size(aom1seq));
     
-    % ---------- aom2 parameters ---------- %
+    % ---------- AOM2 GREEN parameters ---------- %
     % This vector tells the aom which image to play during each frame
     aom2seq = [zeros(1, startframe - 1), ones(1, stimdur) .* framenum1, ...
         zeros(1, 30 - startframe + 1 - stimdur)];
+    
     % This sets the power for each frame
     aom2pow = ones(size(aom2seq));
-    aom2pow(:) = 1; % usual
+    aom2pow(:) = 1; 
     aom2offx = zeros(size(aom2seq));
     aom2offy = zeros(size(aom2seq));
     
