@@ -128,7 +128,7 @@ kb_DownArrow = 'downarrow';
 
 % ---- IR stimulus ---- %
 % make 11x11 stimuli
-CFG.stimsize = 51;
+%CFG.stimsize = 51;
 stim.createStimulus(CFG.stimsize, CFG.stimshape);
 
 % Overwrite cross for IR channel so that is size desired here.

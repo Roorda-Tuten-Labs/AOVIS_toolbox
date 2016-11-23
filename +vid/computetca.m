@@ -169,6 +169,7 @@ end
 
 
 function y = compute_tca_core(frame,crossChannel,showTCA,corrChannel,sub, nframe)
+import img.dftregistration
 global LOCX LOCY;
 skipframe=0;
 frame=double(frame);
@@ -181,9 +182,13 @@ end
     
 
 % construct cross filter and apply to frame
-crossFilter=zeros(11); crossFilter(:,6)=1; crossFilter(6,:)=1;
+crossFilter=zeros(11); 
+crossFilter(:,6)=1; 
+crossFilter(6,:)=1;
+
 % crossFilter=zeros(17); crossFilter(:,9)=1; crossFilter(9,:)=1; %depends on cross size
-r = imfilter(frame,crossFilter); 
+
+r = imfilter(frame, crossFilter); 
 r=r/max(r(:));  % normalize 0 to 1
 bw = im2bw(r,0.9); % binarize by thresholding
 
@@ -191,7 +196,7 @@ bw = im2bw(r,0.9); % binarize by thresholding
 if size(bw(bw==1),1)==1 %only if frame contains cross
     if isempty(LOCX) % store locations only if not found before
         
-        [locy locx]=ind2sub([size(bw,1) size(bw,2)],find(bw==max(bw(:))));
+        [locy, locx]=ind2sub([size(bw,1) size(bw,2)],find(bw==max(bw(:))));
         LOCX=locx; LOCY=locy; % locx,locy is position of cross center; x=column
     else
         locx=LOCX; locy=LOCY;
@@ -267,11 +272,11 @@ if ~skipframe % do the following only if cross was detected
     
     % do 2-D cross-correlation
     [outputIRG temp]=dftregistration(fft2(IR),fft2(G),32);
-    y(1,1) = (outputIRG(1,4)-.3)*3+1;
-    y(1,2) = outputIRG(1,3);
+    y(1,1) = (outputIRG(1,4)-.3);
+    y(1,2) = outputIRG(1,3)*3+1;
     [outputIRR temp]=dftregistration(fft2(IR),fft2(R),32);
-    y(2,1) = (outputIRR(1,4)-.6)*3+2;
-    y(2,2) = outputIRR(1,3);
+    y(2,1) = (outputIRR(1,4)-.6);
+    y(2,2) = outputIRR(1,3)*3+2;
 
     if sub==2
         [outputIRG1 temp]=dftregistration(fft2(IR1),fft2(G1),32);
