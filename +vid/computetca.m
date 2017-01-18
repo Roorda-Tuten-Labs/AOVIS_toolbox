@@ -6,7 +6,7 @@ function computetca(sub)
 %
 % The 'compute_tca_core' function returns the x and y pixel offsets
 % due to transverse chromatic aberration.  Assumes 3 interleaved
-% fast-scan lines, representing Red, Green and IR channels (in that order)
+% fast-scan lines, representing IR, Red and Green channels (in that order)
 % as well as a white cross representing the middle of the TCA area to be
 % measured.
 %
@@ -270,26 +270,33 @@ if ~skipframe % do the following only if cross was detected
     %R1=flipud(R1); G1=flipud(G1); IR1=flipud(IR1);
     %R2=flipud(R2); G2=flipud(G2); IR2=flipud(IR2);
     
-    % do 2-D cross-correlation
-    [outputIRG temp]=dftregistration(fft2(IR),fft2(G),32);
-    y(1,1) = (outputIRG(1,4)-.3);
-    y(1,2) = outputIRG(1,3)*3+1;
-    [outputIRR temp]=dftregistration(fft2(IR),fft2(R),32);
-    y(2,1) = (outputIRR(1,4)-.6);
-    y(2,2) = outputIRR(1,3)*3+2;
+    % ---- do 2-D cross-correlation ---- %
+    % green to IR
+    [outputIRG, ~] = dftregistration(fft2(IR), fft2(G), 32);
+    y(1, 1) = outputIRG(1, 4);
+    
+    % red to IR
+    [outputIRR, ~] = dftregistration(fft2(IR), fft2(R), 32);
+    y(2, 1) = outputIRR(1, 4);
+    
+    % correct the y axis for the downsampling that occurs due to the
+    % interleaved nature of the stimulus
+    y(1, 2) = (outputIRG(1, 3) - 0.6) * 3 + 2;
+    y(2, 2) = (outputIRR(1, 3) - 0.3) * 3 + 1;
+    % ---------------------------------- %
 
     if sub==2
-        [outputIRG1 temp]=dftregistration(fft2(IR1),fft2(G1),32);
+        [outputIRG1, ~]=dftregistration(fft2(IR1),fft2(G1),32);
         y(3,1) = (outputIRG1(1,4)-.3)*3+1;
         y(3,2) = outputIRG1(1,3);
-        [outputIRR1 temp]=dftregistration(fft2(IR1),fft2(R1),32);
+        [outputIRR1, ~]=dftregistration(fft2(IR1),fft2(R1),32);
         y(4,1) = (outputIRR1(1,4)-.6)*3+2;
         y(4,2) = outputIRR1(1,3);
 
-        [outputIRG2 temp]=dftregistration(fft2(IR2),fft2(G2),32);
+        [outputIRG2, ~]=dftregistration(fft2(IR2),fft2(G2),32);
         y(5,1) = (outputIRG2(1,4)-.3)*3+1;
         y(5,2) = outputIRG2(1,3);
-        [outputIRR2 temp]=dftregistration(fft2(IR2),fft2(R2),32);
+        [outputIRR2, ~]=dftregistration(fft2(IR2),fft2(R2),32);
         y(6,1) = (outputIRR2(1,4)-.6)*3+2;
         y(6,2) = outputIRR2(1,3);
     end
