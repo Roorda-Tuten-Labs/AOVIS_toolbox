@@ -154,7 +154,9 @@ SYSPARAMS.aoms_state(1)=1;
 SYSPARAMS.aoms_state(2)=1; % SWITCH RED ON
 SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 
-
+StimParams.stimpath = dirname;
+StimParams.fprefix = fprefix;
+StimParams.fext = 'bmp';
 % --------------------------------------------------- %
 % --------------- Begin Experiment ------------------ %
 % --------------------------------------------------- %
@@ -196,15 +198,12 @@ while(runExperiment ==1)
             
             % update system params with stim info
             if SYSPARAMS.realsystem == 1
-                StimParams.stimpath = dirname;
-                StimParams.fprefix = fprefix;
                 StimParams.sframe = 2;
                 if CFG.random_flicker == 1
                     StimParams.eframe = 28;
                 else
                     StimParams.eframe = 4;
                 end
-                StimParams.fext = 'bmp';
                 Parse_Load_Buffers(0);
             end
 

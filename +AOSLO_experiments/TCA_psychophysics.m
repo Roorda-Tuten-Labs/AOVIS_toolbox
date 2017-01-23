@@ -137,6 +137,12 @@ ir_im = stim.create_cross_img(CFG.stimsize * 3, CFG.stimsize, false);
 %ir_im(CFG.stimsize + 1:CFG.stimsize * 2, CFG.stimsize + 1:CFG.stimsize * 2) = 0; 
 imwrite(ir_im, fullfile(pwd, 'tempStimulus', 'frame3.bmp'));
 
+StimParams.stimpath = dirname;
+StimParams.fprefix = fprefix;
+StimParams.sframe = 2;
+StimParams.eframe = 4;
+StimParams.fext = 'bmp';
+                
 while(runExperiment ==1)
 % Start the experiment
     uiwait;
@@ -160,11 +166,6 @@ while(runExperiment ==1)
 
             % update system params with stim info
             if SYSPARAMS.realsystem == 1
-                StimParams.stimpath = dirname;
-                StimParams.fprefix = fprefix;
-                StimParams.sframe = 2;
-                StimParams.eframe = 4;
-                StimParams.fext = 'bmp';
                 Parse_Load_Buffers(0);
             end
 
