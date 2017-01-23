@@ -258,17 +258,17 @@ if ~skipframe % do the following only if cross was detected
 
     % Plot a frame of each channel to see what you are correlating (sanity
     % check).
-    if nframe == 10
+    if nframe == 25
      figure(2); 
      subplot(3, 1, 1); imshow(G); title('green channel');
      subplot(3, 1, 2); imshow(R); title('red channel');
      subplot(3, 1, 3); imshow(IR); title('IR channel');
     end
     
-    %flip to match fundus view -- No longer needed on current system (2016)
-    %R=flipud(R); G=flipud(G); IR=flipud(IR);
-    %R1=flipud(R1); G1=flipud(G1); IR1=flipud(IR1);
-    %R2=flipud(R2); G2=flipud(G2); IR2=flipud(IR2);
+    %rotate to match fundus view 
+    R=rot90(R, 2); G=rot90(G, 2); IR=rot90(IR, 2);
+    R1=rot90(R1, 2); G1=rot90(G1, 2); IR1=rot90(IR1, 2);
+    R2=rot90(R2, 2); G2=rot90(G2, 2); IR2=rot90(IR2, 2);
     
     % ---- do 2-D cross-correlation ---- %
     % green to IR
