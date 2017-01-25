@@ -65,8 +65,9 @@ Mov.pfx = fprefix;
 Mov.aom2pow(:) = 1;
 Mov.aom0pow(:) = 1;
             
-% Use cross for aom0
+% Use cross for aom0 and aom2
 Mov.aom0seq(Mov.aom0seq ~= 0) = 3; % 3 is index of cross.
+Mov.aom2seq(Mov.aom2seq ~= 0) = 3; % 3 is index of cross.
 
 % Turn ON AOMs
 SYSPARAMS.aoms_state(1)=1;

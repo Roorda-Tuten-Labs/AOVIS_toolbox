@@ -4,6 +4,6 @@ function xcorr = normxcorr2f(ir_cross, currentframe)
         xcorr = normxcorr2_mex(ir_cross, currentframe, 'same');
     else
         import util.normxcorr2e
-        xcorr = util.normxcorr2e(ir_cross, currentframe, 'same');
+        xcorr = normxcorr2e(ir_cross, currentframe, 'same');
     end
 end
