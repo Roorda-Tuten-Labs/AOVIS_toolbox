@@ -2,15 +2,15 @@ function [X_cross_loc, Y_cross_loc, framenums_withcross] = find_cross(filename)
 
 import util.*
 
-ir_cross = zeros(21, 21);
-ir_cross(11,:)=1;ir_cross(:,11)=1;
+% generate a cross
+ir_cross = zeros(17, 17);
+ir_cross(9,:)=1;ir_cross(:,9)=1;
 
 IR    = 0;
 Red   = 1;
 Green = 2;
 
 cross_num = IR;
-
 if cross_num == IR;
     pixel = 255/255;
     
@@ -22,32 +22,33 @@ elseif cross_num == Green;
     
 end
 
-readerobj = VideoReader(filename);
-vidFrames = read(readerobj);
-startframe = 1; 
-endframe = readerobj.NumberOfFrames; 
+% create video reader object
+reader = VideoReader(filename);
 
 n = 1;
+framenum = 1;
+while hasFrame(reader)  
+    currentframe = readFrame(reader);
+    currentframe = im2double(currentframe(:, :, 1));
+    %currentframe = currentframe .* (currentframe==pixel);
 
-for framenum=startframe:endframe
-
-    currentframe = im2double(vidFrames(:,:,:,framenum));
-    currentframe = currentframe(:,:,1);
-    currentframe = currentframe.*(currentframe==pixel);
-    
     xcorr = normxcorr2f(ir_cross, currentframe);
-    
-    [not_used(framenum,1), Yr(framenum,1), Xr(framenum,1)] = util.max2D_RS(xcorr);
+    [not_used(framenum, 1), Yr(framenum,1), Xr(framenum,1)] = util.max2D_RS(xcorr);
 
-    if not_used(framenum,1) > 0.5
+    if not_used(framenum, 1) > 0.55
         Y(n,1)  = Yr(framenum,1);
         X(n,1)  = Xr(framenum,1);
         max_val = not_used(framenum,1);
         framenums_withcross(n,1) = framenum;
         n = n+1; 
     end
+
+    framenum = framenum + 1;
     
 end
+
+disp(X); disp(std(X))
+disp(Y); disp(std(Y))
 
 if (exist('X')) && (std(X) < 10) && std(Y) < 10
 

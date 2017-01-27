@@ -1,4 +1,4 @@
-function vidFrames = read_video(video_file, single_dimension)
+function vidFrames = read_video(video_file)
 
     % create a video reader object
     readerobj = VideoReader(video_file);
