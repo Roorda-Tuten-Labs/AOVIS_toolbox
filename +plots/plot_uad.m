@@ -1,4 +1,4 @@
-function plot_uad(dat, title_text, markersize, fontsize)
+function plot_uad(dat, title_text, markersize, fontsize, format_axes)
     %plot(dat, cone_index, ntrials)
     %
     % Should contain no zero (not seen) rows).
@@ -13,7 +13,9 @@ function plot_uad(dat, title_text, markersize, fontsize)
     if nargin < 4
         fontsize = 12;
     end
-    
+    if nargin < 5
+        format_axes = 1;
+    end
     % import plotting library
     import plots.*
 
@@ -46,8 +48,12 @@ function plot_uad(dat, title_text, markersize, fontsize)
     yb = mean(t_yb);
     yb_sem = std(t_yb) / sqrt(ntrials);
 
-    h = plots.errorbarxy(yb, gr, yb_sem, gr_sem,{'ko', 'k', 'k'});
-    plots.format_uad_axes(true, true, title_text, fontsize);
+    if format_axes
+        plots.format_uad_axes(true, true, title_text, fontsize);
+    end
+    hold on;
+    h = plots.errorbarxy(yb, gr, yb_sem, gr_sem, {'ko', 'r', 'r'});
+    
     
     set(h.hMain, 'MarkerSize', markersize);
     
