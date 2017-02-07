@@ -19,7 +19,7 @@ if strcmp(filename(end-3:end),'.tif')
    
 elseif strcmp(filename(end-3:end),'.avi')
     % otherwise find crosses fresh
-    [X_cross_loc, Y_cross_loc, framenums_withcross] = color_naming.find_cross([path,filename])
+    [X_cross_loc, Y_cross_loc, framenums_withcross] = vid.find_cross([path,filename])
     
     % then if crosses are found, produce stabilized movie (sumnorm)
     img_s = vid.sumframe_from_stabilized_movie(path, filename, framenums_withcross,...
