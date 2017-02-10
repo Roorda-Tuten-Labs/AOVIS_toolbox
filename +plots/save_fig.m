@@ -8,7 +8,10 @@ function save_fig(save_name, fig, transparent, file_type)
     
     % -m2 magnify 2x for good resolution
     if transparent
-        export_fig(save_name, ['-' file_type], '-m2', '-transparent', fig);
+        set(gca, 'Color', 'none'); 
+        %set(gcf, 'Color', 'white');
+        %export_fig(save_name, ['-' file_type], '-m2', '-transparent', fig);
+        print(fig, save_name, '-depsc', '-r300')
     else
         export_fig(save_name, ['-' file_type], '-m2', fig);
     end
