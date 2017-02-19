@@ -96,8 +96,8 @@ end
 selected_cones_filename = [path, (filename(1:end-4)), 'selected_cones_' ...
     strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':','') '.png'];
 
-imwrite(img_map,selected_cones_filename,'png');
+imwrite(img_map, selected_cones_filename, 'png');
 
-offsets_x_y = img.inverse_image_crop(img_s, img_crop,ROI_search, fliplr(offset_cropped));
+offsets_x_y = img.inverse_image_crop(img_s, ROI_search, fliplr(offset_cropped));
 
 
