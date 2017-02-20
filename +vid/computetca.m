@@ -221,8 +221,8 @@ if ~skipframe % do the following only if cross was detected
             IRy=locy-60+1; IRx=locx-127;
         case {'ir','infrared'}
             %     disp('Cross centered in IR channel');
-            IRy=locy-60-1;  IRx=locx-127;
-            Gy=locy-60-2;  Gx=locx-127;
+            IRy=locy-60-2;  IRx=locx-127;
+            Gy=locy-60-1;  Gx=locx-127;
             Ry=locy-60+0; Rx=locx-127;
         otherwise
             disp('Channel with cross is invalid.')

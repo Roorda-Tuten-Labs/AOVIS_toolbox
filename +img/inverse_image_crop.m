@@ -3,7 +3,7 @@ function old_coordinates_x_y = inverse_image_crop(img_orig, img_cropped, rect, n
 %new_coordinates are now in row-col format and not in (x,y) coordinate format
 size_original = size(img_orig);
 
-[x y] = meshgrid(1:size_original(1),1:size_original(2));
+[x, y] = meshgrid(1:size_original(1),1:size_original(2));
 
 img_cropped = imcrop(img_orig, rect);
 x_crop      = imcrop(x,rect);
