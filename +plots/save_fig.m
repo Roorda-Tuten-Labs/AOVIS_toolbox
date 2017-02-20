@@ -5,6 +5,9 @@ function save_fig(save_name, fig, transparent, file_type)
     if nargin < 4
         file_type = 'eps';
     end
+    % make sure save dir exists
+    dirname = fileparts(save_name);
+    util.check_for_dir(dirname);
     
     % -m2 magnify 2x for good resolution
     if transparent
