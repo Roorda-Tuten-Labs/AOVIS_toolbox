@@ -152,20 +152,6 @@ while(runExperiment ==1)
             Mov.aom2offx = aom2offx_mat(1, :, trial);
             Mov.aom2offy = aom2offy_mat(1, :, trial);
 
-            if CFG.random_flicker == 1
-                % find frames that have intensities set to greater than 0
-                on_frames = Mov.aom2seq > 0;
-                n_on_frames = sum(on_frames);
-                
-                % use selected starting locations and randomly walk from
-                % there
-                rand_ind = randi([4, 28], n_on_frames, 1);
-                
-                % update offsets sent to aom2
-                Mov.aom2seq(on_frames) = rand_ind;
-                
-            end
-            
             % change the message displayed in status bar
             message = ['Running Experiment - Trial ' num2str(trial) ...
                        ' of ' num2str(CFG.ntrials * CFG.num_locations)];
@@ -283,7 +269,12 @@ while(runExperiment ==1)
     end
 end
 
- disp([exp_data.trials' exp_data.offsets]);
+% save data
+filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
+    ' ','x'),':',''),'.mat'];
+save(fullfile(VideoParams.videofolder, filename), 'exp_data');
+
+disp([aom2offx_mat(1, 1, :); aom2offx_mat(1, 1, :)]);
 
 
 
