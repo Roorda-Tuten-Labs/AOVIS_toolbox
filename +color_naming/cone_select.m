@@ -32,8 +32,8 @@ max_ROI_width  = 64 * 0.75;
 max_ROI_height = 32 * 0.75;
 
 % use TCA offsets to find location of interest on retina
-tca_x = tca_offsets(1,1);
-tca_y = tca_offsets(1,2);
+tca_x = 0; %tca_offsets(1,1);
+tca_y = 0; %tca_offsets(1,2);
 
 ROI = [(X_cross_loc + tca_x - max_ROI_width/2), ...
        (Y_cross_loc + tca_y - max_ROI_height/2),...

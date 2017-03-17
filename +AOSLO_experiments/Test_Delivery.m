@@ -86,7 +86,6 @@ tca_green = [CFG.green_x_offset CFG.green_y_offset];
 % ---- Select cone locations ---- %
 [stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
     tca_green, VideoParams.rootfolder, CFG);
-
 CFG.num_locations = size(stim_offsets_xy,1);
 cross_xy = [X_cross_loc, Y_cross_loc];
 
@@ -162,7 +161,7 @@ while(runExperiment ==1)
             setappdata(hAomControl, 'Mov', Mov);
             
             VideoParams.vidname = [CFG.vidprefix '_' sprintf('%03d',trial)];
-
+            
             % use the Mov structure to play a movie
             PlayMovie;
 
@@ -275,7 +274,5 @@ filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
 save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
 disp([aom2offx_mat(1, 1, :); aom2offx_mat(1, 1, :)]);
-
-
 
 end
