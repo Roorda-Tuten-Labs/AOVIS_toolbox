@@ -1,7 +1,7 @@
 function save_fig(save_name, fig, transparent, file_type)
     % save_fig(save_name, fig, transparent, file_type)
     % 
-    if nargin < 3
+    if nargin < 3 || isempty(transparent)
         transparent = 1;
     end
     if nargin < 4
@@ -14,12 +14,9 @@ function save_fig(save_name, fig, transparent, file_type)
     % -m2 magnify 2x for good resolution
     if transparent
         set(gca, 'Color', 'none'); 
-        %set(gcf, 'Color', 'white');
         %export_fig(save_name, ['-' file_type], '-m2', '-transparent', fig);
-        print(fig, save_name, '-dsvg', '-r300')
-    else
-        export_fig(save_name, ['-' file_type], '-m2', fig);
     end
+    print(fig, save_name, ['-d' file_type], '-r300', '-painters')
     
 end
     

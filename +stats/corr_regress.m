@@ -25,7 +25,8 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     
     if ~strcmpi(corr_type, 'spearman')
         % compute regression statistics: p-value
-        stats = regstats(y, x, 'linear', {'rsquare' 'fstat' 'beta' 'yhat' 'r'});
+        stats = regstats(y, x, 'linear', ...
+            {'rsquare' 'fstat' 'tstat' 'beta' 'yhat' 'r'});
     end
     
     % compute corr coeff: need to retain sign of R.
@@ -44,8 +45,11 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     % print out results
     if print_results
         disp(disp_name);
+        disp('+++ Correlation +++')
         pprint(Nsamples, 0, 'N:');
         pprint(r, 4, 'R:');
+        % p-value
+        pprint(pval, -1, 'p-val:');
         
         % 95% confidence intervals for correlation
         % Formulas taken from Altman & Gardner 1988. Calculating confidence
@@ -57,6 +61,7 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
         
         CIplus = z_score + (1.96 / sqrt(Nsamples - 3));
         CIminus = z_score - (1.96 / sqrt(Nsamples - 3));
+        
         % convert back to original coordinates
         CIplus = (exp(2 * CIplus) - 1) / (exp(2 * CIplus) + 1);
         CIminus = (exp(2 * CIminus) - 1) / (exp(2 * CIminus) + 1);
@@ -71,22 +76,18 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
             stand_err = sqrt(sum(stats.r .^ 2) / (length(stats.r) - 2));
             stats.stand_err = stand_err;
             pprint(stand_err, 4, 'SE:');
-            
-            % compute mean, stand dev and slope for regression
-            xbar = mean(x);
-            ybar = mean(y);
-            sigx = std(x);
-            sigy = std(y);
-
-            % Regression line slope
-            stats.slope = r * sigy / sigx;
-            pprint(stats.slope, 4, 'slope:');
+        
+            disp(' ');
+            disp('+++ Regression +++');
+            disp(' ');
+            % Regression line slope and intercept           
+            pprint(stats.beta(2), 3, 'slope:');
+            pprint(stats.beta(1), 3, 'inter:');
+            pprint(r ^ 2, 4, 'R^2:');            
+                        
+            disp(stats.fstat);
+            disp(' ');
         end
-        
-        pprint(r ^ 2, 4, 'R^2:');
-        
-        % p-value
-        pprint(pval, 5, 'p-val:');
         
     end
     
@@ -95,7 +96,7 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     % http://www.mathworks.com/help/stats/regress.html
     if add_plot && length(y(1, :)) == 1 && strcmpi(corr_type, 'pearson')
         % Overplot regression line, adding means back in.
-        yfit = ybar + stats.slope * (unique(x) - xbar);
+        yfit = stats.beta(2) * unique(x) + stats.beta(1);
         
         plot(unique(x), yfit,'k-', 'linewidth', 2.5)
         

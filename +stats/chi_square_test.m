@@ -8,6 +8,7 @@ function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
     % observed: an n x m contingency table.
     %           correction: decide whether to apply a Yates correction for 
     %           continuity and small sample sizes. Default is 0. 
+    % correction: use Yates correction for continuityﬂ.
     % print:    decide whether to print out the results to the command line.
     %           Default is 0.
     % DoF:      degrees of freedom. If nothing is passed, the program will
@@ -47,24 +48,27 @@ function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
         Nrand = -1;
     end
     
+    % save orignal dataset for resampling analysis
+    input_data = observed;
+    
+    % test if matrix has zero rows or columns
+    observed = util.remove_zero_cols(observed);
+    if size(observed, 2) ~= size(observed, 2) 
+        error('Matrix contained columns with only zeros.')
+    end
+    
+    observed = util.remove_zero_rows(observed);
+    if size(observed, 1) ~= size(observed, 1)
+        error('Matrix contained rows with only zeros.')
+    end
+    
     Ncols = size(observed, 2);
     Nrows = size(observed, 1);
+    
     if nargin < 4  || isempty(DoF) % compute from data
         % DoF = (rows - 1) * (columns - 1)
         DoF = (Nrows - 1) * (Ncols - 1);
     end
-    
-    % test if matrix has zero rows or columns
-    tobserved = util.remove_zero_cols(observed);
-    if size(tobserved, 2) ~= size(observed, 2) 
-        error('Matrix contained columns with only zeros.')
-    end
-    
-    tobserved = util.remove_zero_rows(observed);
-    if size(tobserved, 1) ~= size(observed, 1)
-        error('Matrix contained rows with only zeros.')
-    end
-
     % find the chi square statistic
     [chi2stat, expected, total] = compute_chi_stat(observed, correction);
     
@@ -72,32 +76,22 @@ function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
         % Find probability with chi square distribution
         pval = 1 - chi2cdf(chi2stat, DoF);
     else
+        % preserve the size of the original input data.
+        [Nrows_original, ~] = size(input_data);
+        
         % use a monte carlo simulation to estimate p value
-
-        % create a mask for simulating data below
-        mask = zeros(size(observed, 1), total); 
-        start = 1; 
-        rowsums = sum(observed, 2);
-        finish = rowsums(1);
-        mask(1, start:finish) = 1; 
-        for ii = 2:size(observed, 1)
-            start = start + rowsums(ii - 1); 
-            finish = start + rowsums(ii) - 1; 
-            mask(ii, start:finish) = 1; 
-        end 
-
+        colsum = sum(observed, 1);
+        
         % monte carlo resimulation
         chi_sims = zeros(1, Nrand); 
         for ii = 1:Nrand 
-            sim_data = zeros(size(observed));
-            % need to do Ncols-1 sims
-            for c = 1:size(observed, 2) - 1
-                S = randperm(total) <= sum(observed(:, c)); 
-                ss = mask * S';
-                sim_data(:, c) = ss;
-            end
-            % fill in last row
-            sim_data(:, end) = rowsums - sum(sim_data, 2);
+            sim_cone1 = hist(randsample(Nrows, colsum(1), 1), ...
+                1:Nrows_original);
+            sim_cone2 = hist(randsample(Nrows, colsum(2), 1), ...
+                1:Nrows_original);
+            % simulated data
+            sim_data = [sim_cone1; sim_cone2];
+            
             % compute chi stat for simulated data
             chi_sims(ii) = compute_chi_stat(sim_data, correction);
         end         
