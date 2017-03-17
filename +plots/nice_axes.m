@@ -1,4 +1,6 @@
 function nice_axes(xlabelname, ylabelname, fontsize)
+    % nice_axes(xlabelname, ylabelname, fontsize)
+    % 
     if nargin < 3
         fontsize = 22;
     end

@@ -150,7 +150,7 @@ while(runExperiment ==1)
             % tell the aom about the offset (TCA + cone location)
             Mov.aom2offx = aom2offx_mat(1, :, trial);
             Mov.aom2offy = aom2offy_mat(1, :, trial);
-            
+
             % change the message displayed in status bar
             message = ['Running Experiment - Trial ' num2str(trial) ...
                        ' of ' num2str(CFG.ntrials * CFG.num_locations)];
@@ -273,9 +273,6 @@ filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
     ' ','x'),':',''),'.mat'];
 save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
- 
- disp([aom2offx_mat(1, 1, :) aom2offy_mat(1, 1, :)]);
-
-
+disp([aom2offx_mat(1, 1, :); aom2offx_mat(1, 1, :)]);
 
 end

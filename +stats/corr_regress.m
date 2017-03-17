@@ -1,5 +1,7 @@
 function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
-    corr_type)   
+    corr_type) 
+%   stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
+%        corr_type) 
     if nargin < 3
         add_plot = false;
     end
