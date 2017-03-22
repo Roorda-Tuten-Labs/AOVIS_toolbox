@@ -22,11 +22,11 @@ function [offsets_x_y, X_cross_loc, Y_cross_loc] = select_cone_gui(...
       case 'New offsets from old/new movie'
 
         % name of folder with offsets
-        folder_name = fullfile(rootfolder, CFG.initials, filesep);
+        folder_name = fullfile(rootfolder, CFG.initials);
 
         % gen new offsets
         [offsets_x_y, X_cross_loc, Y_cross_loc] = color_naming.cone_select(...
-            tca, CFG.cone_selection, folder_name);
+            tca, CFG.cone_selection, folder_name, CFG.initials);
 
         % check for dir, name and save offsets for later
         if ~isdir('color_naming_offsets')

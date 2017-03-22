@@ -1,5 +1,9 @@
 function log_transform_image()
-
+    % log_transform_image()
+    %
+    % log tansform all images in a directory. saves new images with log
+    % appended to file name.
+    
     try
         if ismac
             [fnames, pathname, ~] = uigetfile('*', 'Select video file', ...
@@ -14,9 +18,8 @@ function log_transform_image()
     catch
         [fnames, pathname, ~] = uigetfile('*', 'Select video file', ...
             'multiselect', 'on');
-    end
-    
-    
+    end  
+
     for j = 1:length(fnames)
         fname = fnames{j};
         imagefilename = fullfile(pathname, fname);
@@ -33,4 +36,5 @@ function log_transform_image()
         newfilename = fullfile(pathname, [name 'log' ext]);
         imwrite(d, newfilename);
     end
+
 end

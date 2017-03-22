@@ -1,5 +1,5 @@
 function [offsets_x_y, X_cross_loc, Y_cross_loc] = cone_select(tca_offsets,...
-    cone_selection_method, folder_name)
+    cone_selection_method, folder_name, subject)
             
 import color_naming.*
 import vid.*
@@ -82,11 +82,18 @@ end
 if strcmpi(cone_selection_method,'auto')
     % !!
     % !! Not sure that this is even working. It is never used !!
-    % !!
+    % !!       
     [img_map, offset_cropped] = color_naming.auto_cone_select(img_crop,...
         rect_position);
  
 elseif strcmpi(cone_selection_method,'manual')
+    
+    try
+        AOSLO_experiments.add_cone_types_to_selection_img(subject, img_crop);    
+    catch
+        disp('Warning: Could not run add_cone_types_to_selection_img')
+    end
+    
     % This is the routine typically used.
     [img_map, offset_cropped] = color_naming.manual_cone_select(img_crop,...
         rect_position, rect_position_old);    

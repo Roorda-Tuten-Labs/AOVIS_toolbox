@@ -1,5 +1,3 @@
-
-
 function [output Greg] = dftregistration(buf1ft,buf2ft,usfac)
 % function [output Greg] = dftregistration(buf1ft,buf2ft,usfac);
 % Efficient subpixel image registration by crosscorrelation. This code
@@ -11,18 +9,18 @@ function [output Greg] = dftregistration(buf1ft,buf2ft,usfac)
 % matrix-multiply DFT. With this procedure all the image points are used to
 % compute the upsampled crosscorrelation.
 % Manuel Guizar - Dec 13, 2007
-
+%
 % Portions of this code were taken from code written by Ann M. Kowalczyk 
 % and James R. Fienup. 
 % J.R. Fienup and A.M. Kowalczyk, "Phase retrieval for a complex-valued 
 % object by using a low-resolution image," J. Opt. Soc. Am. A 7, 450-458 
 % (1990).
-
+%
 % Citation for this algorithm:
 % Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup, 
 % "Efficient subpixel image registration algorithms," Opt. Lett. 33, 
 % 156-158 (2008).
-
+%
 % Inputs
 % buf1ft    Fourier transform of reference image, 
 %           DC in (1,1)   [DO NOT FFTSHIFT]
@@ -31,7 +29,7 @@ function [output Greg] = dftregistration(buf1ft,buf2ft,usfac)
 % usfac     Upsampling factor (integer). Images will be registered to 
 %           within 1/usfac of a pixel. For example usfac = 20 means the
 %           images will be registered within 1/20 of a pixel. (default = 1)
-
+%
 % Outputs
 % output =  [error,diffphase,net_row_shift,net_col_shift]
 % error     Translation invariant normalized RMS error between f and g

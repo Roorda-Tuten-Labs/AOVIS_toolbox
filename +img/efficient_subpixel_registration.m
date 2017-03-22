@@ -82,7 +82,7 @@ title('Shifted image, g(x,y)')
 %
 % We now use the image registration code to register f and g within 0.01
 % pixels by specifying an upsampling parameter of 100
-[output Greg] = dftregistration(fft2(f),fft2(g),100);
+[output Greg] = img.dftregistration(fft2(f),fft2(g),100);
 display(output),
 %% 
 % The pixel shift error (difference between the true and obtained shifts)
