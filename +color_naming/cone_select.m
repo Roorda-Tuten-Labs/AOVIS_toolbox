@@ -9,7 +9,7 @@ import vid.*
 [filename, path] = uigetfile('*.*',...
                     'Pick Stabilized Movie or SumFrame to analyze',...
                  folder_name);
-           
+datetime_format = strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':','');
 if strcmp(filename(end-3:end),'.tif')
     % if loading in an already stabilized image.
     img_s = im2double(imread([path, filename], 'tif'));
@@ -89,8 +89,11 @@ if strcmpi(cone_selection_method,'auto')
 elseif strcmpi(cone_selection_method,'manual')
     
     try
-        AOSLO_experiments.add_cone_types_to_selection_img(subject, img_s, ...
+        fighandle = cone_mosaic.add_cone_types_to_selection_img(subject, img_s, ...
             [X_cross_loc, Y_cross_loc]);    
+        % save the ouput plot as an svg file
+        savename = [path, (filename(1:end-4)), 'target_loc_' datetime_format];
+        plots.save_fig(savename, fighandle, [], 'svg');
     catch
         disp('Warning: Could not run add_cone_types_to_selection_img')
     end
@@ -102,7 +105,7 @@ end
 
 % Selected cones
 selected_cones_filename = [path, (filename(1:end-4)), 'selected_cones_' ...
-    strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':','') '.png'];
+    datetime_format '.png'];
 
 imwrite(img_map, selected_cones_filename, 'png');
 
