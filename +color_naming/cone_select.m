@@ -89,7 +89,8 @@ if strcmpi(cone_selection_method,'auto')
 elseif strcmpi(cone_selection_method,'manual')
     
     try
-        AOSLO_experiments.add_cone_types_to_selection_img(subject, img_crop);    
+        AOSLO_experiments.add_cone_types_to_selection_img(subject, img_s, ...
+            [X_cross_loc, Y_cross_loc]);    
     catch
         disp('Warning: Could not run add_cone_types_to_selection_img')
     end
