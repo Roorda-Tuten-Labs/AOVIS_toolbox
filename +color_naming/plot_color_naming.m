@@ -7,7 +7,7 @@ if nargin < 3
     format_axes = 1;
 end
 if nargin < 4
-    figure();
+    figure(258);
 end
 
 %%%%%%%% Plot the output %%%%%%%%%%%
