@@ -194,7 +194,8 @@ while(runExperiment ==1)
     elseif strcmp(resp, kb_StimConst)
         if PresentStimulus == 1
             % play sound to indicate start of stimulus
-            sound(cos(90:0.75:180));            
+            % sound(cos(90:0.75:180));            
+            beep 
             
             % update system params with stim info
             if SYSPARAMS.realsystem == 1
@@ -254,7 +255,9 @@ while(runExperiment ==1)
             GetResponse = 1;
             good_trial = 0;
             % Play sound.
-            sound(sin(0:0.5:90));
+            %sound(sin(0:0.5:90));
+            beep
+            
             PresentStimulus = 1;
             % Update message
             message1 = [Mov.msg ' Repeat trial'];
@@ -361,7 +364,9 @@ while(runExperiment ==1)
                 sequence_rand(trial),1) stim_offsets_xy(sequence_rand(trial),2)];
             exp_data.intensities (trial) = intensities_sequence_rand(trial);
 
-            sound(cos(0:0.5:90));
+            %sound(cos(0:0.5:90));
+            beep;
+            
             pause(0.2);
             
             %update trial counter
