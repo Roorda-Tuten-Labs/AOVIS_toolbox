@@ -11,8 +11,9 @@ import AOSLO_experiments.*
 
 % Intensity levels. Usually set to 1, can be a vector with multiple 
 % intensities that will be randomly presented.
-intensities = 1; %[0.5, 0.75, 1];
+intensities = 1; %[0.25, 0.5, 1];
 nintensities = length(intensities);
+random_flicker = 0;
 
 % ------------------------------------------- %
 
@@ -160,7 +161,7 @@ StimParams.fext = 'bmp';
 % --------------------------------------------------- %
 % --------------- Begin Experiment ------------------ %
 % --------------------------------------------------- %
-if CFG.random_flicker == 1
+if random_flicker == 1
     rng(exp_data.seed);
     stim.createRandomStimulus(1, CFG.stimsize);
 else
