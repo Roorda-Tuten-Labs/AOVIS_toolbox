@@ -1,4 +1,4 @@
-function [figHand1, figHand2] = delivery_error_analysis(video_dir, ...
+function [figHand1, figHand2] = delivery_error_analysis(delivery_err, ...
     pix_per_degree, cross_size_pix, xcorr_thresh)
 % plot delivery error analysis for a directory with stabilized videos
 %
@@ -7,7 +7,8 @@ function [figHand1, figHand2] = delivery_error_analysis(video_dir, ...
 %                           cross_size_pix, xcorr_thresh)
 %
 % INPUT
-% video_dir:        directory containing videos to analyze. if nothing or
+% delivery_err:     matrix of already analyzed delivery errors or a 
+%                   directory containing videos to analyze. if nothing or
 %                   an empty string is passed, the user will be prompted to
 %                   select a directory.
 % pix_per_degree:   pixels/degree of the AOSLO videos. Default = 535.
@@ -22,6 +23,7 @@ function [figHand1, figHand2] = delivery_error_analysis(video_dir, ...
     
 if nargin < 1
     video_dir = '';
+    delivery_err = [];
 end
 if nargin < 2
     pix_per_degree = 535;
@@ -33,8 +35,14 @@ if nargin < 4
     xcorr_thresh = 0.5;
 end
 
-delivery_err = delivery.find_error(video_dir, cross_size_pix, ...
-    xcorr_thresh, 'green', 1);
+% if no delivery error matrix or path to directory is passed.
+if isempty(delivery_err) || ischar(delivery_err)
+    if ischar(delivery_err)
+        video_dir = delivery_err;
+    end
+    delivery_err = delivery.find_error(video_dir, cross_size_pix, ...
+        xcorr_thresh, 'green', 1);
+end
 
 summary_data = delivery.summarize_error(delivery_err, pix_per_degree);
 
