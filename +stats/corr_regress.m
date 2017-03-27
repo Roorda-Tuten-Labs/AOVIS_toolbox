@@ -20,6 +20,14 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     if length(x) ~= length(y)
         error('x and y must be same length');
     end
+    if size(x, 1) == 1 && size(x, 2) ~= 1
+        % rotate x so that it is a column vector(s)
+        x = x';
+    end
+    if size(y, 1) == 1 && size(y, 2) ~= 1
+        % rotate x so that it is a column vector(s)
+        y = y';
+    end    
     
     Nsamples = length(x);
     
@@ -30,7 +38,7 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     end
     
     % compute corr coeff: need to retain sign of R.
-    if length(x(1, :)) == 1
+    if size(x, 1) == 1 || size(x, 2) == 1
         [r, pval] = corr([x y], 'type', corr_type); 
         r = r(1, 2); % off diagonal.
         pval = pval(1, 2);
@@ -40,6 +48,7 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
         % when running multiple regression (sign doesnt matter b/c not
         % plotting).
         r = sqrt(stats.rsquare);
+        pval = stats.fstat.pval;
     end
        
     % print out results
