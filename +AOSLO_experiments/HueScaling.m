@@ -15,6 +15,8 @@ intensities = [0.25, 0.5, 1];
 nintensities = length(intensities);
 random_flicker = 0;
 
+add_blank_trials = 1;
+fraction_blank = 0.1;
 % ------------------------------------------- %
 
 % set some variable to global. most of these are first modified 
@@ -100,9 +102,9 @@ tca_green = [CFG.green_x_offset CFG.green_y_offset];
 % ---- Select cone locations ---- %
 [stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
     tca_green, VideoParams.rootfolder, CFG);
+cross_xy = [X_cross_loc, Y_cross_loc];
 
 CFG.num_locations = size(stim_offsets_xy,1);
-cross_xy = [X_cross_loc, Y_cross_loc];
 
 % ---- Apply TCA offsets to cone locations ---- %
 [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
@@ -111,6 +113,12 @@ cross_xy = [X_cross_loc, Y_cross_loc];
 % ---- Set intensities ---- %
 % this section is essentially meaningless if intensities above is only a
 % single value (1) as it is typically set.
+
+% first handle case where adding in blank trials
+if add_blank_trials
+    n_blank_trials_per_cone = ceil(CFG.ntrials * fraction_blank);
+    CFG.ntrials = CFG.ntrials + n_blank_trials_per_cone;
+end
 sequence = reshape(ones(CFG.ntrials, 1) * (1:CFG.num_locations), 1, ...
     CFG.num_locations * CFG.ntrials);
 sequence_with_intensities = repmat(sequence, 1, nintensities);
@@ -118,7 +126,17 @@ sequence_with_intensities = repmat(sequence, 1, nintensities);
 intensities_sequence = repmat(intensities, CFG.ntrials .* CFG.num_locations, 1);
 intensities_sequence = reshape(intensities_sequence, 1, ...
                                length(sequence_with_intensities));
-
+if add_blank_trials
+    % -- this is where 0 intensities are added to the sequence -- %
+    % new total number of trials with blanks added
+    total = length(intensities_sequence);
+    % number of blanks across the dataset
+    nblanks = n_blank_trials_per_cone * CFG.num_locations * nintensities;
+    % find indexes so that each cone receives same number of blanks
+    blank_indexes = 1:total/nblanks:total;
+    % now switch intensites to 0 for each cone at desired rate
+    intensities_sequence(blank_indexes) = 0;
+end
 % now randominze
 randids_with_intensity = randperm(numel(sequence_with_intensities));
 sequence_rand = sequence_with_intensities(randids_with_intensity);
