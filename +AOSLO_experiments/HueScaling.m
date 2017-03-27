@@ -214,7 +214,8 @@ while(runExperiment ==1)
             % ---- set movie parameters to be played by aom ---- %
             % Select AOM power 100% for most experiments unless set 
             % otherwise with intensity variable at top of file.
-            Mov.aom2pow(:) = intensities_sequence_rand(trial);
+            Mov.aom2pow(:) = 1;%
+            stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities_sequence_rand(trial));
             Mov.aom0pow(:) = 1;
 
             % tell the aom about the offset (TCA + cone location)

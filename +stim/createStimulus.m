@@ -1,9 +1,11 @@
-function createStimulus(stimsize, stimshape)
+function createStimulus(stimsize, stimshape, power)
     import stim.*
-    
+    if nargin<3
+        power = 1;
+    end
     if strcmp(stimshape, 'square')
         stim_im = zeros(stimsize, stimsize);
-        stim_im(1:end,1:end) = 1;
+        stim_im(1:end,1:end) = power;
 
     elseif strcmp(stimshape, 'circle')
         xp =  -fix(stimsize / 2)  : fix(stimsize / 2);
