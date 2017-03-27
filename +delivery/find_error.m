@@ -12,7 +12,7 @@ function delivery_err = find_error(video_dir, cross_size_pix, ...
 %                   select a directory.
 % cross_size_pix:   size of the cross used in cross correlation, specified
 %                   in pixels. Default = 17.
-% xcorr_thresh:     threshold for finding a cross. Default = 0.5.
+% xcorr_thresh:     threshold for finding a cross. Default = 0.6.
 % cross_channel:    the crosses from each channel are encoded with a unique 
 %                   value. select the cross pixel value for the channel of
 %                   interest. this will be used below to binarize the image
@@ -21,9 +21,10 @@ function delivery_err = find_error(video_dir, cross_size_pix, ...
 %                   analysis. Default = 0.
 %
 % OUTPUT
-% delivery_err:     an n by 4 matrix. n=number of videos. columns are 
-%                   organized as follows: [video #, frame, x location, y
-%                   location]
+% delivery_err:     an n by 4 matrix. n=number of videos * number of frames
+%                   per video. columns are organized as follows: 
+%                   [video #, frame, x location, y location]. Locations are
+%                   in pixels.
 %
 
     
@@ -35,7 +36,7 @@ if nargin < 2
     cross_size_pix = 17;
 end
 if nargin < 3
-    xcorr_thresh = 0.5;
+    xcorr_thresh = 0.6;
 end
 if nargin < 4
     cross_channel = 'ir';

@@ -4,8 +4,16 @@ function summary = summarize_error(delivery_err, pix_per_degree)
 % USAGE
 % summary = summarize_error(delivery_err, pix_per_degree)
 %
+% INPUT
+% delivery_err:     matrix with analyzed delivery errors from
+%                   delivery.find_error() routine.
+% pix_per_degree:   for converting to arcmins.
+%
 % OUTPUT
-% summary
+% summary:          n by 4 matrix. each row in the matrix corresponds to a 
+%                   single frame or trial. the columns of the matrix are 
+%                   organized as follows: [x mean, x std, y mean, y std].
+%                   All values are returned in arcmins
 %
 trials = unique(delivery_err(:, 1));
 ntrials = length(trials);

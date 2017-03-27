@@ -12,7 +12,7 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 % filename:         name of video file to read.
 % cross_size_pix:   size of the cross in pixels to use in cross
 %                   correlation.
-% xcorr_threshold:  threshold for detecting a cross. default = 0.5.
+% xcorr_threshold:  threshold for detecting a cross. default = 0.6.
 % print_output:     0 or 1. Decide whether to print results
 % return_mean_only: 0 or 1. this routine will find the mean by excluding
 %                   values that are greater than 1 STD from the mean.
@@ -38,7 +38,7 @@ if nargin < 2
     cross_size_pix = 17;
 end
 if nargin < 3
-    xcorr_threshold = 0.5;
+    xcorr_threshold = 0.6;
 end
 if nargin < 4
     print_output = true;
@@ -66,9 +66,15 @@ ir_cross = zeros(cross_size_pix, cross_size_pix);
 center_cross = ceil(cross_size_pix / 2);
 ir_cross(center_cross,:)=1;ir_cross(:, center_cross) = 1;
 
-% create video reader object
-reader = VideoReader(filename);
-
+try
+    % create video reader object
+    reader = VideoReader(filename);
+    
+catch ME
+    disp(filename);
+    rethrow(ME);
+    
+end
 n = 1;
 frameN = 1;
 while hasFrame(reader)  
