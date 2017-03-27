@@ -148,8 +148,8 @@ exp_data.stimsize = CFG.stimsize;
 exp_data.ntrials = CFG.ntrials;
 exp_data.num_locations = CFG.num_locations;
 exp_data.Nscale = CFG.nscale;
-exp_data.cnames = {kb_ans1_label, kb_ans2_label, kb_ans3_label, ...
-    kb_ans4_label, kb_ans5_label};
+exp_data.cnames = {kb_ans1_label{2}, kb_ans2_label{2}, kb_ans3_label{2}, ...
+    kb_ans4_label{2}, kb_ans5_label{2}};
 exp_data.seed = 45245801;
 
 % Turn ON AOMs
@@ -320,7 +320,7 @@ while(runExperiment ==1)
             % of values.
                 message1 = [Mov.msg ' Repeat trial']; 
                 repeat_trial_flag = 1;
-                resp_count = CFG.nscale + 1; % ensure trial ends
+                resp_count = total_button_presses + 1; % ensure trial ends
                 
             % if abort key triggered, end experiment safely.
             elseif strcmp(resp, kb_AbortConst);
