@@ -118,11 +118,11 @@ if return_mean_only
     if exist('X', 'var') && std(X) < 10 && std(Y) < 10
         % compute mean of XY position from cross locations that fall within
         % one STD of the mean.
-            X_cross_loc = round(mean(X(find((X <= (mean(X)+std(X) / 2)) & ...
-                (X >= (mean(X) - std(X) / 2))))));
+        X_cross_loc = round(mean(X(find((X <= (mean(X)+std(X) / 2)) & ...
+            (X >= (mean(X) - std(X) / 2))))));
 
-            Y_cross_loc = round(mean(Y(find((Y <= (mean(Y) + std(Y) / 2)) & ...
-                (Y >=(mean(Y) - std(Y) / 2))))));
+        Y_cross_loc = round(mean(Y(find((Y <= (mean(Y) + std(Y) / 2)) & ...
+            (Y >=(mean(Y) - std(Y) / 2))))));
 
     else
         errordlg('IR cross not found/not reliable, Record another movie');

@@ -11,7 +11,7 @@ import AOSLO_experiments.*
 
 % Intensity levels. Usually set to 1, can be a vector with multiple 
 % intensities that will be randomly presented.
-intensities = 1; %[0.25, 0.5, 1];
+intensities = [0.25, 0.5, 1];
 nintensities = length(intensities);
 random_flicker = 0;
 
@@ -70,17 +70,18 @@ kb_BadConst = 'return';
 
 % ------- these options were set in dialog option box ---------- %
 kb_ans1 = '1';  
-kb_ans1_label = 'red';
+kb_ans1_label = {'1', 'red'};
 kb_ans2 = '2';  
-kb_ans2_label = 'green';
+kb_ans2_label = {'2', 'green'};
 kb_ans3 = '3';  
-kb_ans3_label = 'blue';
+kb_ans3_label = {'3', 'blue'};
 kb_ans4 = '4';  
-kb_ans4_label = 'yellow';
+kb_ans4_label = {'4', 'yellow'};
 kb_ans5 = '5';  
-kb_ans5_label = 'white';
+kb_ans5_label = {'5', 'white'};
 
-kb_NotSeen = '7';
+kb_NotSeen = 'backquote';
+
 kb_AbortConst = 'escape';
 
 dirname = fullfile(StimParams.stimpath, filesep);
@@ -142,6 +143,7 @@ exp_data.presentdur = ['Presentation Duration (ms): ' num2str(CFG.presentdur)];
 exp_data.videoprefix = ['Video Prefix: ' CFG.vidprefix];
 exp_data.videodur = ['Video Duration: ' num2str(CFG.videodur)];
 exp_data.videofolder = ['Video Folder: ' VideoParams.videofolder];
+exp_data.brightness_scaling = CFG.brightness_scaling;
 exp_data.stimsize = CFG.stimsize;
 exp_data.ntrials = CFG.ntrials;
 exp_data.num_locations = CFG.num_locations;
@@ -234,7 +236,7 @@ while(runExperiment ==1)
             
             % change the message displayed in status bar
             message = ['Running Experiment - Trial ' num2str(trial) ...
-                       ' of ' num2str(CFG.ntrials * CFG.num_locations)];
+                       ' of ' num2str(CFG.ntrials * CFG.num_locations * nintensities)];
             Mov.msg = message;
             Mov.seq = '';
             
@@ -265,37 +267,47 @@ while(runExperiment ==1)
             
     elseif GetResponse == 1
         % reset trial variable
-        trial_response_vector = zeros(1, CFG.nscale);
+        total_button_presses = CFG.nscale + CFG.brightness_scaling;
+        trial_response_vector = zeros(1, total_button_presses);
         resp_count = 1;
         repeat_trial_flag = 0;
         seen_flag = 1;
         
         % collect user input.
-        while resp_count <= CFG.nscale && seen_flag
-            
+        while resp_count <= total_button_presses && seen_flag
+            if CFG.brightness_scaling && resp_count == 1
+                ind = 1;
+            else
+                ind = 2;
+            end
             if strcmp(resp,kb_ans1)
                 trial_response_vector(resp_count) = 1;
-                message1 = [Mov.msg ' T#: ' num2str(resp_count) '; Color: ' kb_ans1_label];
+                message1 = [Mov.msg ' T#: ' num2str(resp_count) ...
+                    '; Color: ' kb_ans1_label{ind}];
                 resp_count = resp_count + 1;
                     
             elseif strcmp(resp,kb_ans2)
                 trial_response_vector(resp_count) = 2;
-                message1 = [Mov.msg ' T#: ' num2str(resp_count) '; Color: ' kb_ans2_label];
+                message1 = [Mov.msg ' T#: ' num2str(resp_count) ...
+                    '; Color: ' kb_ans2_label{ind}];
                 resp_count = resp_count + 1;
 
             elseif strcmp(resp,kb_ans3)
                 trial_response_vector(resp_count) = 3;
-                message1 = [Mov.msg ' T#: ' num2str(resp_count) '; Color: ' kb_ans3_label];
+                message1 = [Mov.msg ' T#: ' num2str(resp_count) ...
+                    '; Color: ' kb_ans3_label{ind}];
                 resp_count = resp_count + 1;
 
             elseif strcmp(resp,kb_ans4)
                 trial_response_vector(resp_count) = 4;
-                message1 = [Mov.msg ' T#: ' num2str(resp_count) '; Color: ' kb_ans4_label];
+                message1 = [Mov.msg ' T#: ' num2str(resp_count) ...
+                    '; Color: ' kb_ans4_label{ind}];
                 resp_count = resp_count + 1;
 
             elseif strcmp(resp,kb_ans5)
                 trial_response_vector(resp_count) = 5;
-                message1 = [Mov.msg ' T#: ' num2str(resp_count) '; Color: ' kb_ans5_label];
+                message1 = [Mov.msg ' T#: ' num2str(resp_count) ...
+                    '; Color: ' kb_ans5_label{ind}];
                 resp_count = resp_count + 1;
 
             elseif strcmp(resp, kb_NotSeen) 
@@ -329,7 +341,13 @@ while(runExperiment ==1)
             
             if repeat_trial_flag < 1
                 % if not repeat trial:
-                if resp_count <= CFG.nscale && seen_flag
+                if resp_count <= total_button_presses && seen_flag
+                    % let the subject know that brightness rating has been
+                    % registered.
+                    if CFG.brightness_scaling && resp_count == 2
+                        beep;
+                    end
+                        
                     uiwait;
                     % get next response
                     resp = get(handles.aom_main_figure,'CurrentKey');
@@ -357,11 +375,16 @@ while(runExperiment ==1)
             set(handles.aom1_state, 'String',message2);
             exp_data.trials (trial) = trial;
             exp_data.coneids (trial) = sequence_rand(trial);
-            exp_data.answer(trial,:) = trial_response_vector;
             exp_data.offsets(trial,:) = [stim_offsets_xy(...
                 sequence_rand(trial),1) stim_offsets_xy(sequence_rand(trial),2)];
             exp_data.intensities (trial) = intensities_sequence_rand(trial);
-
+            % record data according to whether or not brightness was rated.
+            if CFG.brightness_scaling
+                exp_data.answer(trial, :) = trial_response_vector(2:end);
+                exp_data.brightness_rating(trial) = trial_response_vector(1);
+            else
+                exp_data.answer(trial, :) = trial_response_vector;
+            end
             sound(cos(0:0.5:90));
             pause(0.2);
             

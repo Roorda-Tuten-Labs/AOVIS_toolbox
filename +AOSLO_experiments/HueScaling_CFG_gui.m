@@ -170,12 +170,11 @@ function CFG = HueScaling_CFG_gui()
                 'Position',[.05 .45 .25 .07]);
             
     % set the default selected button.
-    if CFG.random_flicker
+    if CFG.brightness_scaling
         set(brigntness_scaling, 'SelectedObject', b2);  % Set the object
     else
         set(brigntness_scaling, 'SelectedObject', b1);  % Set the object
     end
-            
     
     cone_selection = uibuttongroup(ph, 'Units','Normalized', ...
         'Position', [.05 .3 .25 .15]);
