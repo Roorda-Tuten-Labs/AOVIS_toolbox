@@ -8,15 +8,7 @@ import stim.*
 import AOSLO_experiments.*
 
 % --------------- Parameters --------------- %
-
-% Intensity levels. Usually set to 1, can be a vector with multiple 
-% intensities that will be randomly presented.
-intensities = [0.25, 0.5, 1];
-nintensities = length(intensities);
 random_flicker = 0;
-
-add_blank_trials = 1;
-fraction_blank = 0.1;
 % ------------------------------------------- %
 
 % set some variable to global. most of these are first modified 
@@ -64,6 +56,15 @@ end
 
 % get handle to aom gui
 handles = aom.setup_aom_gui();
+
+% Intensity levels. Usually set to 1, can be a vector with multiple 
+% intensities that will be randomly presented.
+if CFG.run_intensity_sequence
+    intensities = [0.25, 0.5, 1];    
+else
+    intensities = 1;
+end
+nintensities = length(intensities);
 
 % setup the keyboard constants and response mappings from config
 kb_StimConst = 'space';
@@ -114,6 +115,12 @@ CFG.num_locations = size(stim_offsets_xy,1);
 % this section is essentially meaningless if intensities above is only a
 % single value (1) as it is typically set.
 
+add_blank_trials = 0;
+fraction_blank = CFG.fraction_blank;
+if fraction_blank > 0
+    add_blank_trials = 1;
+end
+
 % first handle case where adding in blank trials
 if add_blank_trials
     n_blank_trials_per_cone = ceil(CFG.ntrials * fraction_blank);
@@ -137,6 +144,7 @@ if add_blank_trials
     % now switch intensites to 0 for each cone at desired rate
     intensities_sequence(blank_indexes) = 0;
 end
+
 % now randominze
 randids_with_intensity = randperm(numel(sequence_with_intensities));
 sequence_rand = sequence_with_intensities(randids_with_intensity);
@@ -153,6 +161,8 @@ exp_data.answer = zeros(CFG.ntrials * CFG.num_locations * ...
     nintensities, CFG.nscale);
 
 % Save param values for later
+CFG.vidprefix = CFG.initials;
+
 exp_data.experiment = 'Color Naming Basic';
 exp_data.subject  = ['Observer: ' CFG.initials];
 exp_data.pupil = ['Pupil Size (mm): ' CFG.pupilsize];

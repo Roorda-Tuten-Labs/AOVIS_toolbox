@@ -1,4 +1,8 @@
-function CFG = HueScaling_CFG_load()
+function CFG = HueScaling_CFG_load(load_default)
+% CFG = HueScaling_CFG_load(load_default)
+if nargin < 1
+    load_default = 0;
+end
 init_load = 0;
 if exist(fullfile('Experiments', 'lastBasicCFG.mat'),'file')==2
     load(fullfile('Experiments', 'lastBasicCFG.mat'));
@@ -7,11 +11,15 @@ if exist(fullfile('Experiments', 'lastBasicCFG.mat'),'file')==2
     %setappdata(hAomControl, 'CFG', CFG);
 end
 
-if init_load == 0 %load defaults    
+if init_load == 0 || load_default
     CFG.initials = 'test';
     CFG.pupilsize = 7.0;
     CFG.fieldsize = 1.0;
     CFG.presentdur = 500;
+    
+    CFG.run_intensity_sequence = 0;
+    CFG.brightness_scaling = 0;
+    CFG.fraction_blank = 0;
     
     CFG.ntrials = 10;
     CFG.gain = 1.0;
