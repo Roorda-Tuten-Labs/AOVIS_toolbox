@@ -280,12 +280,27 @@ while(runExperiment ==1)
             % play sound to indicate start of stimulus
             % sound(cos(90:0.75:180));            
             beep;
-            
+
+            stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities_sequence_rand(trial));
+
+
+            % update system params with stim info. Parse_Load_Buffers will load the
+            % specified frames into ICANDI.
+            if SYSPARAMS.realsystem == 1
+                StimParams.sframe = 2;
+                if CFG.random_flicker == 1
+                    StimParams.eframe = 28;
+                else
+                    StimParams.eframe = 4;
+                end
+                Parse_Load_Buffers(0);
+            end
+
             % ---- set movie parameters to be played by aom ---- %
             % update aom2seq to display the correct frame
-            framenum = find(intensities == intensities_sequence_rand(trial));
+            %framenum = find(intensities == intensities_sequence_rand(trial));
             % update aom2seq. framenum + 3 because 0, 1 and 2 are taken.
-            Mov.aom2seq = aom.update_aomseq(CFG.presentdur, framenum + 3);
+            %Mov.aom2seq = aom.update_aomseq(CFG.presentdur, framenum + 3);
 
             % Select AOM power 100% for most experiments unless set 
             % otherwise with intensity variable at top of file.
