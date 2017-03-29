@@ -410,7 +410,11 @@ while(runExperiment ==1)
                     num2str(trial) ' of ' num2str(CFG.ntrials)];
                 set(handles.aom1_state, 'String', message);
         
-            elseif strcmp(resp, 'rightarrow') && CFG.cl
+            elseif strcmp(resp, 'rightarrow') && CFG.run_calibration
+                resp_count = total_button_presses + 1; % ensure trial ends
+                message1 = [Mov.msg 'next intensity'];
+                seen_flag = 1;
+                
             else                
                 % All other keys are not valid.
                 message1 = [Mov.msg ' ' resp ' not valid response key'];
