@@ -99,13 +99,7 @@ fprefix = StimParams.fprefix;
 % ---- Find user specified TCA ---- %
 tca_green = [CFG.green_x_offset CFG.green_y_offset];
 
-% ---- Select cone locations ---- %
-[stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
-    tca_green, VideoParams.rootfolder, CFG);
-cross_xy = [X_cross_loc, Y_cross_loc];
-
-CFG.num_locations = size(stim_offsets_xy,1);
-
+% ---- Run calibration or select cone locations ---- %
 if CFG.run_calibration
     CFG.num_locations = 1;
     stim_offsets_xy = [0 0];
@@ -118,6 +112,12 @@ if CFG.run_calibration
     CFG.brightness_scaling = 0;
     CFG.nscale = 1;
     CFG.gain = 0;
+else
+    [stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
+        tca_green, VideoParams.rootfolder, CFG);
+    cross_xy = [X_cross_loc, Y_cross_loc];
+
+    CFG.num_locations = size(stim_offsets_xy,1);    
 end
 
 % ---- Setup Mov structure ---- %
@@ -153,15 +153,22 @@ sequence_with_intensities = repmat(sequence, 1, nintensities);
 intensities_sequence = repmat(intensities, CFG.ntrials .* CFG.num_locations, 1);
 intensities_sequence = reshape(intensities_sequence, 1, ...
                                length(sequence_with_intensities));
-                           
+
 if add_blank_trials && ~CFG.run_calibration
+    % now that intensities sequence has been updated, add 0 intensity to
+    % intensities variable
+    intensities = [0 intensities];
+    
     % -- this is where 0 intensities are added to the sequence -- %
     % new total number of trials with blanks added
     total = length(intensities_sequence);
+    
     % number of blanks across the dataset
     nblanks = n_blank_trials_per_cone * CFG.num_locations * nintensities;
+    
     % find indexes so that each cone receives same number of blanks
     blank_indexes = 1:total/nblanks:total;
+    
     % now switch intensites to 0 for each cone at desired rate
     intensities_sequence(blank_indexes) = 0;
 end
@@ -214,16 +221,30 @@ SYSPARAMS.aoms_state(3)=1; % SWITCH GREEN ON
 StimParams.stimpath = dirname;
 StimParams.fprefix = fprefix;
 StimParams.fext = 'bmp';
-% --------------------------------------------------- %
-% --------------- Begin Experiment ------------------ %
-% --------------------------------------------------- %
+
+% Create stimuli and load into ICANCI
 if random_flicker == 1
     rng(exp_data.seed);
     stim.createRandomStimulus(1, CFG.stimsize);
 else
-    stim.createStimulus(CFG.stimsize, CFG.stimshape);
+    stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities);
 end
 
+% update system params with stim info. Parse_Load_Buffers will load the
+% specified frames into ICANDI.
+if SYSPARAMS.realsystem == 1
+    StimParams.sframe = 2;
+    if CFG.random_flicker == 1
+        StimParams.eframe = 28;
+    else
+        StimParams.eframe = 4;
+    end
+    Parse_Load_Buffers(0);
+end
+
+% --------------------------------------------------- %
+% --------------- Begin Experiment ------------------ %
+% --------------------------------------------------- %    
 % Set initial while loop conditions
 runExperiment = 1;
 trial = 1;
@@ -231,6 +252,7 @@ PresentStimulus = 1;
 GetResponse = 0;
 good_trial = 0;
 set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
+
 
 % Start the experiment
 while(runExperiment ==1)
@@ -254,13 +276,15 @@ while(runExperiment ==1)
             % sound(cos(90:0.75:180));            
             beep;
             
-            stim.createStimulus(CFG.stimsize, CFG.stimshape, ...
-                intensities_sequence_rand(trial));
-
             % ---- set movie parameters to be played by aom ---- %
+            % update aom2seq to display the correct frame
+            framenum = find(intensities == intensities_sequence_rand(trial));
+            % update aom2seq. framenum + 3 because 0, 1 and 2 are taken.
+            Mov.aom2seq = aom.update_aomseq(CFG.presentdur, framenum + 3);
+
             % Select AOM power 100% for most experiments unless set 
             % otherwise with intensity variable at top of file.
-            Mov.aom2pow(:) = 1;%
+            Mov.aom2pow(:) = 1;
             Mov.aom0pow(:) = 1;
 
             % tell the aom about the offset (TCA + cone location)
@@ -289,19 +313,10 @@ while(runExperiment ==1)
             
             % send the Mov structure to app data
             setappdata(hAomControl, 'Mov', Mov);
-            
+                        
+            % update save name of video
             VideoParams.vidname = [CFG.vidprefix '_' sprintf('%03d',trial)];
-            
-            % update system params with stim info
-            if SYSPARAMS.realsystem == 1
-                StimParams.sframe = 2;
-                if CFG.random_flicker == 1
-                    StimParams.eframe = 28;
-                else
-                    StimParams.eframe = 4;
-                end
-                Parse_Load_Buffers(0);
-            end
+
             % use the Mov structure to play a movie
             PlayMovie;
 
@@ -390,6 +405,7 @@ while(runExperiment ==1)
                     num2str(trial) ' of ' num2str(CFG.ntrials)];
                 set(handles.aom1_state, 'String', message);
         
+            elseif strcmp(resp, 'rightarrow') && CFG.cl
             else                
                 % All other keys are not valid.
                 message1 = [Mov.msg ' ' resp ' not valid response key'];

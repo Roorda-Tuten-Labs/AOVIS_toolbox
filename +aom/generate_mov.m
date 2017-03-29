@@ -5,6 +5,7 @@ function Mov = generate_mov(CFG)
     
     % CFG.presentdur in msec
     presentdur = CFG.presentdur / 1000; 
+    
     % how long is the presentation (in frames)
     stimdur = round(fps * presentdur); 
 
@@ -13,7 +14,6 @@ function Mov = generate_mov(CFG)
     framenum1 = 4; % stimulus
     framenum2 = 3; % cross
     
-
      % ---------- AOM0 IR parameters ---------- %
    
     % This vector tells the aom which image to play during each frame
