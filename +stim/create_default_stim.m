@@ -11,12 +11,11 @@ function create_default_stim
     
     if isdir(fullfile(pwd, 'tempStimulus')) == 0;
         mkdir(fullfile(pwd, 'tempStimulus'));
-        imwrite(blank, fullfile(pwd, 'tempStimulus', 'frame2.bmp'));
-        
     else
         % delete any existing bmp files
         delete(fullfile(pwd, 'tempStimulus', '*.*'));
-        imwrite(blank, 'frame2.bmp');
     end
+    
+    imwrite(blank, fullfile(pwd, 'tempStimulus', 'frame2.bmp'));
     
 end
