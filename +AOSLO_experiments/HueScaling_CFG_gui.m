@@ -6,7 +6,8 @@ function CFG = HueScaling_CFG_gui()
     import AOSLO_experiments.*
     
     CFG = AOSLO_experiments.HueScaling_CFG_load();
-
+    CFG.run_calibration = 0;
+    
     %  Construct the components
     textbox_height = 0.08;
     radio_height = 0.12;    
@@ -286,12 +287,22 @@ function CFG = HueScaling_CFG_gui()
     % ---- Buttons
     uicontrol(ph,'Style','pushbutton','String','start',...
             'Units','normalized',...
-            'Position', [.25 .01 .45 .08], ...
+            'Position', [.3 .01 .4 .08], ...
             'Callback', 'uiresume(gcbf)');
+        
+    uicontrol(ph,'Style','pushbutton','String','cal',...
+            'Units','normalized',...
+            'Position', [.01 .01 .1 .08], ...
+            'Callback', @calibration);  
         
     uiwait(f);
     
     get_current_CFG();
+    
+    function calibration(~, ~)
+        CFG.run_calibration = 1;
+        uiresume(gcbf)
+    end
     
     function get_current_CFG()
         CFG.initials = get(initials, 'String');
