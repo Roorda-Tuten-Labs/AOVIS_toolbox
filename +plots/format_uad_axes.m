@@ -1,12 +1,14 @@
 function format_uad_axes(boundaries, labels, title_text, fontsize)
     % format_uad_axes(boundaries, labels, title_text, fontsize)
-    if nargin < 1
+    %
+    
+    if nargin < 1 || isempty(boundaries)
         boundaries = true;
     end
-    if nargin < 2
+    if nargin < 2 || isempty(labels)
         labels = true;
     end
-    if nargin < 3
+    if nargin < 3 || isempty(title_text)
         title_text = '';
     end
     if nargin < 4

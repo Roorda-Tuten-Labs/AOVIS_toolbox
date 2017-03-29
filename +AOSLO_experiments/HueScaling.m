@@ -405,11 +405,11 @@ while(runExperiment ==1)
         if good_trial
             message2 = num2str(trial_response_vector);
             set(handles.aom1_state, 'String',message2);
-            exp_data.trials (trial) = trial;
-            exp_data.coneids (trial) = sequence_rand(trial);
+            exp_data.trials(trial) = trial;
+            exp_data.coneids(trial) = sequence_rand(trial);
             exp_data.offsets(trial,:) = [stim_offsets_xy(...
                 sequence_rand(trial),1) stim_offsets_xy(sequence_rand(trial),2)];
-            exp_data.intensities (trial) = intensities_sequence_rand(trial);
+            exp_data.intensities(trial) = intensities_sequence_rand(trial);
 
             % record data according to whether or not brightness was rated.
             if CFG.brightness_scaling

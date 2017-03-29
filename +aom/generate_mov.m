@@ -29,7 +29,7 @@ function Mov = generate_mov(CFG)
     aom0pow(:) = 0;
 
     % ---------- AOM1 RED parameters ---------- %
-    aom1seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum2, ... 
+    aom1seq = [zeros(1,startframe - 1), ones(1, stimdur) .* framenum0, ... 
         zeros(1, 30 - startframe + 1 - stimdur)];
     
     aom1pow = ones(size(aom1seq));
