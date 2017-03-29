@@ -28,6 +28,12 @@ CFG = AOSLO_experiments.HueScaling_CFG_gui();
 CFG.videodur = 1.0;
 CFG.angle = 0;
 
+if CFG.run_calibration
+    VideoParams.vidrecord = 0;
+else
+    VideoParams.vidrecord = 1;
+end
+
 if isstruct(CFG) == 1;
     if CFG.ok == 1
         StimParams.stimpath = fullfile(pwd, 'tempStimulus', filesep);
@@ -105,9 +111,8 @@ if CFG.run_calibration
     stim_offsets_xy = [0 0];
     tca_green = [0 0];
     cross_xy = [0 0];
-    CFG.videodur = 10.0; % s
-    CFG.presentdur = 10000; % ms
-    CFG.stimsize = 250;
+    CFG.videodur = CFG.presentdur / 1000; % s
+    %CFG.presentdur = 10000; % ms
     CFG.ntrials = 1;
     CFG.brightness_scaling = 0;
     CFG.nscale = 1;
