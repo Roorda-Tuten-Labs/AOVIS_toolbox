@@ -60,10 +60,15 @@ handles = aom.setup_aom_gui();
 % Intensity levels. Usually set to 1, can be a vector with multiple 
 % intensities that will be randomly presented.
 if CFG.run_intensity_sequence
-    intensities = [0.25, 0.5, 1];    
-else
+    intensities = [0.25, 0.5, 1];
+else%if ~CFG.run_intensity_sequence && ~run_calibration
     intensities = 1;
 end
+
+if CFG.run_calibration
+    intensities = [0, 0.25, 0.5, 0.75, 1];
+end
+
 nintensities = length(intensities);
 
 % setup the keyboard constants and response mappings from config
@@ -91,12 +96,6 @@ dirname = fullfile(StimParams.stimpath, filesep);
 fprefix = StimParams.fprefix;
 % ------------------------------------------------------------- %
 
-% ---- Setup Mov structure ---- %
-Mov = aom.generate_mov(CFG);
-Mov.dir = dirname;
-Mov.suppress = 0;
-Mov.pfx = fprefix;
-
 % ---- Find user specified TCA ---- %
 tca_green = [CFG.green_x_offset CFG.green_y_offset];
 
@@ -106,6 +105,26 @@ tca_green = [CFG.green_x_offset CFG.green_y_offset];
 cross_xy = [X_cross_loc, Y_cross_loc];
 
 CFG.num_locations = size(stim_offsets_xy,1);
+
+if CFG.run_calibration
+    CFG.num_locations = 1;
+    stim_offsets_xy = [0 0];
+    tca_green = [0 0];
+    cross_xy = [0 0];
+    CFG.videodur = 10.0; % s
+    CFG.presentdur = 10000; % ms
+    CFG.stimsize = 250;
+    CFG.ntrials = 1;
+    CFG.brightness_scaling = 0;
+    CFG.nscale = 1;
+    CFG.gain = 0;
+end
+
+% ---- Setup Mov structure ---- %
+Mov = aom.generate_mov(CFG);
+Mov.dir = dirname;
+Mov.suppress = 0;
+Mov.pfx = fprefix;
 
 % ---- Apply TCA offsets to cone locations ---- %
 [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
@@ -117,12 +136,13 @@ CFG.num_locations = size(stim_offsets_xy,1);
 
 add_blank_trials = 0;
 fraction_blank = CFG.fraction_blank;
-if fraction_blank > 0
+if fraction_blank > 0 && ~CFG.run_calibration
     add_blank_trials = 1;
 end
 
+
 % first handle case where adding in blank trials
-if add_blank_trials
+if add_blank_trials && ~CFG.run_calibration
     n_blank_trials_per_cone = ceil(CFG.ntrials * fraction_blank);
     CFG.ntrials = CFG.ntrials + n_blank_trials_per_cone;
 end
@@ -133,7 +153,8 @@ sequence_with_intensities = repmat(sequence, 1, nintensities);
 intensities_sequence = repmat(intensities, CFG.ntrials .* CFG.num_locations, 1);
 intensities_sequence = reshape(intensities_sequence, 1, ...
                                length(sequence_with_intensities));
-if add_blank_trials
+                           
+if add_blank_trials && ~CFG.run_calibration
     % -- this is where 0 intensities are added to the sequence -- %
     % new total number of trials with blanks added
     total = length(intensities_sequence);
@@ -146,7 +167,12 @@ if add_blank_trials
 end
 
 % now randominze
-randids_with_intensity = randperm(numel(sequence_with_intensities));
+if CFG.run_calibration
+    % dont actually randomize
+    randids_with_intensity = 1:numel(sequence_with_intensities);
+else
+    randids_with_intensity = randperm(numel(sequence_with_intensities));
+end
 sequence_rand = sequence_with_intensities(randids_with_intensity);
 intensities_sequence_rand =  intensities_sequence(randids_with_intensity);
 
@@ -226,24 +252,15 @@ while(runExperiment ==1)
         if PresentStimulus == 1
             % play sound to indicate start of stimulus
             % sound(cos(90:0.75:180));            
-            beep 
+            beep;
             
-            % update system params with stim info
-            if SYSPARAMS.realsystem == 1
-                StimParams.sframe = 2;
-                if CFG.random_flicker == 1
-                    StimParams.eframe = 28;
-                else
-                    StimParams.eframe = 4;
-                end
-                Parse_Load_Buffers(0);
-            end
+            stim.createStimulus(CFG.stimsize, CFG.stimshape, ...
+                intensities_sequence_rand(trial));
 
             % ---- set movie parameters to be played by aom ---- %
             % Select AOM power 100% for most experiments unless set 
             % otherwise with intensity variable at top of file.
             Mov.aom2pow(:) = 1;%
-            stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities_sequence_rand(trial));
             Mov.aom0pow(:) = 1;
 
             % tell the aom about the offset (TCA + cone location)
@@ -274,7 +291,17 @@ while(runExperiment ==1)
             setappdata(hAomControl, 'Mov', Mov);
             
             VideoParams.vidname = [CFG.vidprefix '_' sprintf('%03d',trial)];
-
+            
+            % update system params with stim info
+            if SYSPARAMS.realsystem == 1
+                StimParams.sframe = 2;
+                if CFG.random_flicker == 1
+                    StimParams.eframe = 28;
+                else
+                    StimParams.eframe = 4;
+                end
+                Parse_Load_Buffers(0);
+            end
             % use the Mov structure to play a movie
             PlayMovie;
 
@@ -436,15 +463,16 @@ while(runExperiment ==1)
     end
 end
 
-disp(exp_data);
+if ~CFG.run_calibration
+    disp(exp_data);
 
-% save data
-filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
-    ' ','x'),':',''),'.mat'];
-save(fullfile(VideoParams.videofolder, filename), 'exp_data');
+    % save data
+    filename = ['data_color_naming_',strrep(strrep(strrep(datestr(now),'-',''),...
+        ' ','x'),':',''),'.mat'];
+    save(fullfile(VideoParams.videofolder, filename), 'exp_data');
 
-% plot data
-color_naming.plot_color_naming(exp_data);
-
+    % plot data
+    color_naming.plot_color_naming(exp_data);
+end
 
 end
