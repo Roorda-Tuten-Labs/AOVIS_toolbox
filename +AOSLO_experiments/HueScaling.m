@@ -29,9 +29,8 @@ CFG.videodur = 1.0;
 CFG.angle = 0;
 
 if CFG.run_calibration
+    % don't record videos when running calibration
     VideoParams.vidrecord = 0;
-else
-    VideoParams.vidrecord = 1;
 end
 
 if isstruct(CFG) == 1;
@@ -58,7 +57,6 @@ if isstruct(CFG) == 1;
         return;
     end
 end
-
 
 % get handle to aom gui
 handles = aom.setup_aom_gui();
@@ -111,12 +109,12 @@ if CFG.run_calibration
     stim_offsets_xy = [0 0];
     tca_green = [0 0];
     cross_xy = [0 0];
-    CFG.videodur = CFG.presentdur / 1000; % s
-    %CFG.presentdur = 10000; % ms
     CFG.ntrials = 1;
     CFG.brightness_scaling = 0;
     CFG.nscale = 1;
     CFG.gain = 0;
+    CFG.videodur = CFG.presentdur / 1000; % s    
+    VideoParams.videodur = CFG.videodur;    
 else
     [stim_offsets_xy, X_cross_loc, Y_cross_loc] = color_naming.select_cone_gui(...
         tca_green, VideoParams.rootfolder, CFG);
@@ -133,7 +131,8 @@ Mov.pfx = fprefix;
 
 % ---- Apply TCA offsets to cone locations ---- %
 [aom2offx_mat, aom2offy_mat] = aom.apply_TCA_offsets_to_locs(...
-    tca_green(1, :), cross_xy, stim_offsets_xy, length(Mov.aom2seq), CFG.system);
+    tca_green(1, :), cross_xy, stim_offsets_xy, ...
+    length(Mov.aom2seq), CFG.system);
 
 % ---- Set intensities ---- %
 % this section is essentially meaningless if intensities above is only a
@@ -227,24 +226,12 @@ StimParams.stimpath = dirname;
 StimParams.fprefix = fprefix;
 StimParams.fext = 'bmp';
 
-% Create stimuli and load into ICANCI
+% Create stimuli 
 if random_flicker == 1
     rng(exp_data.seed);
     stim.createRandomStimulus(1, CFG.stimsize);
 else
-    stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities);
-end
-
-% update system params with stim info. Parse_Load_Buffers will load the
-% specified frames into ICANDI.
-if SYSPARAMS.realsystem == 1
-    StimParams.sframe = 2;
-    if CFG.random_flicker == 1
-        StimParams.eframe = 28;
-    else
-        StimParams.eframe = 4;
-    end
-    Parse_Load_Buffers(0);
+    stim.createStimulus(CFG.stimsize, CFG.stimshape);
 end
 
 % --------------------------------------------------- %
@@ -257,7 +244,6 @@ PresentStimulus = 1;
 GetResponse = 0;
 good_trial = 0;
 set(handles.aom_main_figure, 'KeyPressFcn','uiresume');
-
 
 % Start the experiment
 while(runExperiment ==1)
@@ -281,11 +267,12 @@ while(runExperiment ==1)
             % sound(cos(90:0.75:180));            
             beep;
 
-            stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities_sequence_rand(trial));
+            % create new stimuli for each trial with new intensity
+            stim.createStimulus(CFG.stimsize, CFG.stimshape, ...
+                intensities_sequence_rand(trial));
 
-
-            % update system params with stim info. Parse_Load_Buffers will load the
-            % specified frames into ICANDI.
+            % update system params with stim info. Parse_Load_Buffers will 
+            % load the specified frames into ICANDI.
             if SYSPARAMS.realsystem == 1
                 StimParams.sframe = 2;
                 if CFG.random_flicker == 1
@@ -298,7 +285,8 @@ while(runExperiment ==1)
 
             % ---- set movie parameters to be played by aom ---- %
             % update aom2seq to display the correct frame
-            %framenum = find(intensities == intensities_sequence_rand(trial));
+            % THIS DOES NOT WORK FOR SOME REASON
+            % framenum = find(intensities == intensities_sequence_rand(trial));
             % update aom2seq. framenum + 3 because 0, 1 and 2 are taken.
             %Mov.aom2seq = aom.update_aomseq(CFG.presentdur, framenum + 3);
 
