@@ -1,18 +1,24 @@
 function [lms, wavelengths] = get_fundamentals(fund_type, resolution, ...
-                                                          min_max_wvlen, ...
-                                                          in_quanta)
+    min_max_wvlen, in_quanta)
 % Get cone fundmentals. 
 %
-% fund_type = source of fundamentals.
-% resolution = sampling. If resolution of measurements is lower
-% than desired resolution, cubic spline interpolation is used to
-% upsample to the desired resolution. Default is 1 nm.
-% min_max_wvlen = minimum and maximum wavelength to return. Default
-% is 400 and 750 nm.
-% in_quant = return sensitivity functions in quanta. Default is
-% false, i.e. functions are in energy.
+% USAGE
+% [lms, wavelengths] = get_fundamentals(fund_type, resolution, min_max_wvlen, 
+%                                        in_quanta)
+%                                                      
+% INPUT
+% fund_type     source of fundamentals. Options = [stockman2, stockman10,
+%               konig, neitz]
+% resolution    sampling. If resolution of measurements is lower
+%               than desired resolution, cubic spline interpolation is used 
+%               to upsample to the desired resolution. Default is 1 nm.
+% min_max_wvlen minimum and maximum wavelength to return. Default
+%               is 400 and 750 nm.
+% in_quant      return sensitivity functions in quanta. Default is
+%               false, i.e. functions are in energy.
 %
-% returns: CMFs, wavelengths
+% OUTPUT 
+% CMFs, wavelengths
 
 if nargin < 1
     fund_type = 'stockman2';
@@ -27,29 +33,29 @@ if nargin < 4
     in_quanta = 0;
 end
 
-if strcmp(lower(fund_type), 'stockman2') || strcmp(lower(fund_type), ...
-                                                   'stockman')
+if strcmpi(fund_type, 'stockman2') || strcmpi(fund_type, 'stockman')
     fname = 'ss2_10e_5';
     [lms, wavelengths] = load_fundamentals(fname, resolution, ...
                                                    min_max_wvlen);
 
-elseif strcmp(lower(fund_type), 'stockman10')
+elseif strcmpi(fund_type, 'stockman10')
     fname = 'ss10e_5';
     [lms, wavelengths] = load_fundamentals(fname, resolution, ...
                                                    min_max_wvlen);
 
-elseif strcmp(lower(fund_type), 'konig')
-    [lms, wavelength] = [lms, wavelengths] = konig_fundamentals(resolution, ...
-                                                      min_max_wvlen)
+elseif strcmpi(fund_type, 'konig')
+    [lms, wavelengths] = konig_fundamentals(resolution, min_max_wvlen);
 
-elseif strcmp(lower(fund_type), 'neitz')
+elseif strcmpi(fund_type, 'neitz')
+    res = abs(diff(min_max_wvlen)) / resolution;
     S_sens = neitz(420, 0.3, 'log', min_max_wvlen(1), min_max_wvlen(2), ...
-                   resolution)
+                   res);
     M_sens = neitz(530, 0.45, 'log', min_max_wvlen(1), min_max_wvlen(2), ...
-                   resolution)
+                   res);
     L_sens = neitz(559, 0.45, 'log', min_max_wvlen(1), min_max_wvlen(2), ...
-                   resolution)
-
+                   res);
+    lms = [L_sens; M_sens; S_sens]';
+    wavelengths = min_max_wvlen(1):resolution:min_max_wvlen(2)';
     
 end
 
@@ -75,7 +81,9 @@ function [lms, wavelengths] = load_fundamentals(fname, resolution, ...
     % cells properly. This is especially important here because
     % some files, eg Stockman S-cone fundamentals, have a large
     % number of empty cells. We need those to be NaN.
-    fhandle = fopen(['dat/fundamentals/' fname '.csv']);
+    fdir = fileparts(which('colorimetry.get_fundamentals'));
+    fname = fullfile(fdir, 'dat', 'fundamentals', [fname '.csv']);
+    fhandle = fopen(fname);
     funds = textscan(fhandle, '%f %f %f %f', 'delimiter', ',', ...
                      'emptyvalue', NaN);
     fclose(fhandle);
@@ -155,12 +163,24 @@ function [withOD, extinction] = neitz(LambdaMax, OpticalDensity, Output, StartWa
 
 format long;
 
-if nargin < 6, Res = 1000; end
-if nargin < 5, EndWavelength = 780; end
-if nargin < 4, StartWavelength = 380; end
-if nargin < 3, Output = 'log'; end
-if nargin < 2, OpticalDensity = 0.2000; end
-if nargin < 1, LambdaMax = 559; end
+if nargin < 6 
+    Res = 1000; 
+end
+if nargin < 5
+    EndWavelength = 780; 
+end
+if nargin < 4
+    StartWavelength = 380;
+end
+if nargin < 3
+    Output = 'log';
+end
+if nargin < 2
+    OpticalDensity = 0.2000;
+end
+if nargin < 1
+    LambdaMax = 559;
+end
 
 A = 0.417050601;
 B = 0.002072146;

@@ -42,7 +42,8 @@ end
 
 % Get  color matching functions
 filedir = fileparts(which('colorimetry.get_CMFs'));
-cmfs = csvread([filedir filesep 'dat' filesep 'cmf' filesep fname '.csv']);
+fname = fullfile(filedir, 'dat', 'cmf', [fname '.csv']);
+cmfs = csvread(fname);
 wavelengths = cmfs(:, 1);
 cmfs = cmfs(:, 2:4);
 
