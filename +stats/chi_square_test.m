@@ -47,6 +47,9 @@ function [pval, chi2stat, DoF, SE, chi_sims] = chi_square_test(observed, correct
     if nargin < 5
         Nrand = -1;
     end
+    if nargout == 5 && Nrand <=0
+        chi_sims = nan;
+    end
     
     % save orignal dataset for resampling analysis
     input_data = observed;
@@ -85,13 +88,13 @@ function [pval, chi2stat, DoF, SE, chi_sims] = chi_square_test(observed, correct
         % bootstrap resimulation
         chi_sims = zeros(1, Nrand); 
         for ii = 1:Nrand 
-            sim_cone1 = hist(randsample(Nrows_original, colsum(1), 1), ...
+            sim1 = hist(randsample(Nrows_original, colsum(1), 1), ...
                 1:Nrows_original);
-            sim_cone2 = hist(randsample(Nrows_original, colsum(2), 1), ...
+            sim2 = hist(randsample(Nrows_original, colsum(2), 1), ...
                 1:Nrows_original);
             
             % simulated data
-            sim_data = [sim_cone1; sim_cone2];
+            sim_data = [sim1; sim2];
             
             % compute chi stat for simulated data
             chi_sims(ii) = compute_chi_stat(sim_data, correction);
