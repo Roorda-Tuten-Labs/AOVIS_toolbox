@@ -1,4 +1,5 @@
 % test_add_cone_types_to_selection_img
+clearvars;
  
 testdir = fileparts(which('cone_mosaic.add_cone_types_to_selection_img'));
 
@@ -9,7 +10,6 @@ selection_img = imread(fname);
 %selection_img = imresize(selection_img, 0.2);
 %selection_img = uint8(selection_img(:, :, 1));
 xy_cross_loc = [300 400];
-
     
 cone_mosaic.add_cone_types_to_selection_img('20076R', selection_img,...
     xy_cross_loc);

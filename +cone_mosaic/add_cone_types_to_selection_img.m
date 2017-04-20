@@ -45,22 +45,16 @@ function handle = add_cone_types_to_selection_img(subject, selection_img, ...
     
     % relative offsets (in pixels) between the two images
     offsets = output(3:4);
-
-    handle = figure;
-    if max(max(img_crop)) > 125
-        imshow(img_crop, [0 255]);
-    else
-        imshow(img_crop)
-    end
     
-    selection_img_coords = [x_interest + offsets(2), ...
+    selection_img_coords = [x_interest, y_interest];
+    selection_img_ref_coords = [x_interest + offsets(2), ...
         y_interest + offsets(1)];
 
     [index, distance] = knnsearch(ref_cone_coords(:, 1:2), ...
-        selection_img_coords);
+        selection_img_ref_coords);
     
     % now iterate through each possible match and select only those higher
-    % than the threshold (2-3 pix).
+    % than the threshold (2-7 pix).
     cone_coords = zeros(size(ref_cone_coords));
     unique_indexes = unique(index);
     for c = 1:length(unique_indexes)        
@@ -69,37 +63,68 @@ function handle = add_cone_types_to_selection_img(subject, selection_img, ...
         dists = distance(inds);
         % check if smallest distance is below threshold
         [mindist, ind] = min(dists);
-        if mindist < 7            
+        if mindist < 7
             selection_ind = inds(ind);
-            cone_coords(ref_ind, 1:2) = selection_img_coords(selection_ind, :);
-            cone_coords(ref_ind, 3) = ref_cone_coords(ref_ind, 3);
-            cone_coords(ref_ind, 4) = ref_ind;
+            cone_coords(c, 1:2) = selection_img_coords(selection_ind, :);
+            cone_coords(c, 3) = ref_cone_coords(ref_ind, 3);
+            cone_coords(c, 4) = ref_ind;
         end
     end
-
-    figure; imshow(ref); hold on;
-    plot(selection_img_coords(:, 1), selection_img_coords(:, 2), 'r.')
-    plot(ref_cone_coords(:, 1), ref_cone_coords(:, 2), 'g.')
+    cone_coords = util.remove_zero_rows(cone_coords);
     
-    figure; imshow(img_crop); hold on;
-    plot(cone_coords(c, 1), cone_coords(c, 2), 'b.')
+    % set up coord spaces, then translate ref into selection coords
+    sel_coords = cone_coords(:, 1:2);
+    ref_coords = ref_cone_coords(cone_coords(:, 4), 1:2);
+   
+    ref_coords(:, 1) = ref_coords(:, 1) - offsets(2);
+    ref_coords(:, 2) = ref_coords(:, 2) - offsets(1);  
+    
+    % solve linear equation
+    transform_matrix = sel_coords \ ref_coords;
 
+%     ref_coords = transform_matrix * ref_coords';
+%     ref_coords = ref_coords';    
+%    
+%     figure; hold on;
+%     plot(sel_coords(:, 1), sel_coords(:, 2), 'k.')
+%     plot(ref_coords(:, 1), ref_coords(:, 2), 'ro')
+
+    % translate
+    ref_cone_coord = ref_cone_coords(:, 1:2);
+    ref_cone_coord(:, 1) = ref_cone_coord(:, 1) - offsets(2);
+    ref_cone_coord(:, 2) = ref_cone_coord(:, 2) - offsets(1); 
+
+    % scale and rotate
+    class_cones_in_new_coords = transform_matrix * ref_cone_coord(:, 1:2)';
+    class_cones_in_new_coords = class_cones_in_new_coords';
+    
+    % plot the results
+    handle = figure;
+    if max(max(img_crop)) > 125
+        imshow(img_crop, [0 255]);
+    else
+        imshow(img_crop)
+    end
+    
     hold on;
     colors = {'b' 'g' 'r'};
-    for c = 1:size(ref_cone_coords, 1)
-        cone = ref_cone_coords(c, :);
-        plot(cone(1) - offsets(2), cone(2) - offsets(1), '.', ...
-            'markersize', 16, 'color', colors{cone(3)});
-    end
+    for c = 1:size(class_cones_in_new_coords, 1)
+        plot(class_cones_in_new_coords(c, 1), ...
+            class_cones_in_new_coords(c, 2), '.', ...
+            'color', colors{ref_cone_coords(c, 3)}, 'markersize', 12)
+    end   
+    
+    for c = 1:size(cone_coords, 1)
+        plot(cone_coords(c, 1), cone_coords(c, 2), 'o', ...
+            'color', colors{cone_coords(c, 3)})
+    end       
+        
+%     figure; hold on;
+%     plot(cone_coords(:, 1), cone_coords(:, 2), 'r.')
+%     plot(class_cones_in_new_coords(:, 1), ...
+%         class_cones_in_new_coords(:, 2), 'k.')
 
     if ~isempty(xy_cross_loc)
-        plot(xy_cross_loc(1), xy_cross_loc(2), 'y+', 'markersize', 30);
+        plot(xy_cross_loc(1), xy_cross_loc(2), 'y+', 'markersize', 25);
     end
 
-
-    % x_lim = [min(new_cone_coords(:, 1)) - offsets(2)...
-    %     max(new_cone_coords(:, 1)) - offsets(2)];
-    % y_lim = [min(new_cone_coords(:, 2)) - offsets(1) ...
-    %     max(new_cone_coords(:, 2)) - offsets(1)];
-    % xlim(x_lim);
-    % ylim(y_lim);
