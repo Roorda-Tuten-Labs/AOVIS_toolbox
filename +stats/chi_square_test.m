@@ -1,4 +1,4 @@
-function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
+function [pval, chi2stat, DoF, SE, chi_sims] = chi_square_test(observed, correction, ...
     print, DoF, Nrand)
     % Chi-square test 
     % [pval, chi2stat, DoF, SE] = chi_square_test(observed,
@@ -43,9 +43,12 @@ function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
     end
     if nargin < 3 || isempty(print)
         print = 0;
-    end 
+    end   
     if nargin < 5
         Nrand = -1;
+    end
+    if nargout == 5 && Nrand <=0
+        chi_sims = nan;
     end
     
     % save orignal dataset for resampling analysis
@@ -79,18 +82,19 @@ function [pval, chi2stat, DoF, SE] = chi_square_test(observed, correction, ...
         % preserve the size of the original input data.
         [Nrows_original, ~] = size(input_data);
         
-        % use a monte carlo simulation to estimate p value
-        colsum = sum(observed, 1);
+        % use a bootstrap simulation to estimate p value
+        colsum = sum(input_data, 1);
         
-        % monte carlo resimulation
+        % bootstrap resimulation
         chi_sims = zeros(1, Nrand); 
         for ii = 1:Nrand 
-            sim_cone1 = hist(randsample(Nrows, colsum(1), 1), ...
+            sim1 = hist(randsample(Nrows_original, colsum(1), 1), ...
                 1:Nrows_original);
-            sim_cone2 = hist(randsample(Nrows, colsum(2), 1), ...
+            sim2 = hist(randsample(Nrows_original, colsum(2), 1), ...
                 1:Nrows_original);
+            
             % simulated data
-            sim_data = [sim_cone1; sim_cone2];
+            sim_data = [sim1; sim2];
             
             % compute chi stat for simulated data
             chi_sims(ii) = compute_chi_stat(sim_data, correction);

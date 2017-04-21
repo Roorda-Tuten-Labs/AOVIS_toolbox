@@ -1,13 +1,28 @@
 function [x_interest, y_interest, img_map] =  find_cones(cone_size, img,...
-    method)
+    method, xcorr_threshold, show_plot)
 % Original function written by R. Sabesan
 % Sent to BPS on 1 Sept 2016.
+%
+% INPUT
+% cone_size         in pixels. should be an odd number. will be force into 
+%                   odd if an even number is passed.
+% img               img matrix. 
+% method            cone selection method. auto or manual.
+% xcorr_threshold   default = 0.6.
+% show_plot         decide whether to show the plot or not.
+
 import util.*
 
+if nargin < 5
+    show_plot = 1;
+end
+if nargin < 4
+    xcorr_threshold = 0.6;
+end
 if nargin < 3
     method = 'auto';
 end
-if nargin < 2
+if nargin < 2 || isempty(img)
     [fname, pathname, ~] = uigetfile('*', 'Select image file'); 
     imgfile = fullfile(pathname, fname);
     img = imread(imgfile);
@@ -17,7 +32,6 @@ if nargin < 1
 end
 
 if strcmpi(method, 'auto')
-    xcorr_threshold = 0.6; % from 0.6
     % cone_size = 7; %odd number please
 
     [conex coney] = meshgrid(-floor(cone_size / 2):floor(cone_size / 2));
@@ -64,20 +78,24 @@ if strcmpi(method, 'auto')
 
     end
 
-    h = figure(259); 
-    imshow(img,'InitialMagnification', 500, 'Border', 'Tight');
-    colormap(gray); 
-    caxis([min(img(:)), max(img(:))]); hold on;
-    
-    axis equal, axis off;
-    for ii = 1:size(x_interest,1)
-        plot(x_interest(ii,1), y_interest(ii,1),'r.');  
-        %text(x_interest(ii,1)+1,y_interest(ii,1),[num2str(ii)],...
-        %'Color','b','FontWeight','bold');
+    if show_plot
+        h = figure(259); 
+        imshow(img,'InitialMagnification', 500, 'Border', 'Tight');
+        colormap(gray); 
+        caxis([min(img(:)), max(img(:))]); hold on;
+
+        axis equal, axis off;
+        for ii = 1:size(x_interest,1)
+            plot(x_interest(ii,1), y_interest(ii,1),'r.');  
+            %text(x_interest(ii,1)+1,y_interest(ii,1),[num2str(ii)],...
+            %'Color','b','FontWeight','bold');
+        end
+
+        hold off;
+        img_map = frame2im(getframe(h));
+    else
+        img_map = 'run with show_plot==1 to get img_map';
     end
-    
-    hold off;
-    img_map = frame2im(getframe(h));
     % close 259;
 else
     
