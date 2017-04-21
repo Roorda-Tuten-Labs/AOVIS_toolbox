@@ -72,7 +72,7 @@ else%if ~CFG.run_intensity_sequence && ~run_calibration
 end
 
 if CFG.run_calibration
-    intensities = [0, 0.25, 0.5, 0.75, 1];
+    intensities = 0:0.125:1; %[0., 0.25, 0.5, 0.75, 1];
 end
 
 nintensities = length(intensities);
@@ -232,7 +232,7 @@ if random_flicker == 1
     rng(exp_data.seed);
     stim.createRandomStimulus(1, CFG.stimsize);
 else
-    stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities);
+    stim.createStimulus(CFG.stimsize, CFG.stimshape, 1);
 end
 
 % update system params with stim info. Parse_Load_Buffers will load the
@@ -281,9 +281,6 @@ while(runExperiment ==1)
             % sound(cos(90:0.75:180));            
             beep;
 
-            stim.createStimulus(CFG.stimsize, CFG.stimshape, intensities_sequence_rand(trial));
-
-
             % update system params with stim info. Parse_Load_Buffers will load the
             % specified frames into ICANDI.
             if SYSPARAMS.realsystem == 1
@@ -304,7 +301,8 @@ while(runExperiment ==1)
 
             % Select AOM power 100% for most experiments unless set 
             % otherwise with intensity variable at top of file.
-            Mov.aom2pow(:) = 1;
+%             Mov.aom2pow(:) = 1;
+            Mov.aom2pow(:) =  intensities_sequence_rand(trial);
             Mov.aom0pow(:) = 1;
 
             % tell the aom about the offset (TCA + cone location)
@@ -427,7 +425,7 @@ while(runExperiment ==1)
         
             elseif strcmp(resp, 'rightarrow') && CFG.run_calibration
                 resp_count = total_button_presses + 1; % ensure trial ends
-                message1 = [Mov.msg 'next intensity'];
+                message1 = [Mov.msg 'next intensity:' num2str(intensities(trial+1))];
                 seen_flag = 1;
                 
             else                
