@@ -1,6 +1,10 @@
 function handles = setup_aom_gui()
+% get a handle to the gui so that we can change its appearance later and
+% set some basic parameters.
+%
+% OUTPUT
+% handle to aom gui
 
-    % get a handle to the gui so that we can change its appearance later
     if exist('handles','var') == 0;
         handles = guihandles;
     end
