@@ -38,7 +38,7 @@ if nargin < 2
     cross_size_pix = 17;
 end
 if nargin < 3
-    xcorr_threshold = 0.6;
+    xcorr_threshold = 0.7;
 end
 if nargin < 4
     print_output = true;
