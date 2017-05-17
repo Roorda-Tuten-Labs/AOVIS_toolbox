@@ -35,11 +35,12 @@ mosaic_img = mosaic_img(4:end-3, 4:end-3, :);
 % convert to gray scale image for dtf registration
 mosaic_gray = sum(mosaic_img, 3); %rgb2gray(mosaic);
 % zero buffer to make the same size as ref
-mosaic_gray = img.zero_buffer(mosaic_gray, size(ref));
+mosaic_gray = img.zero_buffer(mosaic_gray, size(ref), [], mean(mosaic_gray(:)));
 %figure; imshow(mosaic_gray, [0 255]);
 
 % find the relative offsets
-mosaic_offset = img.dftregistration(fft2(ref), fft2(mosaic_gray), 1);
+mosaic_offset = img.dftregistration(fft2(im2double(ref)), ...
+    fft2(im2double(mosaic_gray)), 1);
 
 % zero buffer and apply offsets to mosaic
 mosaic_offset(3:4) = [70, -20];

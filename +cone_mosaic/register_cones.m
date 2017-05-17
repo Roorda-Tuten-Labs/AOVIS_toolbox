@@ -25,7 +25,8 @@ function [cones_in_new_coords, nn_cone_coords] = register_cones(ref, ...
     
     % register the two images first
     % output =  [error,diffphase,net_row_shift,net_col_shift]
-    [output, ~] = img.dftregistration(fft2(ref), fft2(new_img), 1);
+    [output, ~] = img.dftregistration(fft2(ref), fft2(new_img), 100);
+    
     % relative offsets (in pixels) between the two images
     offsets = output(3:4);
     
