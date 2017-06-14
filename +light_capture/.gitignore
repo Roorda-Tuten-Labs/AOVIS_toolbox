@@ -1,0 +1,12 @@
+*.eps
+*.png
+*.fig
+*~
+*~
+old/*
+test_conv.m
+LightCaptureCalculation_ColorNaming_SciAdv.m
+dat/*
+img/*
+*.~
+test_speed.m
