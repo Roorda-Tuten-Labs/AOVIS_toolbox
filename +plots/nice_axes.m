@@ -1,14 +1,14 @@
-function nice_axes(xlabelname, ylabelname, fontsize, ticksize)
+function nice_axes(xlabelname, ylabelname, fontsize, ticksize, offsetaxes)
     % nice_axes(xlabelname, ylabelname, fontsize)
     % 
     if nargin < 3
         fontsize = 22;
     end
     if nargin < 4
-        offsetaxes = 1;
-    end
-    if nargin < 5
         ticksize = 0.025;
+    end    
+    if nargin < 5
+        offsetaxes = 1;
     end
 
     ylabel(ylabelname, 'FontSize', fontsize);

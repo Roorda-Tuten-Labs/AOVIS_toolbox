@@ -57,7 +57,8 @@ end
 hold on;
 
 colors = get(gca, 'ColorOrder');
-for trial = 1:ntrials
+for t = 1:ntrials
+    trial = trials(t);
     trial_data = delivery_err(delivery_err(:, 1) == trial, :);
     
     color = colors(mod(trial, 7) + 1, :);
@@ -72,7 +73,7 @@ else
 end
 hold on;
 
-histogram(summary_data(:, 5), 0:0.05:1.5);
+histogram(summary_data(:, 6), 0:0.05:1.5);
 plots.nice_axes('delivery error (arcmin)', 'count', 22);
 
 end
