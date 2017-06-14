@@ -2,7 +2,7 @@ function retina_image = gen_retina_image(stimulus, PSF, halfwidth)
 
     % Convolve PSF with stimulus and crop resulting image so that you can
     % jitter its position more easily
-    diff_im = convolve(stimulus, PSF);
+    diff_im = util.convolve(stimulus, PSF);
     stim_im_tmp = im2double(diff_im);
 
     % peak row and column of convolved stimulus
