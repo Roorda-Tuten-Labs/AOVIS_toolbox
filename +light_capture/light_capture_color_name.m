@@ -3,12 +3,13 @@ close all;
 format compact
 
 % --- General parameters
+% subject: use '10001' or '20076' for real mosaic, otherwise 'model'
+data.subject = '20076';
+
 % get list of stimulated cones
 cone_list = csvread(['dat/' data.subject '/cone_loc_index.csv']);
 stim_cone_list = cone_list(:, 4);
 
-% subject: use '10001' or '20076' for real mosaic, otherwise 'model'
-data.subject = '20076';
 % pixels per degree of the raster field; get from AOSLO calibration video
 data.scaling = 550;
 % standard deviation for delivery, in arcmin (average from manuscript v6)
@@ -45,10 +46,10 @@ data.proportion = 0.48;
 % -----------------------------------------------------------------------
 
 % --- Set the random number generator seed.
-rng(data.seed);
+rng(data.seed, 'twister');
 
 % --- Generate stimulus used for testing 
-stim_im_orig = gen_stimulus(data);
+stim_im_orig = light_capture.gen_stimulus(data);
 
 % ---- Generate PSF
 % set up PSF parameters
@@ -59,7 +60,7 @@ psf_pupil = data.pupil_size;
 zernike_pupil = psf_pupil;
 
 % regenerate the PSF each iteration with new defocus level
-PSF = GeneratePSF(data.imsize, psf_pupil, zernike_pupil, ...
+PSF = light_capture.GeneratePSF(data.imsize, psf_pupil, zernike_pupil, ...
                     field_size * 60, data.lamda, data.diff_limited,...
                     defocus);
 
@@ -67,7 +68,7 @@ PSF = GeneratePSF(data.imsize, psf_pupil, zernike_pupil, ...
 halfwidth = 25; 
 
 % get retinal image
-retina_image = gen_retina_image(stim_im_orig, PSF, halfwidth);
+retina_image = light_capture.gen_retina_image(stim_im_orig, PSF, halfwidth);
 
 data.per_cone_int = zeros(length(stim_cone_list), data.numSim, 21);
 for cone = 1:length(stim_cone_list)
@@ -76,14 +77,15 @@ for cone = 1:length(stim_cone_list)
     data.center_cone_index = stim_cone_list(cone);
     
     % --- Generate cone array
-    [xi, yi, model_im, model_im_layers] = gen_cone_array(data);
+    [xi, yi, model_im, model_im_layers] = light_capture.gen_cone_array(data);
 
     % --- Get delivery locations
     % Place convolved stimulus at each delivered location and calculate
     % light capture in each cone;
-    [xloc, yloc] = gen_delivery_locations(xi(1), yi(1), data);
+    [xloc, yloc] = light_capture.gen_delivery_locations(xi(1), yi(1), ...
+        data);
 
-    [~, stim_image] = compute_light_capture(retina_image, ...
+    [~, stim_image] = light_capture.compute_light_capture(retina_image, ...
         xloc, yloc, model_im_layers, model_im, halfwidth);
 
     data.per_cone_int(cone, :, :) = stim_image;    

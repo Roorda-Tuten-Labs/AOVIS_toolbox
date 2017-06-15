@@ -54,16 +54,16 @@ function cones_per_unit = curcio_cone_density(eccentricity, meridian, ...
     nasal = data{6};
     
     if strcmp(units, 'deg')
-        superior = mm2_to_deg2(mm_from_fovea, superior);
-        inferior = mm2_to_deg2(mm_from_fovea, inferior);
-        temporal = mm2_to_deg2(mm_from_fovea, temporal);
-        nasal = mm2_to_deg2(mm_from_fovea, nasal);
+        superior = util.mm2_to_deg2(mm_from_fovea, superior);
+        inferior = util.mm2_to_deg2(mm_from_fovea, inferior);
+        temporal = util.mm2_to_deg2(mm_from_fovea, temporal);
+        nasal = util.mm2_to_deg2(mm_from_fovea, nasal);
     end
     % Watson (2014) wasn't happy with Drasdo & Fowler (1974) model eye
     % conversion so he defined his own from their data. Curcio in her
     % spreadsheet reported a conversion from the Drasdo & Fowler model
     % eye. So first thing we need to do is convert using Watson's method.
-    deg = mm_to_deg(mm_from_fovea);
+    deg = util.mm_to_deg(mm_from_fovea);
     
     % decide which meridian along the retina to use
     if strcmp(meridian, 'superior')

@@ -1,7 +1,8 @@
 function stim_im_orig = gen_stimulus(data)
 
     % or read in from CFG or .psy file (i.e. stimsize = CFG.stimsize)
-    stim_im_orig = createStimulus(data.stimsize, data.stimshape, data.imsize);
+    stim_im_orig = light_capture.createStimulus(data.stimsize, ...
+        data.stimshape, data.imsize);
 
     %scale stimulus by trial intensity
     stim_im_orig = stim_im_orig .* data.trialIntensity; 

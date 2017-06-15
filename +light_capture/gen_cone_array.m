@@ -2,7 +2,8 @@ function [xi, yi, model_im, model_im_layers] = gen_cone_array(data)
 
 % --- Set up array of cone light collecting apertures
 % cone inner segment as a func of eccentricity
-fwhm = get_fwhm_curcio(data.test_ecc, data.scaling, data.proportion);
+fwhm = light_capture.get_fwhm_curcio(data.test_ecc, data.scaling, ...
+    data.proportion);
 
 % convert FWHM to standard deviation of Gaussian
 c = fwhm./2.35482; 
@@ -20,7 +21,7 @@ cone_aperture = cone_aperture ./ max(cone_aperture(:));
 
 % Take cone density, make hexagon and then scale by image size
 test_ecc_mm = data.test_ecc * 0.28;
-cone_density = curcio_cone_density(test_ecc_mm, 'mean', 'mm');
+cone_density = light_capture.curcio_cone_density(test_ecc_mm, 'mean', 'mm');
 cone_spacing_mm = sqrt(sqrt(3) / (2 * cone_density));
 cone_spacing = cone_spacing_mm * (1 / 0.28) * 60; % in arcmin
 
@@ -50,7 +51,7 @@ if strcmp(data.subject, 'model')
 elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076')
 
     % get the cones from a subject
-    cones = cone_mosaic.load_locs('20076R')(data.subject);
+    cones = cone_mosaic.load_locs(data.subject);
     
     % data for 10001 & 20076 were collected at a pix/deg of 420, need to
     % convert the locations into new coordinate space.

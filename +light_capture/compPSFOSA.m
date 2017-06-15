@@ -3,7 +3,7 @@ function [PSF] = compPSFOSA(c)
 global PARAMS;
 % Zphase_Mahajan generates the complex pupil function for the Fourier transform
 
-pupilfunc = Zphase_MahajanOSA(c);
+pupilfunc = light_capture.Zphase_MahajanOSA(c);
 
 pupilfunc=transpose(pupilfunc);
 

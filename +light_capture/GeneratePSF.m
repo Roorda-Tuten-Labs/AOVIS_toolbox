@@ -81,7 +81,7 @@ else
 end
 
 if (PARAMS(2) < PARAMS(3))
-    c = TransformC(c,PARAMS(3),PARAMS(2),0,0,0);
+    c = light_capture.TransformC(c,PARAMS(3),PARAMS(2),0,0,0);
     c(1:5) = 0; %set tilt, defocus and astigmatism to zero
     PARAMS(3) = PARAMS(2); %set PARAMS(3) to correspond to the new coefficients.
 end
@@ -91,7 +91,7 @@ end
     PARAMS(2)=psf_pupil;
     
     if (PARAMS(2) < PARAMS(3))
-        c = TransformC(c,PARAMS(3),PARAMS(2),0,0,0);
+        c = light_capture.TransformC(c,PARAMS(3),PARAMS(2),0,0,0);
         c(1:5) = 0; %set tilt, defocus and astigmatism to zero    
         PARAMS(3) = PARAMS(2); %set PARAMS(3) to correspond to the new coefficients. 
     end
@@ -106,6 +106,6 @@ end
 
 %Generate PSF using compPSFOSA.m
     PARAMS(4) = param4orig; %reset PARAMS(4) to its original value just in case it was changed in another script
-    [PSF] = compPSFOSA(c); % call the script compPSFOSA.m to generate PSF    
+    [PSF] = light_capture.compPSFOSA(c); % call the script compPSFOSA.m to generate PSF    
 end
 
