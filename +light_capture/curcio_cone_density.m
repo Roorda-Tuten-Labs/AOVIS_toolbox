@@ -41,7 +41,9 @@ function cones_per_unit = curcio_cone_density(eccentricity, meridian, ...
         units = 'deg';
     end
     
-    fileID = fopen('curcio_conedensity_1990.csv');
+    % open curcio data from text file
+    filedir = fileparts(which('light_capture.curcio_cone_density'));
+    fileID = fopen(fullfile(filedir, 'curcio_conedensity_1990.csv'));    
     headers = textscan(fileID, '%s %s %s %s %s %s', 1, 'delimiter', ',');
     data = textscan(fileID, '%f %f %f %f %f %f', 'delimiter', ',');
     fclose(fileID);

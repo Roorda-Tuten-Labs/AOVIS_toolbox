@@ -72,9 +72,10 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
             % full path and name to color naming data: in hue_scaling
             % project directory
             dname = fullfile('dat', subject_name, subject_subname, ...
-                'raw', datapaths{d}.(bkgd{:}));
+                'raw', datapaths{d}.(bkgd{:}).data_file);
+            
             % full path to videos on external hard drive, lyle.
-            viddir = fullfile(base_dir, datapaths{d}.([bkgd{:} '_video_dir']));
+            viddir = fullfile(base_dir, datapaths{d}.(bkgd{:}).video_dir);
 
             % load color naming data
             exp_data = load(dname);

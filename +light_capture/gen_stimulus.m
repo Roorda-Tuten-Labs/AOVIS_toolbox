@@ -1,19 +1,19 @@
-function stim_im_orig = gen_stimulus(data)
+function params = gen_stimulus(params)
 
     % or read in from CFG or .psy file (i.e. stimsize = CFG.stimsize)
-    stim_im_orig = light_capture.createStimulus(data.stimsize, ...
-        data.stimshape, data.imsize);
+    stim_im_orig = light_capture.createStimulus(params.stimsize, ...
+        params.stimshape, params.imsize);
 
     %scale stimulus by trial intensity
-    stim_im_orig = stim_im_orig .* data.trialIntensity; 
+    params.stim_im_orig = stim_im_orig .* params.trialIntensity; 
 
     % --- Convolve stimulus image with 15-frame delivery error
-    if data.intratrial_delivery_error > 0;
-        sigma = data.intratrial_delivery_error * (1 / 60) * data.scaling;
+    if params.intratrial_delivery_error > 0;
+        sigma = params.intratrial_delivery_error * (1 / 60) * params.scaling;
 
         %gaussian from fspecial only has single pixel peak if filter
         %size is odd, so add 1 pixel here and trim one pixel two lines later
-        delivery_blur = fspecial('gaussian', data.imsize + 1, sigma); 
+        delivery_blur = fspecial('gaussian', params.imsize + 1, sigma); 
 
         %normalize
         delivery_blur = delivery_blur ./ max(delivery_blur(:)); 
@@ -23,7 +23,7 @@ function stim_im_orig = gen_stimulus(data)
         delivery_blur(end,:) = []; 
 
         %convolve stimulus with "trial blur"
-        stim_im_orig = util.convolve(stim_im_orig,delivery_blur); 
+        params.stim_im_orig = util.convolve(stim_im_orig,delivery_blur); 
     end
 
 end
