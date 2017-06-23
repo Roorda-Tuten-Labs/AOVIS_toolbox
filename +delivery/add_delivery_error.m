@@ -67,7 +67,7 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
     end
     
     % loop through every file in info
-    for d = 1:ndirs
+    parfor d = 1:ndirs
         for bkgd = bkgds
             % full path and name to color naming data: in hue_scaling
             % project directory
@@ -106,12 +106,25 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
             end
                 
             if savedata
-                % save the raw data
-                save(dname, 'exp_data');
-            end
-                
+                % if saving need to store the name and data file in a
+                % struct for saving later. parfor loop can not contain a
+                % call to save().
+                dfiles(d).(bkgd).name = dname;
+                dfiles(d).(bkgd).data = exp_data;
+
+            end                
         end
     end
+
+    % save the raw data outside of the parfor loop.
+    for d = 1:length(dfiles)
+        for bkgd = 1:length(dfiles(d))
+            dname = dfiles(d).(bkgd).name;
+            exp_data = dfiles(d).(bkgd).data; %#ok
+            save(dname, 'exp_data');
+        end
+    end
+    
 end
 
 

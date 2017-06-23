@@ -16,6 +16,16 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     end
     import util.pprint
     
+    % check that x and y do not contain any nan values. if they do the corr
+    % will return nan so throw an error here to for the user to fix their
+    % input
+    if any(isnan(x))
+        error('x vector contains NaN values');
+    end
+    if any(isnan(y))
+        error('y vector contains NaN values');
+    end
+    
     disp(['Correlation type: ' corr_type]);
     if length(x) ~= length(y)
         error('x and y must be same length');

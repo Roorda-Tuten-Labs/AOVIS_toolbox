@@ -64,6 +64,9 @@ elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076')
     % find the 20 nearest neighbors
     [indexes, ~] = knnsearch(cones(:, 1:2), [x_cone y_cone], 'k', 21);
     
+    % save this info for later analyses
+    data.neighbor_indexes = indexes;
+    
     % create an x, y list of cones
     xi = cones(indexes(2:end), 1);
     yi = cones(indexes(2:end), 2);
