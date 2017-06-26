@@ -43,7 +43,7 @@ function format_uad_axes(boundaries, labels, title_text, fontsize)
     end
 
     if ~strcmp(title_text, '')
-        text( -0.3, 1.15, title_text, 'FontSize', fontsize);
+        text( -0.7, 1.26, title_text, 'FontSize', fontsize);
     end
 
     axis square;

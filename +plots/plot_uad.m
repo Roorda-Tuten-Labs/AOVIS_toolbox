@@ -1,5 +1,5 @@
 function plot_uad(dat, title_text, markersize, fontsize, format_axes)
-    %plot(dat, cone_index, ntrials)
+    % plot_uad(dat, title_text, markersize, fontsize, format_axes)
     %
     % Should contain no zero (not seen) rows).
 
