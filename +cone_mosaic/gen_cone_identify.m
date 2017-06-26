@@ -4,7 +4,6 @@
 % The dftregistration does not work perfectly on the cone classed mosaic
 % tiff. Therefore, you have to manually play with the mosaic_offset (line
 % 41) to get a good match between ref.tif and mosaic.tif.
-
 clearvars;
 
 subject = '20076R';
@@ -14,17 +13,22 @@ savedir = fullfile(fileparts(mfilename('fullpath')), ...
 % This accounts for differences in scale between the old and new systems
 % (i.e. 1.28 vs ~0.95 degree raster sizes). Set this to zero if cone
 % classing was done on same system as experiment.
-mosaic_scale_factor = 1.28/0.95;
+mosaic_scale_factor = 1.35/0.90;
 
 % load reference image
-ref = imread(fullfile(savedir, 'ref.tif'));
+ref = imread(fullfile(savedir, 'ref3.tif'));
+
+% % find cone in reference image
+% [xlocs, ylocs] = img.find_cones(7, ref);
+% ref_cone_locs = [xlocs ylocs;];
+
 % uncomment lines below to crop and save ref image (to remove black boarder
 % created by movie normalize) -- this cropping may be unnecessary in the
 % future.
-%ref = ref(120:600, 120:600);
-%%imwrite(ref, 'ref.tif');
+% ref = ref(120:end-120, 120:end-120);
+% imwrite(ref, 'ref2.tif');
 
-% mosaic.
+%% mosaic.
 mosaic_img = imread(fullfile(savedir, 'mosaic.tif'));
 % resize to account for 4x upsampling
 mosaic_img = imresize(mosaic_img, 0.25);
@@ -42,11 +46,12 @@ mosaic_gray = img.zero_buffer(mosaic_gray, size(ref), [], mean(mosaic_gray(:)));
 mosaic_offset = img.dftregistration(fft2(im2double(ref)), ...
     fft2(im2double(mosaic_gray)), 1);
 
+
 % zero buffer and apply offsets to mosaic
-mosaic_offset(3:4) = [70, -20];
+mosaic_offset(3:4) = [-2, 55];
 mosaic_img = img.zero_buffer(mosaic_img, size(ref), [mosaic_offset(3), mosaic_offset(4)]);
 
-%%
+%
 f = figure; 
 imshow(ref);
 hold on;
