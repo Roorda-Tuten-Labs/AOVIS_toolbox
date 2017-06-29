@@ -153,7 +153,8 @@ end
 
 %% plot data and errorbars
 flagHold=ishold; % record the current status of "HOLD"
-h=plot(x,y, color{1}); % main plot
+
+% add error bars first
 allh=nan(length(x), 6); % all errorbar handles
 for k=1:length(x)
     if ~isempty(lx) & ~isempty(ly) % both errors are specified
@@ -183,14 +184,18 @@ for k=1:length(x)
     end
     if exist('l1', 'var')
         h1=[l1, l2, l3]; % all handles
-        set(h1, 'color', color{2});
+        set(h1, 'color', color{2}, 'linewidth', 1);
     end
     if exist('l4', 'var')
         h1=[l4, l5, l6]; % all handles
-        set(h1, 'color', color{3});
+        set(h1, 'color', color{3}, 'linewidth', 1);
     end
 end
-arrayfun(@(d) set(get(get(d,'Annotation'),'LegendInformation'), 'IconDisplayStyle','off'), allh(~isnan(allh))); % exclude errorbars from legend
+% main plot
+h=plot(x,y, color{1}); 
+
+arrayfun(@(d) set(get(get(d,'Annotation'),'LegendInformation'), ...
+    'IconDisplayStyle','off'), allh(~isnan(allh))); % exclude errorbars from legend
 out.hMain=h;
 out.hErrorbar=allh;
 hold off;

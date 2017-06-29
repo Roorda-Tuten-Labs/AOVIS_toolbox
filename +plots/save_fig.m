@@ -5,7 +5,7 @@ function save_fig(save_name, fig, transparent, file_type)
         transparent = 1;
     end
     if nargin < 4
-        file_type = 'svg';
+        file_type = 'pdf';
     end
     % make sure save dir exists
     dirname = fileparts(save_name);
@@ -16,7 +16,23 @@ function save_fig(save_name, fig, transparent, file_type)
         set(gca, 'Color', 'none'); 
         %export_fig(save_name, ['-' file_type], '-m2', '-transparent', fig);
     end
-    print(fig, save_name, ['-d' file_type], '-r300', '-painters')
+    if strcmp(file_type, 'svg')
+        print(fig, save_name, '-dsvg', '-r300', '-painters')
+    elseif strcmp(file_type, 'pdf')
+        figpos = get(fig, 'pos');
+        figwidth = figpos(3);
+        figheight = figpos(4);
+        if figwidth > 625 || figheight > 750
+            % if the figure is larger than the size of a figure, use best
+            % fit to preserve the aspect ratio, while fitting on a single
+            % page.
+            print(fig, save_name, '-dpdf', '-bestfit');
+        else
+            print(fig, save_name, '-dpdf');
+        end
+    else
+        print(fig, save_name, ['-d' file_type], '-r300', '-painters')
+    end
     
 end
     

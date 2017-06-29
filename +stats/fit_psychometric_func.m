@@ -1,5 +1,9 @@
-function pBest = fit_psychometric_func(results, ...
-    pInit, color)
+function pBest = fit_psychometric_func(results, pInit, color)
+    %
+    % USAGE
+    % pBest = fit_psychometric_func(results, pInit, color)
+    %
+    %
     
     if nargin < 3
         color = 'k';

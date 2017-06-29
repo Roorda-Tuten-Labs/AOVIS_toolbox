@@ -109,8 +109,8 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
                 % if saving need to store the name and data file in a
                 % struct for saving later. parfor loop can not contain a
                 % call to save().
-                dfiles(d).(bkgd).name = dname;
-                dfiles(d).(bkgd).data = exp_data;
+                dfiles(d).(bkgd{:}).name = dname;
+                dfiles(d).(bkgd{:}).data = exp_data;
 
             end                
         end
@@ -118,9 +118,9 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
 
     % save the raw data outside of the parfor loop.
     for d = 1:length(dfiles)
-        for bkgd = 1:length(dfiles(d))
-            dname = dfiles(d).(bkgd).name;
-            exp_data = dfiles(d).(bkgd).data; %#ok
+        for bkgd = bkgds
+            dname = dfiles(d).(bkgd{:}).name;
+            exp_data = dfiles(d).(bkgd{:}).data; %#ok
             save(dname, 'exp_data');
         end
     end
