@@ -1,4 +1,4 @@
-function nice_axes(xlabelname, ylabelname, fontsize, ticksize)
+function nice_axes(xlabelname, ylabelname, fontsize, offsetaxes, ticksize)
     % nice_axes(xlabelname, ylabelname, fontsize)
     % 
     if nargin < 3
@@ -15,7 +15,7 @@ function nice_axes(xlabelname, ylabelname, fontsize, ticksize)
     xlabel(xlabelname, 'FontSize', fontsize);
     
     if offsetaxes
-        ax = gca;
+        ax = get(gca);
         plots.offsetAxes(ax);
     end
     
