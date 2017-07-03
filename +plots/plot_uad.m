@@ -1,5 +1,5 @@
 function plot_uad(dat, title_text, markersize, fontsize, format_axes)
-    %plot(dat, cone_index, ntrials)
+    % plot_uad(dat, title_text, markersize, fontsize, format_axes)
     %
     % Should contain no zero (not seen) rows).
 
@@ -54,7 +54,8 @@ function plot_uad(dat, title_text, markersize, fontsize, format_axes)
     hold on;
     h = plots.errorbarxy(yb, gr, yb_sem, gr_sem, {'ko', 'r', 'r'});
     
-    
+    h.hMain.LineWidth = 1.75;
+    h.hMain.MarkerFaceColor = 'w';
     set(h.hMain, 'MarkerSize', markersize);
     
 end

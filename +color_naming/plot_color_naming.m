@@ -1,13 +1,10 @@
-function plot_color_naming(AllData, single_plot, format_axes, figh)
+function plot_color_naming(AllData, single_plot, format_axes)
 
 if nargin < 2
     single_plot = 0;
 end
 if nargin < 3
     format_axes = 1;
-end
-if nargin < 4
-    figure(258);
 end
 
 %%%%%%%% Plot the output %%%%%%%%%%%
@@ -36,6 +33,53 @@ if AllData.Nscale == 1
     end
 else
     
+    intensities = unique(AllData.intensities);
+    nintensities = length(intensities);
+    ncones = length(unique(AllData.coneids));
+    if nintensities > 1     
+        figure;
+        clf;
+        hold on;
+        FoS_data = zeros(ncones, nintensities);
+        for c = 1:ncones
+            cone = AllData.brightness_rating(AllData.coneids == c);
+            stim_intensities = AllData.intensities(AllData.coneids == c);
+            for inten = 1:nintensities
+                intensity = intensities(inten);
+                intensity_trials = stim_intensities == intensity;
+                seen = sum(cone(intensity_trials) > 1);
+                trials = sum(intensity_trials);
+                FoS_data(c, inten) = seen / trials;
+            end
+        end
+        % 
+        blankFoS = mean(FoS_data(:, 1));
+        % threshold estimates
+        thresholds = zeros(ncones, 1);
+        for c = 1:ncones
+            % use the mean of all blanks to avoid issues with low number of
+            %  trials
+            coneFoS = [blankFoS FoS_data(c, 2:end)];
+
+            plot(intensities, coneFoS, 'ko', 'color', 'k');
+
+            % fit a psychometric function
+            results.intensity = intensities';
+            results.response = coneFoS;
+            pInit.b = 0.1;
+            pInit.t = 0.5;        
+            pBest = stats.fit_psychometric_func(results, pInit, 'k');
+            
+            text(pBest.t, 0.5, num2str(c), 'FontSize', 16);
+
+            thresholds(c) = pBest.t;
+        end
+        plots.nice_axes('stimulus intensity (a.u.)', ...
+            'frequency of seeing', 20);
+        
+    end
+    
+    figure;
     % plot uad diagram here for each cone
     for loc_index = 1:AllData.num_locations
         
@@ -52,17 +96,22 @@ else
             % set the subplot
             subplot(ceil(AllData.num_locations / 3), 3, loc_index); 
             
-            % compute the frequency of seeing
-            FoS = round(size(cone, 1) / ntrials , 3);
-
-            title_text = ['#', num2str(loc_index) '; FoS: ' num2str(FoS)];
+            % compute the frequency of seeing or use threshold from above
+            if exist('thresholds', 'var')
+                FoS = thresholds(loc_index);
+                title_text = ['50% FoS: ' num2str(round(FoS, 2))];
+            else
+                FoS = round(size(cone, 1) / ntrials , 3);
+                title_text = ['#', num2str(loc_index) '; FoS: ' ...
+                    num2str(FoS)];
+            end
             
         end
         
         % plot response data for cone on Uniform Appearance Diagram
-        plots.plot_uad(cone, title_text, 10, 13, format_axes);
+        plots.plot_uad(cone, title_text, 10, 12, format_axes);
 
-    end
+    end                
     
 
 end

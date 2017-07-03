@@ -1,5 +1,7 @@
-function [img_map, offsets_manual] = manual_cone_select(img_crop,rect_position,...
-                                                      rect_position_old)
+function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
+    rect_position, rect_position_old)
+    %
+    %                                                  
     
     Redo = 1;
     while Redo
@@ -25,8 +27,13 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop,rect_position,.
             X(n,1)= round(x); 
             Y(n,1)= round(y);
 
+            % add dot to center
+            hold on;
+            plot(X(n, 1), Y(n, 1), 'r.');
+            
             % add text to image to display cone locations
-            text(X(n,1),Y(n,1),[num2str(n)],'Color','b','FontWeight','bold')
+            text(X(n, 1), Y(n, 1), num2str(n), 'Color', 'b', ...
+                'FontWeight', 'bold');
             
             n = n+1; % increment number of cones
             if clicks == 3 % Right click button terminates cone selection
@@ -49,7 +56,7 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop,rect_position,.
           case 'Yes'
             Redo = 0;
             img_map = frame2im(getframe(h));
-            [offsets_manual] = [X,Y];
+            [offsets_manual] = [X, Y];
             close 259;
         end
         

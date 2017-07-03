@@ -16,6 +16,17 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     end
     import util.pprint
     
+    % check that x and y do not contain any nan values. if they do the corr
+    % will return nan so throw an error here to for the user to fix their
+    % input
+    if any(isnan(x))
+        error('x vector contains NaN values');
+    end
+    if any(isnan(y))
+        error('y vector contains NaN values');
+    end
+    disp(' ')
+    disp('+++++++++++++++++')
     disp(['Correlation type: ' corr_type]);
     if length(x) ~= length(y)
         error('x and y must be same length');
@@ -48,17 +59,16 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
         % when running multiple regression (sign doesnt matter b/c not
         % plotting).
         r = sqrt(stats.rsquare);
-        pval = stats.fstat.pval;
     end
        
     % print out results
-    if print_results
+    if print_results        
         disp(disp_name);
-        disp('+++ Correlation +++')
+        disp('+++++++++++++++++')
+        disp('-- Correlation --')
         pprint(Nsamples, 0, 'N:');
         pprint(r, 4, 'R:');
         % p-value
-        pprint(pval, -1, 'p-val:');
         
         % 95% confidence intervals for correlation
         % Formulas taken from Altman & Gardner 1988. Calculating confidence
@@ -87,14 +97,20 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
             pprint(stand_err, 4, 'SE:');
         
             disp(' ');
-            disp('+++ Regression +++');
+            disp('-- Regression --');
             disp(' ');
             % Regression line slope and intercept           
             pprint(stats.beta(2), 3, 'slope:');
             pprint(stats.beta(1), 3, 'inter:');
-            pprint(r ^ 2, 4, 'R^2:');            
-                        
-            disp(stats.fstat);
+            pprint(r ^ 2, 4, 'R^2:');  
+            disp(' ')
+            
+            disp('-- F-Test --');
+            pprint(stats.fstat.f, 3, 'F-val:');
+            pprint(stats.fstat.dfe, 3, 'dfe:');
+            pprint(stats.fstat.dfr, 3, 'dfr:');
+            pprint(stats.fstat.pval, 3, 'pval:');
+            
             disp(' ');
         end
         

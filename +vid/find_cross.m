@@ -109,36 +109,42 @@ while hasFrame(reader)
     
 end
 
-if print_output
-    disp(X); disp(std(X))
-    disp(Y); disp(std(Y))
-end
+if exist('X', 'var') && exist('Y', 'var')
+    if print_output
+        disp(X); disp(std(X))
+        disp(Y); disp(std(Y))
+    end
 
-if return_mean_only
-    if exist('X', 'var') && std(X) < 10 && std(Y) < 10
-        % compute mean of XY position from cross locations that fall within
-        % one STD of the mean.
-        X_cross_loc = round(mean(X(find((X <= (mean(X)+std(X) / 2)) & ...
-            (X >= (mean(X) - std(X) / 2))))));
+    if return_mean_only
+        if exist('X', 'var') && std(X) < 10 && std(Y) < 10
+            % compute mean of XY position from cross locations that fall within
+            % one STD of the mean.
+            X_cross_loc = round(mean(X(find((X <= (mean(X)+std(X) / 2)) & ...
+                (X >= (mean(X) - std(X) / 2))))));
 
-        Y_cross_loc = round(mean(Y(find((Y <= (mean(Y) + std(Y) / 2)) & ...
-            (Y >=(mean(Y) - std(Y) / 2))))));
+            Y_cross_loc = round(mean(Y(find((Y <= (mean(Y) + std(Y) / 2)) & ...
+                (Y >=(mean(Y) - std(Y) / 2))))));
+
+        else
+            % case where cross was found, but the STD was too high.
+            X_cross_loc = nan;
+            Y_cross_loc = nan;
+            frames_w_cross = nan;            
+            errordlg('IR cross not reliable', 'Record another movie.');
+        end
 
     else
-        errordlg('IR cross not found/not reliable, Record another movie');
-
-    end
-    
-else
-    if exist('X', 'var') && exist('Y', 'var')
         X_cross_loc = X;
         Y_cross_loc = Y;
-    else
-        % in the case where a cross was not found in any frames, return nan
-        % values
-        X_cross_loc = nan;
-        Y_cross_loc = nan;
-        frames_w_cross = nan;
     end
+else
+    % in the case where a cross was not found in any frames, return nan
+    % values
+    X_cross_loc = nan;
+    Y_cross_loc = nan;
+    frames_w_cross = nan;
+    errordlg('IR cross not found', 'Record another movie.');
 end
+
+
 

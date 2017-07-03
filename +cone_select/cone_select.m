@@ -25,11 +25,17 @@ if strcmp(filename(end-3:end),'.tif')
    
 elseif strcmp(filename(end-3:end),'.avi')
     % otherwise find crosses fresh
-    [X_cross_loc, Y_cross_loc, framenums_withcross] = vid.find_cross([path,filename])
-    
-    % then if crosses are found, produce stabilized movie (sumnorm)
-    img_s = vid.sumframe_from_stabilized_movie(path, filename, framenums_withcross,...
-                                         X_cross_loc, Y_cross_loc);
+    [X_cross_loc, Y_cross_loc, framenums_withcross] = vid.find_cross(...
+        [path, filename]);
+    if ~isnan(X_cross_loc) && ~isnan(Y_cross_loc)
+        % then if crosses are found, produce stabilized movie (sumnorm)
+        img_s = vid.sumframe_from_stabilized_movie(path, filename, ...
+            framenums_withcross, X_cross_loc, Y_cross_loc);
+    else
+        offsets_x_y = NaN;
+        disp('X,Y cross locations were not found. Try another video.');
+        return
+    end
 end
 
 % To be safe, lets use 75% of the max allowed offsets.
@@ -94,6 +100,7 @@ if strcmpi(cone_selection_method,'auto')
  
 elseif strcmpi(cone_selection_method,'manual')
     
+    fighandle = [];
     try
         fighandle = cone_mosaic.add_cone_types_to_selection_img(subject, img_s, ...
             [X_cross_loc, Y_cross_loc]);    
@@ -107,6 +114,10 @@ elseif strcmpi(cone_selection_method,'manual')
     % This is the routine typically used.
     [img_map, offset_cropped] = cone_select.manual_cone_select(img_crop,...
         rect_position, rect_position_old);    
+    
+    if ~isempty(fighandle)
+        close(fighandle)
+    end
 end
 
 % Selected cones
