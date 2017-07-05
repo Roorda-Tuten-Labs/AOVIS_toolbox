@@ -1,4 +1,4 @@
-function plot_color_naming(AllData, single_plot, format_axes)
+function plot_color_naming(AllData, single_plot, format_axes, save_plots)
 
 if nargin < 2
     single_plot = 0;
@@ -6,9 +6,15 @@ end
 if nargin < 3
     format_axes = 1;
 end
+if nargin < 4
+    save_plots = 0;
+end
 
 %%%%%%%% Plot the output %%%%%%%%%%%
 temp = [AllData.coneids, AllData.intensities, AllData.answer];
+
+% video folder where plots will be saved. first 14 chars are "Video Folder:"
+videofolder = AllData.videofolder(15:end);
 
 % sort rows so that organized by cone ID. (i.e. cone#1, cone#2 ...);
 sortrows(temp,1);
@@ -17,19 +23,23 @@ ntrials = size(AllData.answer, 1) / AllData.num_locations;
 % need to add not seen category
 cnames = {'n.s.', AllData.cnames{:}};
 if AllData.Nscale == 1
+    fig1 = figure;
     for loc_index = 1:AllData.num_locations
-       subplot(ceil(AllData.num_locations / 3), 3, loc_index); 
+        subplot(ceil(AllData.num_locations / 3), 3, loc_index); 
 
-       cone = temp(temp(:, 1) == loc_index, 3);       
-       
-       C = categorical(cone, 0:5, cnames);
-       histogram(C, 'Normalization', 'probability');
+        cone = temp(temp(:, 1) == loc_index, 3);       
 
-       xlim([-0.5, 7.0]);
-       ylim([0 1]);
-       set(gca, 'FontSize', 12);            
-       title(['#', num2str(loc_index) '; N seen: ' num2str(sum(cone < 6))]); 
+        C = categorical(cone, 0:5, cnames);
+        histogram(C, 'Normalization', 'probability');
 
+        xlim([-0.5, 7.0]);
+        ylim([0 1]);
+        set(gca, 'FontSize', 12);            
+        title(['#', num2str(loc_index) '; N seen: ' num2str(sum(cone < 6))]); 
+        if save_plots
+            savename = fullfile(videofolder, 'color_naming');
+            plots.save_fig(savename, fig1, 1, 'eps');
+        end        
     end
 else
     
@@ -37,7 +47,7 @@ else
     nintensities = length(intensities);
     ncones = length(unique(AllData.coneids));
     if nintensities > 1     
-        figure;
+        fig1 = figure;
         clf;
         hold on;
         FoS_data = zeros(ncones, nintensities);
@@ -76,10 +86,14 @@ else
         end
         plots.nice_axes('stimulus intensity (a.u.)', ...
             'frequency of seeing', 20);
+        if save_plots
+            savename = fullfile(videofolder, 'FoS_plot');
+            plots.save_fig(savename, fig1, 1, 'eps');
+        end        
         
     end
     
-    figure;
+    fig = figure;
     % plot uad diagram here for each cone
     for loc_index = 1:AllData.num_locations
         
@@ -109,9 +123,11 @@ else
         end
         
         % plot response data for cone on Uniform Appearance Diagram
-        plots.plot_uad(cone, title_text, 10, 12, format_axes);
-
+        plots.plot_uad(cone, title_text, 10, 12, format_axes);     
     end                
-    
+    if save_plots
+        savename = fullfile(videofolder, 'hue_scaling');
+        plots.save_fig(savename, fig, 1, 'eps');
+    end   
 
 end

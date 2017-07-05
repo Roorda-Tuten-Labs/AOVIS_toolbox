@@ -64,7 +64,8 @@ end
 % generate a cross
 ir_cross = zeros(cross_size_pix, cross_size_pix);
 center_cross = ceil(cross_size_pix / 2);
-ir_cross(center_cross,:)=1;ir_cross(:, center_cross) = 1;
+ir_cross(center_cross,:)=1;
+ir_cross(:, center_cross) = 1;
 
 try
     % create video reader object
@@ -79,7 +80,7 @@ n = 1;
 frameN = 1;
 while hasFrame(reader)  
     % select the current frame
-    currentframe = readFrame(reader);
+    currentframe = readFrame(reader, 'VideoFormat', 'Grayscale');
     
     % convert to a double (necessary for cross corr)
     currentframe = im2double(currentframe(:, :, 1));

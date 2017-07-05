@@ -7,14 +7,25 @@ function save_fig(save_name, fig, transparent, file_type)
     if nargin < 4
         file_type = 'pdf';
     end
+    
+    % if an extension is provided at the end of save_name, save the file as
+    % that type.
+    extension = save_name(end-3:end);
+    if strcmp(extension(1), '.') 
+        f = extension(2:4);
+        if strcmp(f, 'svg') || strcmp(f, 'pdf') || strcmp(f, 'jpg') || ...
+                strcmp(f, 'png') || strcmp(f, 'eps')
+            file_type = extension(2:4);
+        end
+    end
+    
     % make sure save dir exists
     dirname = fileparts(save_name);
     util.check_for_dir(dirname);
     
-    % -m2 magnify 2x for good resolution
+    % set background to transparent
     if transparent
         set(gca, 'Color', 'none'); 
-        %export_fig(save_name, ['-' file_type], '-m2', '-transparent', fig);
     end
     if strcmp(file_type, 'svg')
         print(fig, save_name, '-dsvg', '-r300', '-painters')
@@ -22,14 +33,19 @@ function save_fig(save_name, fig, transparent, file_type)
         figpos = get(fig, 'pos');
         figwidth = figpos(3);
         figheight = figpos(4);
-        if figwidth > 625 || figheight > 750
+        fig.Renderer = 'Painters';
+        if figwidth > 610 || figheight > 750
             % if the figure is larger than the size of a figure, use best
             % fit to preserve the aspect ratio, while fitting on a single
             % page.
             print(fig, save_name, '-dpdf', '-bestfit');
+            
         else
             print(fig, save_name, '-dpdf');
+
         end
+    elseif strcmp(file_type, 'eps')
+        print(fig, save_name, '-depsc')
     else
         print(fig, save_name, ['-d' file_type], '-r300', '-painters')
     end
