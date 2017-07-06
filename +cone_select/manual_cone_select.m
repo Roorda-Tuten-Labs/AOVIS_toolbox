@@ -6,7 +6,7 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
     Redo = 1;
     while Redo
  
-        h = figure (259);
+        h = figure();
         hold on;
         imshow(img_crop,'InitialMagnification', 500, 'Border', 'Tight')
         colormap(gray); 
@@ -20,12 +20,14 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
         axis equal; 
         axis off;
 
-        n = 1; 
+        n = 1;
+        X = 0;
+        Y = 0;
         while 1
             % get user defined locations
             [x, y, clicks] = ginput(1);
-            X(n,1)= round(x); 
-            Y(n,1)= round(y);
+            X(n, 1)= round(x); 
+            Y(n, 1)= round(y);
 
             % add dot to center
             hold on;
@@ -35,7 +37,8 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
             text(X(n, 1), Y(n, 1), num2str(n), 'Color', 'b', ...
                 'FontWeight', 'bold');
             
-            n = n+1; % increment number of cones
+            % increment number of cones
+            n = n + 1; 
             if clicks == 3 % Right click button terminates cone selection
                 break
             end
@@ -52,12 +55,12 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
         switch choice
           case 'Redo'
             Redo = 1;
-            close 259
+            close(h)
           case 'Yes'
             Redo = 0;
             img_map = frame2im(getframe(h));
             [offsets_manual] = [X, Y];
-            close 259;
+            close(h);
         end
         
     end

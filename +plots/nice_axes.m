@@ -15,8 +15,14 @@ function nice_axes(xlabelname, ylabelname, fontsize, ticksize, offsetaxes)
     xlabel(xlabelname, 'FontSize', fontsize);
     
     if offsetaxes
-        ax = get(gca);
-        plots.offsetAxes(ax);
+        try
+            ax = gca;
+            plots.offsetAxes(ax);
+        catch ME
+            disp(ME);
+            disp(['offset axes did not run properly.' ...
+            'does not work on older versions of matlab']);
+        end
     end
     
     set(gca, 'FontSize', fontsize, 'TickLength', [ticksize ticksize], ...
