@@ -85,7 +85,7 @@ else
             thresholds(c) = pBest.t;
         end
         plots.nice_axes('stimulus intensity (a.u.)', ...
-            'frequency of seeing', 20);
+            'frequency of seeing', 20, [], 0);
         if save_plots
             savename = fullfile(videofolder, 'FoS_plot');
             plots.save_fig(savename, fig1, 1, 'eps');
