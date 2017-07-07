@@ -1,4 +1,8 @@
-function plot_color_naming(AllData, single_plot, format_axes, save_plots)
+function [fig1, fig2] = plot_color_naming(AllData, single_plot, ...
+    format_axes, save_plots)
+% [fig1, fig2] = plot_color_naming(AllData, single_plot, ...
+%    format_axes, save_plots)
+%
 
 if nargin < 2
     single_plot = 0;
@@ -57,7 +61,7 @@ else
             for inten = 1:nintensities
                 intensity = intensities(inten);
                 intensity_trials = stim_intensities == intensity;
-                seen = sum(cone(intensity_trials) > 1);
+                seen = sum(cone(intensity_trials) > 0);
                 trials = sum(intensity_trials);
                 FoS_data(c, inten) = seen / trials;
             end
@@ -93,7 +97,7 @@ else
         
     end
     
-    fig = figure;
+    fig2 = figure;
     % plot uad diagram here for each cone
     for loc_index = 1:AllData.num_locations
         
@@ -127,7 +131,7 @@ else
     end                
     if save_plots
         savename = fullfile(videofolder, 'hue_scaling');
-        plots.save_fig(savename, fig, 1, 'eps');
+        plots.save_fig(savename, fig2, 1, 'eps');
     end   
 
 end
