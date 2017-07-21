@@ -29,21 +29,15 @@ function save_fig(save_name, fig, transparent, file_type)
     end
     if strcmp(file_type, 'svg')
         print(fig, save_name, '-dsvg', '-r300', '-painters')
+        
     elseif strcmp(file_type, 'pdf')
-        figpos = get(fig, 'pos');
-        figwidth = figpos(3);
-        figheight = figpos(4);
         fig.Renderer = 'Painters';
-        if figwidth > 610 || figheight > 750
-            % if the figure is larger than the size of a figure, use best
-            % fit to preserve the aspect ratio, while fitting on a single
-            % page.
-            print(fig, save_name, '-dpdf', '-bestfit');
-            
-        else
-            print(fig, save_name, '-dpdf');
+        set(fig,'Units', 'Inches');
+        pos = get(fig, 'Position');
+        set(fig, 'PaperPositionMode','Auto','PaperUnits',...
+            'Inches','PaperSize',[pos(3), pos(4)]);
+        print(fig, save_name, '-dpdf', '-r0', '-bestfit')        
 
-        end
     elseif strcmp(file_type, 'eps')
         print(fig, save_name, '-depsc')
     else

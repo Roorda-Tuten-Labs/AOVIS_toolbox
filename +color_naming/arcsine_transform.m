@@ -22,6 +22,6 @@ function hues = arcsine_transform(data, data_format)
     % number of hue scaling button presses
     total = sum(counts(1, :));
     % apply arcsine
-    hues = total .* ((2 .* (asin((counts ./ total) .^ 0.5))) ./ pi);
+    hues = total .* ((2 .* (asin(sqrt(counts ./ total)))) ./ pi);
 
 end

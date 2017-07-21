@@ -6,17 +6,17 @@
 % 41) to get a good match between ref.tif and mosaic.tif.
 clearvars;
 
-subject = '20076R';
+subject = '20053R';
 savedir = fullfile(fileparts(mfilename('fullpath')), ...
     'cone_identify', subject);
 
 % This accounts for differences in scale between the old and new systems
 % (i.e. 1.28 vs ~0.95 degree raster sizes). Set this to zero if cone
 % classing was done on same system as experiment.
-mosaic_scale_factor = 1.35/0.90;
+mosaic_scale_factor = 1.28/0.9;
 
 % load reference image
-ref = imread(fullfile(savedir, 'ref3.tif'));
+ref = imread(fullfile(savedir, 'ref.tif'));
 
 % % find cone in reference image
 % [xlocs, ylocs] = img.find_cones(7, ref);
@@ -39,17 +39,19 @@ mosaic_img = mosaic_img(4:end-3, 4:end-3, :);
 % convert to gray scale image for dtf registration
 mosaic_gray = sum(mosaic_img, 3); %rgb2gray(mosaic);
 % zero buffer to make the same size as ref
-mosaic_gray = img.zero_buffer(mosaic_gray, size(ref), [], mean(mosaic_gray(:)));
+mosaic_gray = img.zero_buffer(mosaic_gray, size(ref), [], ...
+    mean(mosaic_gray(:)));
 %figure; imshow(mosaic_gray, [0 255]);
 
 % find the relative offsets
 mosaic_offset = img.dftregistration(fft2(im2double(ref)), ...
-    fft2(im2double(mosaic_gray)), 1);
+    fft2(im2double(mosaic_gray)), 100);
 
 
 % zero buffer and apply offsets to mosaic
-mosaic_offset(3:4) = [-2, 55];
-mosaic_img = img.zero_buffer(mosaic_img, size(ref), [mosaic_offset(3), mosaic_offset(4)]);
+%mosaic_offset(3:4) = [-2, 55];
+mosaic_img = img.zero_buffer(mosaic_img, size(ref), ...
+    [mosaic_offset(3), mosaic_offset(4)]);
 
 %
 f = figure; 
@@ -61,7 +63,7 @@ center = floor(size(ref) ./ 2);
 colors = {'b' 'g' 'r'};
 
 % load cone locations
-cones = cone_mosaic.load_locs('20076R');
+cones = cone_mosaic.load_locs(subject);
 
 % scale based on raster size change
 cones(:, 1:2) = cones(:, 1:2) .* mosaic_scale_factor;
@@ -71,8 +73,9 @@ cones(:, 2) = max(cones(:, 2)) - cones(:, 2);
 new_cone_coords = zeros(size(cones));
 for c = 1:size(cones, 1)
     cone = cones(c, :);
-    coneloc = [cone(1) + mosaic_offset(4) + center(1) - (max(cones(:, 1) / 2)) - 3,...
-        cone(2) + mosaic_offset(3) + center(2) - (max(cones(:, 2) / 2))];
+    coneloc = [cone(1) + mosaic_offset(4) + center(1) - ...
+        (max(cones(:, 1) / 2)) + 19,...
+        cone(2) + mosaic_offset(3) + center(2) - (max(cones(:, 2) / 2))-20];
     
     plot(coneloc(1), coneloc(2), ...
         '.', 'color', colors{cone(3)}, 'markersize', 16);
