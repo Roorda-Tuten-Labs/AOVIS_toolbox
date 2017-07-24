@@ -1,5 +1,5 @@
 function add_delivery_error(subject, datapaths, pix_per_degree, ...
-    cross_size_pix, xcorr_thresh, overwrite)
+    cross_size_pix, xcorr_thresh, overwrite_raw, overwrite_summary)
     % add delivery error to existing color naming data files
     %
     % USAGE
@@ -39,7 +39,10 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
         xcorr_thresh = 0.6;
     end
     if nargin < 6
-        overwrite = 0;
+        overwrite_raw = 0;
+    end
+    if nargin < 7
+        overwrite_summary = 0;
     end
     
     subject = strsplit(subject, '/');
@@ -68,7 +71,7 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
 
     % check if parfor loop should be run
     run_parfor_loop = 0;
-    if overwrite
+    if overwrite_raw
         run_parfor_loop = 1;
     else
         for d = 1:ndirs
@@ -83,11 +86,8 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
                 exp_data = exp_data.exp_data;
 
                 % check if file already has delivery analysis
-                if ~isfield(exp_data, 'delivery_error_raw')% || overwrite == 1                
-                    run_parfor_loop = run_parfor_loop + 1;
-                end
-
-                if ~isfield(exp_data, 'delivery_error') || overwrite == 1
+                if ~isfield(exp_data, 'delivery_error_raw') || ...
+                        overwrite_raw == 1                
                     run_parfor_loop = run_parfor_loop + 1;
                 end
             end
@@ -114,7 +114,8 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
 
                 savedata = 0;
                 % check if file already has delivery analysis
-                if ~isfield(exp_data, 'delivery_error_raw') || overwrite == 1
+                if ~isfield(exp_data, 'delivery_error_raw') || ...
+                        overwrite_raw == 1
 
                     % find the delivery error (this is slow)
                     delivery_err = delivery.find_error(viddir, ...
@@ -124,13 +125,16 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
                     savedata = 1;
                 else
                     % read in delivery error from data.
-                    delivery_err = exp_data.delivery_error_raw;
+                    delivery_err = exp_data.delivery_error_raw;                    
                 end
 
-                if ~isfield(exp_data, 'delivery_error') || overwrite == 1
+                if ~isfield(exp_data, 'delivery_error') || ...
+                        overwrite_summary == 1
+                    % offsets that were selected in AOMcontrol
+                    offsets_xy = exp_data.offsets;
                     % summarize the delivery error for each video (trial)
                     summary = delivery.summarize_error(delivery_err, ...
-                        pix_per_degree);
+                        pix_per_degree, offsets_xy);
                     % add delivery error summary
                     exp_data.delivery_error = summary;
                     savedata = 1;
@@ -149,6 +153,47 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
         % shut down the parallel pool
         poolobj = gcp('nocreate');
         delete(poolobj);
+    else
+            % loop through every file in info
+        for d = 1:ndirs
+            for bkgd = bkgds
+                % full path and name to color naming data: in hue_scaling
+                % project directory
+                dname = fullfile('dat', subject_name, subject_subname, ...
+                    'raw', datapaths{d}.(bkgd{:}).data_file);
+
+                % load color naming data
+                exp_data = load(dname);
+                exp_data = exp_data.exp_data;
+
+                savedata = 0;
+                
+                % read in delivery error from data.
+                delivery_err = exp_data.delivery_error_raw;
+
+                if ~isfield(exp_data, 'delivery_error') || ...
+                        overwrite_summary == 1
+                    % offsets that were selected in AOMcontrol
+                    %offsets_xy = exp_data.offsets;
+                    % summarize the delivery error for each video (trial)
+                    summary = delivery.summarize_error(delivery_err, ...
+                        pix_per_degree); %, offsets_xy);
+                    % add delivery error summary
+                    exp_data.delivery_error = summary;
+                    savedata = 1;
+                end
+
+                if savedata
+                    % if saving need to store the name and data file in a
+                    % struct for saving later. parfor loop can not contain 
+                    % a call to save().
+                    dfiles(d).(bkgd{:}).name = dname;
+                    dfiles(d).(bkgd{:}).data = exp_data;
+
+                end                
+            end
+        end
+
     end
 
     if exist('dfiles', 'var')

@@ -48,7 +48,8 @@ if strcmp(data.subject, 'model')
     end
 
 % get real mosaic file!
-elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076')
+elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076') || ...
+    strcmp(data.subject, '20053')
 
     % get the cones from a subject
     cones = cone_mosaic.load_locs(data.subject);

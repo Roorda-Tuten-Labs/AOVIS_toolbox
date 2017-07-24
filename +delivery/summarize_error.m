@@ -1,4 +1,5 @@
-function summary = summarize_error(delivery_err, pix_per_degree)
+function summary = summarize_error(delivery_err, pix_per_degree)%, ...
+    %trial_offsets)
 % summarize delivery error over each trial
 % 
 % USAGE
@@ -15,6 +16,11 @@ function summary = summarize_error(delivery_err, pix_per_degree)
 %                   organized as follows: [x mean, x std, y mean, y std].
 %                   All values are returned in arcmins
 %
+
+% if nargin < 3
+%     trial_offsets = [];
+% end
+
 trials = unique(delivery_err(:, 1));
 ntrials = length(trials);
 
@@ -31,9 +37,15 @@ for t = 1:ntrials
     summary(t, 5) = std(trial_data(:, 4)); % Y
     
     % convert to polar.
+    %if isempty(trial_offsets)
     [~, radius] = cart2pol(trial_data(:, 3) - summary(t, 2), ...
         trial_data(:, 4) - summary(t, 4));
-
+    %else
+    %    trial_xy = trial_offsets(trial, :);
+    %    [~, radius] = cart2pol(trial_data(:, 3) - trial_xy(1), ...
+    %        trial_data(:, 4) - trial_xy(2));
+    %end
+    
     % find the mean distance
     summary(t, 6) = mean(radius);
 

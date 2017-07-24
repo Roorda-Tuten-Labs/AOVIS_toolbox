@@ -10,7 +10,7 @@ if ~isfield(data, 'subject')
     disp(['setting data.subject to ' data.subject]);
 end
 % --- get list of stimulated cones
-if ~isfield(data, 'stim_cone_IDs')
+if ~isfield(data, 'center_cone_index')
     % random index to use. only relevant if subject is a real person (not a
     % model mosaic).
     data.center_cone_index = 300;
