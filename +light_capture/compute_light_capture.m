@@ -21,7 +21,8 @@ function [per_trial_int, per_cone_int] = compute_light_capture(retina_image, ...
         % place stimulus image at stimulus location (can be jittered)
         for j = 1:ncones
             blank_im(delivery_y(n) - halfwidth:delivery_y(n) + halfwidth, ...
-                delivery_x(n) - halfwidth:delivery_x(n) + halfwidth, j) = retina_image;
+                delivery_x(n) - halfwidth:delivery_x(n) + halfwidth, j) = ...
+                retina_image;
         end
         % image depicting light captured during this frame/trial
         light_int_trial = blank_im(:, :, 1) .* model_im; 

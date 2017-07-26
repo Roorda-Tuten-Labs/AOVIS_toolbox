@@ -39,10 +39,12 @@ end
 [xloc, yloc] = light_capture.gen_delivery_locations(xi(1), yi(1), ...
     data);
 
-[~, stim_image] = light_capture.compute_light_capture(data.retina_image, ...
-    xloc, yloc, model_im_layers, model_im, data.halfwidth);
+[per_trial_int, per_cone_int] = light_capture.compute_light_capture(...
+    data.retina_image, xloc, yloc, model_im_layers, model_im, ...
+    data.halfwidth);
 
 % N simulations (or deliveries/frames), cone of interest + 20 nearest 
 % neighbors.
-data.per_cone_int = stim_image;    
+data.per_cone_int = per_cone_int;    
+data.per_trial_int = per_trial_int;
 
