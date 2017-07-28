@@ -47,7 +47,7 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
         stats = regstats(y, x, 'linear', ...
             {'rsquare' 'fstat' 'tstat' 'beta' 'yhat' 'r'});
     end
-    
+    multiple_reg = 0;
     % compute corr coeff: need to retain sign of R.
     if size(x, 1) == 1 || size(x, 2) == 1
         [r, pval] = corr([x y], 'type', corr_type); 
@@ -58,7 +58,9 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
     else
         % when running multiple regression (sign doesnt matter b/c not
         % plotting).
+        multiple_reg = 1;
         r = sqrt(stats.rsquare);
+        stats.pval = stats.fstat.pval;
     end
        
     % print out results
@@ -114,6 +116,14 @@ function stats = corr_regress(x, y, add_plot, disp_name, print_results, ...
         end
         % also print p-val for spearman or multiple-regression
         pprint(stats.pval, 5, 'pval:');
+        
+        if multiple_reg
+            disp(' ');
+            disp('-- posthoc T-Tests --');
+            pprint(stats.tstat.t, 3, 't-val(s):');
+            pprint(stats.tstat.se, 3, 'se(s):');
+            pprint(stats.tstat.pval, 3, 'p-val(s):');            
+        end
 
         disp(' ');        
     end

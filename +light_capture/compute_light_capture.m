@@ -28,7 +28,8 @@ function [per_trial_int, per_cone_int] = compute_light_capture(retina_image, ...
         light_int_trial = blank_im(:, :, 1) .* model_im; 
 
         % proportion of light captured by entire model cone array
-        current_per_trial_int = sum(light_int_trial(:)) / sum_retina_image;
+        sum_light_int_trial = sum(light_int_trial(:));
+        current_per_trial_int = sum_light_int_trial / sum_retina_image;
         per_trial_int(n) = current_per_trial_int;
         
         % calculate per cone light capture for each cross location
@@ -36,7 +37,7 @@ function [per_trial_int, per_cone_int] = compute_light_capture(retina_image, ...
         light_int_cone = blank_im .* model_im_layers; 
 
         % proportion of light captured by this particular cone
-        per_cone_int(n, :) = (sum(sum(light_int_cone, 1), 2) ./ ...
-            sum_retina_image) ./ current_per_trial_int;
+        per_cone_int(n, :) = sum(sum(light_int_cone, 1), 2) ./ ...
+            sum_light_int_trial;
 
     end

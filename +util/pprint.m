@@ -1,4 +1,9 @@
 function pprint(number, sig_digit, text)
+% pretty print - display numbers to a specified sig digit along with text
+% describing the result. output is text displayed in the command window.
+%
+% USAGE
+% pprint(number, sig_digit, text)
 
 if nargin < 3
     text = '';
@@ -9,10 +14,16 @@ end
 
 % first format the string
 
-if sig_digit == -1 % don't round in this case
-    string = sprintf([text '\t' '%g'], number);
+if numel(number) == 1
+    text_val = [text '\t' '%g'];
 else
-    string = sprintf([text '\t' '%g'], round(number, sig_digit));
+    text_val = [text '\t' '%g' '\n'];
+end
+
+if sig_digit == -1 % don't round in this case
+    string = sprintf(text_val, number);
+else
+    string = sprintf(text_val, round(number, sig_digit));
 end
 
 % now print

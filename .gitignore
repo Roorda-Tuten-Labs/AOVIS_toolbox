@@ -1,2 +1,3 @@
 *~
 *.asv
+unittests/dat/blood_vessel/*.tif
