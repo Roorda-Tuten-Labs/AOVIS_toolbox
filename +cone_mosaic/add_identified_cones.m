@@ -1,14 +1,20 @@
-clearvars;
-
-subject = '20092L';
-find_ncones = 8;
+function add_identified_cones(subject, find_ncones)
+%
+% USAGE
+% add_identify_cones(subject, find_ncones)
+if nargin < 1    
+    subject = input('what is the subject ID');
+end
+if nargin < 2
+    find_ncones = input('how many cones would you like to add?');
+end
 
 if exist(fullfile('cone_identify', subject, ...
         'cone_coord_ref_img_space.mat'), 'file');
     % will load a variable called new_cone_coords
     load('cone_coord_ref_img_space.mat');
 
-    ncones = size(new_cone_coords, 2);
+    ncones = size(new_cone_coords, 2); %#ok!
     for i = 1:ncones
         cone = new_cone_coords(i, :);
         plot(cone(1), cone(2), ...
@@ -45,7 +51,7 @@ while coneN <= find_ncones
         
     elseif button == 1 % left button click
         % find selected cone from identified cones
-        [nn, d] = knnsearch(cones, new_cone, 'K', 1);
+        [nn, ~] = knnsearch(cones, new_cone, 'K', 1);
         ind = nn(:, 1);
         
         % check that the cone doesn't already exist
@@ -68,7 +74,9 @@ while coneN <= find_ncones
 end
 
 % since we don't know the cone types, call them all L-cones.
-new_cone_coords = [loc(:, 1:2) ones(length(loc(:, 1)), 1) * 3];
+cone_coords = [loc(:, 1:2) ones(length(loc(:, 1)), 1) * 3];
+% add to existing new_cone_coords;
+new_cone_coords = [new_cone_coords; cone_coords];
 
 save(fullfile('cone_identify', subject, 'cone_coord_ref_img_space.mat'), ...
     'new_cone_coords');
