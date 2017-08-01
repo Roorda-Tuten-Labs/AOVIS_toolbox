@@ -4,10 +4,10 @@ function [fig1, fig2] = plot_color_naming(AllData, single_plot, ...
 %    format_axes, save_plots)
 %
 
-if nargin < 2
+if nargin < 2 || isempty(single_plot)
     single_plot = 0;
 end
-if nargin < 3
+if nargin < 3 || isempty(format_axes)
     format_axes = 1;
 end
 if nargin < 4
