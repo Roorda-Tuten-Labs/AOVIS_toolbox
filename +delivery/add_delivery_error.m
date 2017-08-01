@@ -131,10 +131,10 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
                 if ~isfield(exp_data, 'delivery_error') || ...
                         overwrite_summary == 1
                     % offsets that were selected in AOMcontrol
-                    offsets_xy = exp_data.offsets;
+                    %offsets_xy = exp_data.offsets;
                     % summarize the delivery error for each video (trial)
                     summary = delivery.summarize_error(delivery_err, ...
-                        pix_per_degree, offsets_xy);
+                        pix_per_degree); %, offsets_xy);
                     % add delivery error summary
                     exp_data.delivery_error = summary;
                     savedata = 1;
