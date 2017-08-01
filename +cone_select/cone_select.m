@@ -43,16 +43,20 @@ end
 max_ROI_width  = 64 * 0.75;
 max_ROI_height = 32 * 0.75;
 
-% use TCA offsets to find location of interest on retina
-tca_x = 0; %tca_offsets(1,1);
-tca_y = 0; %tca_offsets(1,2);
+% use TCA offsets when finding location of interest on retina
+% we are applying TCA opposite to the way necessary to correct for it. in
+% effect we are undoing the effects of TCA so that we always be selecting
+% cones that are in the center of the raster. otherwise, the TCA offsets
+% could push the targeted cones towards the edges if it is large.
+tca_x = tca_offsets(1, 1);
+tca_y = tca_offsets(1, 2);
 
-ROI = [(X_cross_loc + tca_x - max_ROI_width/2), ...
-       (Y_cross_loc + tca_y - max_ROI_height/2),...
+ROI = [(X_cross_loc - tca_x - max_ROI_width / 2), ...
+       (Y_cross_loc - tca_y - max_ROI_height / 2), ...
        max_ROI_width, max_ROI_height];
 
-ROI_search = [(X_cross_loc + tca_x - 3 * max_ROI_width / 2), ...
-       (Y_cross_loc + tca_y - 3 * max_ROI_height / 2),...
+ROI_search = [(X_cross_loc - tca_x - 3 * max_ROI_width / 2), ...
+       (Y_cross_loc - tca_y - 3 * max_ROI_height / 2), ...
        3 * max_ROI_width, 3 * max_ROI_height];
 
 % cut the image down to speed up search   
