@@ -9,12 +9,20 @@ if nargin < 2
     find_ncones = input('how many cones would you like to add?');
 end
 
+
+im = imread(fullfile('cone_identify', subject, 'ref.tif'));
+im = im(:, :, 1);
+[cones_x, cones_y] = img.find_cones(7, im, 'auto', 0.55, 1);
+cones = [cones_x, cones_y];
+    
 if exist(fullfile('cone_identify', subject, ...
         'cone_coord_ref_img_space.mat'), 'file');
     % will load a variable called new_cone_coords
-    load('cone_coord_ref_img_space.mat');
+    load(fullfile('cone_identify', subject, ...
+        'cone_coord_ref_img_space.mat'));
 
-    ncones = size(new_cone_coords, 2); %#ok!
+    ncones = size(new_cone_coords, 1); %#ok!
+    hold on;
     for i = 1:ncones
         cone = new_cone_coords(i, :);
         plot(cone(1), cone(2), ...
@@ -22,10 +30,6 @@ if exist(fullfile('cone_identify', subject, ...
     end
 
 else
-    im = imread(fullfile('cone_identify', subject, 'ref.tif'));
-    im = im(:, :, 1);
-    [cones_x, cones_y] = img.find_cones(9, im, 'auto', 0.6, 1);
-    cones = [cones_x, cones_y];
     new_cone_coords = [];
 end
 
