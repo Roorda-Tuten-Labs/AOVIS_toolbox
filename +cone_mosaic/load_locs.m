@@ -45,6 +45,13 @@ function mosaic = load_locs(subject)
 
         mosaic(:, 1:2) = rot90(mosaic(:, 1:2))';
         mosaic(:, 2) = max(mosaic(:, 2)) - mosaic(:, 2);
+        
+    elseif strcmpi(subject(1:5), '20092')
+        subj = '20092L';
+        basedir = fullfile(fileparts(mfilename('fullpath')), 'dat', subj);
+        dat = load(fullfile(basedir, 'LMS_cones.mat'));
+        mosaic = dat.LMS_cones;        
+        
     else                
         error('Only mosaics currently available are 20076 and 20053')
     end
