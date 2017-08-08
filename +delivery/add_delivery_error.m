@@ -53,8 +53,14 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
         subject_subname = '';
     end
     % base directory for videos    
-    base_dir = fullfile(filesep, 'Volumes', 'lyle', 'Video_Files', ...
-        subject_name);
+    if ismac
+        base_dir = fullfile(filesep, 'Volumes', 'lyle', 'Video_Files', ...
+            subject_name);
+    elseif ~ismac && isunix
+        base_dir = fullfile(filesep, 'media', 'brian', 'lyle', ...
+            'Video_Files', subject_name);
+    end
+    
     
     % get the info about each directory  
     ndirs = length(datapaths);
@@ -97,7 +103,7 @@ function add_delivery_error(subject, datapaths, pix_per_degree, ...
     % only run the for loop if there is new data to be analyzed.
     if run_parfor_loop > 0
         % loop through every file in info
-        parfor d = 1:ndirs
+        for d = 1:ndirs
             for bkgd = bkgds
                 % full path and name to color naming data: in hue_scaling
                 % project directory

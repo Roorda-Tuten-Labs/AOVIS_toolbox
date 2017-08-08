@@ -1,6 +1,6 @@
 function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
     cross_size_pix, xcorr_threshold, print_output, return_mean_only, ...
-    cross_channel)
+    cross_channel, show_error_dlg)
 % Find cross in a video
 %
 % USAGE
@@ -21,6 +21,8 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 %                   of interest. this will be used below to binarize the 
 %                   image and improve the detection algorithm. Default =
 %                   ir.
+% show_error_dlg:   choose to show an error dialogue box with information
+%                   for the user or not.
 %
 % OUTPUT
 % X_cross_loc:      location of cross in X. If return_mean_only==0, this
@@ -48,6 +50,9 @@ if nargin < 5
 end
 if nargin < 6
     cross_channel = 'ir';
+end
+if nargin < 7
+    show_error_dlg = 1;
 end
 
 % select channel with ir cross and set appropriate cross_pixel_val
@@ -130,8 +135,10 @@ if exist('X', 'var') && exist('Y', 'var')
             % case where cross was found, but the STD was too high.
             X_cross_loc = nan;
             Y_cross_loc = nan;
-            frames_w_cross = nan;            
-            errordlg('IR cross not reliable', 'Record another movie.');
+            frames_w_cross = nan;          
+            if show_error_dlg
+                errordlg('IR cross not reliable', 'Record another movie.');
+            end
         end
 
     else
@@ -144,7 +151,9 @@ else
     X_cross_loc = nan;
     Y_cross_loc = nan;
     frames_w_cross = nan;
-    errordlg('IR cross not found', 'Record another movie.');
+    if show_error_dlg
+        errordlg('IR cross not found', 'Record another movie.');
+    end
 end
 
 
