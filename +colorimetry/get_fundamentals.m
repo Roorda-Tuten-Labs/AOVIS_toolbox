@@ -142,7 +142,7 @@ end
 
 function [lms, wavelengths] = konig_fundamentals(resolution, min_max_wvlen)
 % Get CMFs
-    [CMFs, wavelengths] = get_CMFs('CIE1931', resolution, min_max_wvlen);
+    [CMFs, wavelengths] = colorimetry.get_CMFs('CIE1931', resolution, min_max_wvlen);
 
     % From Wyszechki & Stiles pg 606
     M = [0.0713 0.9625 -0.0147;

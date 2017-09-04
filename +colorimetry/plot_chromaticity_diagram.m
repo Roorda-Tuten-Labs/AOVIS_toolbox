@@ -6,16 +6,16 @@ fundamentals = 'konig';
 if strcmp(fundamentals, 'stockman')
     cones = csvread('dat/stockman2deg.csv');
     lms = cones(:, 2:4);
-    spectrum = cones(:, 1);
+    wvlens = cones(:, 1);
     
 elseif strcmp(fundamentals, 'smith-pokorny')
     tmp_cie = csvread('dat/ciexyzjv.csv');
     % need to upsample with spline
-    spectrum = min(tmp_cie(:, 1)):1:max(tmp_cie(:, 1));
-    xyz = zeros(length(spectrum), 3);
+    wvlens = min(tmp_cie(:, 1)):1:max(tmp_cie(:, 1));
+    xyz = zeros(length(wvlens), 3);
     for i = 1:3
         cs = spline(tmp_cie(:, 1), tmp_cie(:, i+1));
-        xyz(:, i) = ppval(cs, spectrum);
+        xyz(:, i) = ppval(cs, wvlens);
     end
     lms = xyz2lms(xyz')';
     %lms(:, 1) = lms(:, 1) ./ max(lms(:, 1));
@@ -23,10 +23,9 @@ elseif strcmp(fundamentals, 'smith-pokorny')
     %lms(:, 3) = lms(:, 3) ./ max(lms(:, 3));
 
 elseif strcmp(fundamentals, 'konig')
-    [lms, spectrum] = konig_fundamentals();
-    lms = lms';
+    [lms, wvlens] = colorimetry.get_fundamentals('konig', 1, [390 max_wv]);
 end
-max_ind = find(spectrum == max_wv);
+max_ind = find(wvlens == max_wv);
 lms = lms(1:max_ind, :);
 
 %Based off of Stockman cone spectral sensitivities and luminious efficiency function.
@@ -34,14 +33,14 @@ lms = lms(1:max_ind, :);
 %lms = lms';
 
 % Get primaries
-primaries = get_norm_primaries(primaries);
+primaries = colorimetry.get_norm_primaries(primaries);
 primary_spectrum = primaries(:, 1);
 max_ind = find(primary_spectrum == max_wv);
 primaries = primaries(1:max_ind, 2:4);
 
 % Find MB chromaticity of primaries
 min_wv = min(primary_spectrum);
-min_ind = find(spectrum == min_wv);
+min_ind = find(wvlens == min_wv);
 lms = lms(min_ind:end, :); 
 
 primary_lms = primaries' * lms;
@@ -59,7 +58,7 @@ elseif strcmp(fundamentals, 'smith-pokorny')
 end
 
 % Find chromaticity of background leak
-bkgd_stim = csvread('dat/Roorda_lab_AO_stim_leak.csv');
+bkgd_stim = csvread('dat/primaries/Roorda_lab_AO_stim_leak.csv');
 bkgd_stim = bkgd_stim(1:max_ind, 2);
 bkgd_lms = bkgd_stim' * lms;
 
@@ -84,9 +83,9 @@ end
 %[EE_mb, ~] = LMS2MacBoyn(EE_lms');
 
 % Find the locations of the unique hues
-u_g_ind = find(spectrum == 520);
-u_y_ind = find(spectrum == 578);
-u_b_ind = find(spectrum == 474);
+u_g_ind = find(wvlens == 520);
+u_y_ind = find(wvlens == 578);
+u_b_ind = find(wvlens == 474);
 
 u_g = mb(:, u_g_ind);
 u_b = mb(:, u_b_ind);

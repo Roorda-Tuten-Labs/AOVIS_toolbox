@@ -1,7 +1,10 @@
 function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
-    rect_position, rect_position_old)
+    rect_position, rect_position_old, cone_pairs_flag)
     %
     %                                                  
+    if nargin < 4
+        cone_pairs_flag = 0;
+    end
     
     Redo = 1;
     while Redo
@@ -64,5 +67,12 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
         end
         
     end
+
+    if cone_pairs_flag
+        % if this flag was true, also find the centers of 
+        
+    end
+    
+end
 
         

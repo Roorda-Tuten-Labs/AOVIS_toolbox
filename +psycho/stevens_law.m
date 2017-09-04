@@ -11,7 +11,8 @@ if ~isstruct(params)
         p.x0 = params(2);
         p.n = params(3);
     else
-        raise('params must be a struct with fields k, x0 and n or a 3x1 vector');
+        raise(['params must be a struct with fields k, x0 and'...
+            ' n or a 3x1 vector']);
     end
 else
     p = params;
