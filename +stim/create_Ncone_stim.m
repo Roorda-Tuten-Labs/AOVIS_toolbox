@@ -1,5 +1,5 @@
 function create_Ncone_stim(locs_xy, max_locs_xy, intensity, stimsize, ...
-    first_frameN)
+    first_frameN, extension)
 % create_Ncone_stim(locs_xy, max_locs_xy, intensity, stimsize, ...
 %    first_frameN)
 %
@@ -7,6 +7,9 @@ function create_Ncone_stim(locs_xy, max_locs_xy, intensity, stimsize, ...
 
 if nargin < 5
     first_frameN = 4;
+end
+if nargin < 6
+    extension = 'buf';
 end
 
 % force spot size to be odd.
@@ -38,4 +41,10 @@ stimulus = flipud(rot90(stimulus));
 % save images
 savedir = fullfile(pwd, 'tempStimulus');
 util.check_for_dir(savedir);
-imwrite(stimulus, fullfile(savedir, ['frame' num2str(first_frameN) '.bmp']));
+if strcmpi(extension, 'bmp')
+    imwrite(stimulus, fullfile(savedir, ['frame' num2str(first_frameN) ...
+        '.bmp']));
+elseif strcmpi(extension, 'buf')
+    stim.write_to_buf_file(stimulus, first_frameN, savedir, ...
+        'frame')
+end
