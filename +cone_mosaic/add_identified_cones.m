@@ -16,7 +16,7 @@ im = im(:, :, 1);
 cones = [cones_x, cones_y];
     
 if exist(fullfile('cone_identify', subject, ...
-        'cone_coord_ref_img_space.mat'), 'file');
+        'cone_coord_ref_img_space.mat'), 'file')
     % will load a variable called new_cone_coords
     load(fullfile('cone_identify', subject, ...
         'cone_coord_ref_img_space.mat'));
