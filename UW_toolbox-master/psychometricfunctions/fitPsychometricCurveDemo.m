@@ -26,7 +26,7 @@ load resultsStaircase.mat % 'results' structure
 % of the stimuli intensity level. We can do so by calling 'plotPsycho' on
 % the 'results' structure.
 
-h=plotPsycho(results, [], [], logFlag, pS);
+plotPsycho(results, funName, [], logFlag, pS);
 xlabel('Stimuli Intensity Levels');
 title('Results');
 
@@ -60,7 +60,7 @@ title(sprintf('Initial %s Fit\nb = %5.4f, t = %5.4f\nError = %5.4f', ...
 % fitting. We'll call fit with the initial parameters as seeds
 
 freeList = {'b', 't'}; % free parameters, allowed to vary when fitting
-[pFit,fitErr] = fit('fitPsychometricFunction', pInit, freeList, results, funName);
+[pFit,fitErr] = fit_fmin('fitPsychometricFunction', pInit, freeList, results, funName);
 
 % We can see how well the fitted parameters look with our data
 plotPsycho(results, funName, pFit, logFlag, pS);

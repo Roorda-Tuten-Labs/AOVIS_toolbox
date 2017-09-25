@@ -13,8 +13,8 @@ size_cropped = size(x_crop);
 
 % change coordiantes
 old_coordinates_row_col(:,2) = x_crop(sub2ind(size_cropped,...
-    new_coordinates(:,1),new_coordinates(:,2)));
+    new_coordinates(:,1), new_coordinates(:,2)));
 old_coordinates_row_col(:,1) = y_crop(sub2ind(size_cropped,...
-    new_coordinates(:,1),new_coordinates(:,2)));
+    new_coordinates(:,1), new_coordinates(:,2)));
 
 old_coordinates_x_y =  fliplr(old_coordinates_row_col);

@@ -15,7 +15,20 @@ if nargin < 4
 end
 
 %%%%%%%% Plot the output %%%%%%%%%%%
-temp = [AllData.coneids, AllData.intensities, AllData.answer];
+if isfield(AllData, 'coneids')
+    temp = AllData.coneids;
+    ncones = length(unique(AllData.coneids));
+    loc_ids = AllData.coneids;    
+    pairs_flag = 0;
+    
+elseif isfield(AllData, 'location_ids')
+    temp = AllData.combination_id;
+    ncones = length(unique(AllData.combination_id));
+    loc_ids = AllData.combination_id;
+    pairs_flag = 1;
+end
+    
+temp = [temp, AllData.intensities, AllData.answer];
 
 % video folder where plots will be saved. first 14 chars are "Video Folder:"
 videofolder = AllData.videofolder(15:end);
@@ -23,7 +36,7 @@ videofolder = AllData.videofolder(15:end);
 % sort rows so that organized by cone ID. (i.e. cone#1, cone#2 ...);
 sortrows(temp,1);
 
-ntrials = size(AllData.answer, 1) / AllData.num_locations;
+ntrials = AllData.ntrials;% size(AllData.answer, 1) / AllData.num_locations;
 % need to add not seen category
 cnames = {'n.s.', AllData.cnames{:}};
 if AllData.Nscale == 1
@@ -47,17 +60,16 @@ if AllData.Nscale == 1
     end
 else
     
-    intensities = unique(AllData.intensities);
+    intensities = unique(AllData.intensities);    
     nintensities = length(intensities);
-    ncones = length(unique(AllData.coneids));
-    if nintensities > 1     
+    if sum(intensities > 0) > 2     
         fig1 = figure;
         clf;
         hold on;
         FoS_data = zeros(ncones, nintensities);
         for c = 1:ncones
-            cone = AllData.brightness_rating(AllData.coneids == c);
-            stim_intensities = AllData.intensities(AllData.coneids == c);
+            cone = AllData.brightness_rating(loc_ids == c);
+            stim_intensities = AllData.intensities(loc_ids == c);
             for inten = 1:nintensities
                 intensity = intensities(inten);
                 intensity_trials = stim_intensities == intensity;
@@ -99,7 +111,12 @@ else
     
     fig2 = figure;
     % plot uad diagram here for each cone
-    for loc_index = 1:AllData.num_locations
+    if pairs_flag
+        nlocations = AllData.num_locations * 2;
+    else
+        nlocations = AllData.num_locations;
+    end
+    for loc_index = 1:nlocations
         
         % select out individual cone's data
         cone = temp(temp(:, 1) == loc_index, 3:end);
@@ -112,7 +129,7 @@ else
         else
             
             % set the subplot
-            subplot(ceil(AllData.num_locations / 3), 3, loc_index); 
+            subplot(ceil(ncones / 3), 3, loc_index); 
             
             % compute the frequency of seeing or use threshold from above
             if exist('thresholds', 'var')
