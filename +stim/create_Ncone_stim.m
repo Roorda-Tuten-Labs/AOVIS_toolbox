@@ -1,12 +1,12 @@
 function create_Ncone_stim(locs_xy, max_locs_xy, intensity, stimsize, ...
-    first_frameN, extension)
+   frameN, extension)
 % create_Ncone_stim(locs_xy, max_locs_xy, intensity, stimsize, ...
-%    first_frameN)
+%    frameN)
 %
 %
 
 if nargin < 5
-    first_frameN = 4;
+    frameN = 4;
 end
 if nargin < 6
     extension = 'buf';
@@ -42,9 +42,9 @@ stimulus = flipud(rot90(stimulus));
 savedir = fullfile(pwd, 'tempStimulus');
 util.check_for_dir(savedir);
 if strcmpi(extension, 'bmp')
-    imwrite(stimulus, fullfile(savedir, ['frame' num2str(first_frameN) ...
+    imwrite(stimulus, fullfile(savedir, ['frame' num2str(frameN) ...
         '.bmp']));
 elseif strcmpi(extension, 'buf')
-    stim.write_to_buf_file(stimulus, first_frameN, savedir, ...
+    stim.write_to_buf_file(stimulus, frameN, savedir, ...
         'frame')
 end
