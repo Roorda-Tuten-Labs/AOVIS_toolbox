@@ -3,6 +3,9 @@ function [locs_relative_xy, max_size_xy] = compute_relative_xy(stimsize,...
     % [locs_relative_xy, max_size_xy] = compute_relative_xy(stimsize,...
     %    stim_offsets_xy)
     %
+    
+    %%% TODO: build in error function if stimulus offsets are larger than
+    %%% maximum permissible in AOVIS
 
     % halfwidth of stimulus:: Needs to be accounted for when placing the
     % stimulus in a relative space.

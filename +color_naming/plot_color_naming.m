@@ -120,6 +120,8 @@ else
         
         % select out individual cone's data
         cone = temp(temp(:, 1) == loc_index, 3:end);
+        
+        ntrials = size(cone, 1);
 
         % remove rows with all zeros
         cone = cone(any(cone, 2), :);
