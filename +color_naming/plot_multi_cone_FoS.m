@@ -6,7 +6,7 @@ FoS = zeros(length(IDs), 1);
 for id = 1:length(IDs)
     response = exp_data.answer(exp_data.combination_id == id);
     %intensities = exp_data.intensities(exp_data.combination_id == id);
-    FoS(id, 1) = sum(response) / length(response);
+    FoS(id, 1) = sum(response > 0) / length(response);
     FoS(id, 2) = sqrt(FoS(id, 1) * (1 - FoS(id, 1)) / length(response));
 end
 
