@@ -7,6 +7,8 @@ function save_fig(save_name, fig, transparent, file_type)
     if nargin < 4
         file_type = 'pdf';
     end
+    % sometimes the save goes too fast and other functions haven't finished
+    pause(0.25);
     
     % if an extension is provided at the end of save_name, save the file as
     % that type.
@@ -27,6 +29,10 @@ function save_fig(save_name, fig, transparent, file_type)
     if transparent
         set(gca, 'Color', 'none'); 
     end
+    
+    % ensure that the saved figure looks like the one on the plots
+    set(fig, 'PaperPositionMode', 'auto');
+    
     if strcmp(file_type, 'svg')
         print(fig, save_name, '-dsvg', '-r300', '-painters')
         
@@ -34,9 +40,10 @@ function save_fig(save_name, fig, transparent, file_type)
         fig.Renderer = 'Painters';
         set(fig,'Units', 'Inches');
         pos = get(fig, 'Position');
-        set(fig, 'PaperPositionMode','Auto','PaperUnits',...
-            'Inches','PaperSize',[pos(3), pos(4)]);
-        print(fig, save_name, '-dpdf', '-r0', '-bestfit')        
+        pos(3) = pos(3) * 1.1;
+        pos(4) = pos(4) * 1.1;
+        set(fig,'PaperUnits', 'Inches', 'PaperSize',[pos(3), pos(4)]);
+        print(fig, save_name, '-dpdf', '-r0');%, '-fillpage')        
 
     elseif strcmp(file_type, 'eps')
         print(fig, save_name, '-depsc')

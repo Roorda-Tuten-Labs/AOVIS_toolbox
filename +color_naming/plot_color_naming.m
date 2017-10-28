@@ -37,6 +37,7 @@ videofolder = AllData.videofolder(15:end);
 sortrows(temp,1);
 
 ntrials = AllData.ntrials;% size(AllData.answer, 1) / AllData.num_locations;
+
 % need to add not seen category
 cnames = {'n.s.', AllData.cnames{:}};
 if AllData.Nscale == 1
@@ -94,14 +95,17 @@ else
             results.response = coneFoS;
             pInit.b = 0.1;
             pInit.t = 0.5;        
-            pBest = stats.fit_psychometric_func(results, pInit, 'k');
+            pBest = stats.fit_psychometric_func(results, pInit, 'k', [], ...
+                [], 'weibull');
             
             text(pBest.t, 0.5, num2str(c), 'FontSize', 16);
 
             thresholds(c) = pBest.t;
         end
+        
         plots.nice_axes('stimulus intensity (a.u.)', ...
-            'frequency of seeing', 20, [], 0);
+            'frequency of seeing', 14, [], 1);
+        
         if save_plots
             savename = fullfile(videofolder, 'FoS_plot');
             plots.save_fig(savename, fig1, 1, 'eps');
@@ -116,6 +120,10 @@ else
     else
         nlocations = AllData.num_locations;
     end
+    
+    if single_plot
+        plots.format_uad_axes(1, 1, '', 12);
+    end    
     for loc_index = 1:nlocations
         
         % select out individual cone's data
@@ -143,15 +151,20 @@ else
                 title_text = ['#', num2str(loc_index) '; FoS: ' ...
                     num2str(FoS)];
             end
+            plots.format_uad_axes(1, 1, title_text, 12);
             
         end
         
         % plot response data for cone on Uniform Appearance Diagram
-        plots.plot_uad(cone, title_text, 10, 12, format_axes);     
-    end                
+        plots.plot_uad(cone, title_text, 8, 12, 0);     
+    end 
+
     if save_plots
         savename = fullfile(videofolder, 'hue_scaling');
-        plots.save_fig(savename, fig2, 1, 'eps');
+        plots.save_fig(savename, fig2, 1, 'pdf');
     end   
+    if nargout == 2 && ~exist('fig1', 'var')
+        fig1 = [];
+    end
 
 end
