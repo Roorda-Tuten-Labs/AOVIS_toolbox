@@ -20,6 +20,6 @@ function make_combined_pdf(directory, save_name)
     end
     util.append_pdfs(save_name, filenames{:});
 
-    open(save_name);
+    %open(save_name);
     
 end

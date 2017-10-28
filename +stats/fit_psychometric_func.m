@@ -9,10 +9,10 @@ function [pBest, logLikelihoodBest] = fit_psychometric_func(results, ...
     if nargin < 3
         color = 'k';
     end
-    if nargin < 4
+    if nargin < 4 || isempty(print_log_like)
         add_to_plot = 1;
     end
-    if nargin < 5
+    if nargin < 5 || isempty(print_log_like)
         print_log_like = 1;
     end
     if nargin < 6
@@ -27,7 +27,7 @@ function [pBest, logLikelihoodBest] = fit_psychometric_func(results, ...
         pInit.g = 0.03;
         pInit.e = 0.5;
         pInit.b = 4;
-        pInit.t = 0.4;
+        pInit.t = 0.3;
        [pBest, logLikelihoodBest] = fit_fmin('fitPsychometricFunction',...
             pInit, {'b','t'}, results, 'weibull');        
     end

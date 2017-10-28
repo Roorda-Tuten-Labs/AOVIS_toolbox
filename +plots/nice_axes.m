@@ -2,7 +2,7 @@ function nice_axes(xlabelname, ylabelname, fontsize, ticksize, offsetaxes)
     % nice_axes(xlabelname, ylabelname, fontsize, ticksize, offsetaxes)
     % 
     if nargin < 3 || isempty(fontsize)
-        fontsize = 20;
+        fontsize = 14;
     end
     if nargin < 4 || isempty(ticksize)
         ticksize = 0.025;
@@ -26,7 +26,7 @@ function nice_axes(xlabelname, ylabelname, fontsize, ticksize, offsetaxes)
     end
     
     set(gca, 'FontSize', fontsize, 'TickLength', [ticksize ticksize], ...
-        'tickdir', 'out', 'xcolor', [0 0 0], 'ycolor', [0 0 0], 'linewidth', 2);
+        'tickdir', 'out', 'xcolor', [0 0 0], 'ycolor', [0 0 0], 'linewidth', 1.25);
     box off
 
     %whitebg(f, 'k');
