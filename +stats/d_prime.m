@@ -1,17 +1,20 @@
-function dprime = d_prime(x, y)
+function dprime = d_prime(x, y, Nresample)
     % dprime = d_prime(x, y)
     %
-    % d' analysis
+    % d' analysis on two distributions.
     %
     % INPUT
-    % x:    distribution 1
-    % y:    distribution 2
+    % x:            distribution 1
+    % y:            distribution 2
+    % Nresample:    number of resamples for confidence interval bootstrap.
     %
     % OUTPUT
     % dprime
     %
-
-    Nresample = 10000;
+        
+    if nargin < 3 || isempty(Nresample)
+        Nresample = 10000;
+    end
     
     % make sure that x and y have no nan values
     x = x(~isnan(x));
