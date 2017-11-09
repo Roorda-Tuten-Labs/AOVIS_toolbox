@@ -1,4 +1,4 @@
-function [pBest, logLikelihoodBest] = fit_psychometric_func(results, ...
+function [pBest, logLikelihoodBest, handle] = fit_psychometric_func(results, ...
     pInit, color, add_to_plot, print_log_like, function_to_fit)
     %
     % USAGE
@@ -24,10 +24,18 @@ function [pBest, logLikelihoodBest] = fit_psychometric_func(results, ...
         [pBest, logLikelihoodBest] = fit_fmin('fitPsychometricFunction',...
             pInit, {'b','t'}, results, 'normcdf');
     elseif strcmpi(function_to_fit, 'weibull')
-        pInit.g = 0.03;
-        pInit.e = 0.5;
-        pInit.b = 4;
-        pInit.t = 0.3;
+        if ~isfield(pInit, 'g')
+            pInit.g = 0.03;
+        end
+        if ~isfield(pInit, 'e')
+            pInit.e = 0.5;
+        end        
+        if ~isfield(pInit, 'b')
+            pInit.b = 4;
+        end
+        if ~isfield(pInit, 't')
+            pInit.t = 0.3;
+        end
        [pBest, logLikelihoodBest] = fit_fmin('fitPsychometricFunction',...
             pInit, {'b','t'}, results, 'weibull');        
     end
@@ -49,6 +57,6 @@ function [pBest, logLikelihoodBest] = fit_psychometric_func(results, ...
     
     if add_to_plot
         logflag = 0;
-        plotPsycho(results, function_to_fit, pBest, logflag, pS);
+        handle = plotPsycho(results, function_to_fit, pBest, logflag, pS);
     end
     
