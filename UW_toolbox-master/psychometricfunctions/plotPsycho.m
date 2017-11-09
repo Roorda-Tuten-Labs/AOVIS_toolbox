@@ -116,7 +116,7 @@ sd = (pCorrect .* (1-pCorrect)) ./ sqrt(nTrials); % pq/sqrt(n)
 hold on;
 if exist('params', 'var') && ~isempty(params) % plot the parametric psychometric function
     x = linspace(min(intensity), max(intensity), 101);
-    plot((1-logFlag)*x + logFlag*log(x), feval(funName, params, x), ...
+    h = plot((1-logFlag)*x + logFlag*log(x), feval(funName, params, x), ...
         'Color' ,pS.LineColor, 'LineWidth', 2);
 end
 % if pS.MarkerScale==0 % no scaling by number of trials

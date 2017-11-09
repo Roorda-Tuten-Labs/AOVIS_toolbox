@@ -93,8 +93,8 @@ else
             % fit a psychometric function
             results.intensity = intensities';
             results.response = coneFoS;
-            pInit.b = 0.1;
-            pInit.t = 0.5;        
+            pInit.b = 4;
+            pInit.t = 0.3;        
             pBest = stats.fit_psychometric_func(results, pInit, 'k', [], ...
                 [], 'weibull');
             
