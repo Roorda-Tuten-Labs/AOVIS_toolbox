@@ -6,14 +6,14 @@
 % 41) to get a good match between ref.tif and mosaic.tif.
 clearvars;
 
-subject = '20053R';
+subject = '10001R';
 savedir = fullfile(fileparts(mfilename('fullpath')), ...
     'cone_identify', subject);
 
 % This accounts for differences in scale between the old and new systems
 % (i.e. 1.28 vs ~0.95 degree raster sizes). Set this to zero if cone
 % classing was done on same system as experiment.
-mosaic_scale_factor = 1.28/0.9;
+mosaic_scale_factor = 1.28/0.93;
 
 % load reference image
 ref = imread(fullfile(savedir, 'ref.tif'));
@@ -25,8 +25,8 @@ ref = imread(fullfile(savedir, 'ref.tif'));
 % uncomment lines below to crop and save ref image (to remove black boarder
 % created by movie normalize) -- this cropping may be unnecessary in the
 % future.
-% ref = ref(120:end-120, 120:end-120);
-% imwrite(ref, 'ref2.tif');
+%ref = ref(120:end-120, 120:end-120);
+%imwrite(ref, 'ref2.tif');
 
 %% mosaic.
 mosaic_img = imread(fullfile(savedir, 'mosaic.tif'));
@@ -74,8 +74,8 @@ new_cone_coords = zeros(size(cones));
 for c = 1:size(cones, 1)
     cone = cones(c, :);
     coneloc = [cone(1) + mosaic_offset(4) + center(1) - ...
-        (max(cones(:, 1) / 2)) + 19,...
-        cone(2) + mosaic_offset(3) + center(2) - (max(cones(:, 2) / 2))-20];
+        (max(cones(:, 1) / 2)) - 2,...
+        cone(2) + mosaic_offset(3) + center(2) - (max(cones(:, 2) / 2))-1];
     
     plot(coneloc(1), coneloc(2), ...
         '.', 'color', colors{cone(3)}, 'markersize', 16);
