@@ -44,7 +44,7 @@ function cauchy_LCA(D_modeleye, ref_wvlen, target_wvlen, formula)
     R = R_base - R_lambda;
 
     % Relative retinal position for model eye in mm
-    Df_modeleye = 1000 *  (1 / D_modeleye - 1 / (D_modeleye + R));
+    Df_modeleye = 1000 *  (1 / (D_modeleye - R) - 1 / D_modeleye);
 
     % Print out results
     disp(' ')
