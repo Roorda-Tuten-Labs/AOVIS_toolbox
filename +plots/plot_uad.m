@@ -37,36 +37,13 @@ function plot_uad(dat, title_text, markersize, fontsize, format_axes)
     for trial = 1:ntrials
         
         % color vector from given trial
-        t_cone = dat(trial, :);
+        t_cone = dat(trial, :);        
+
+        % convert to UAD
+        [gr, yb] = color_naming.data_uad(t_cone);
         
-        if independent_saturation            
-            white = nscale  .* ((max_sat_val - t_cone(1)) ./ max_sat_val); 
-            t_cone = t_cone(2:end);
-        else
-            white = sum(t_cone == 5);
-        end
-        
-        % convert numbers to red, green, blue, yellow, white
-        red = sum(t_cone == 1);
-        green = sum(t_cone == 2);
-        blue = sum(t_cone == 3);
-        yellow = sum(t_cone == 4);
-        
-        if independent_saturation          
-            nonwhite = 1 - (white / nscale);
-            red = red .* nonwhite;
-            green = green .* nonwhite;
-            blue = blue .* nonwhite;
-            yellow = yellow .* nonwhite;
-        end
-        total = red + green + blue + yellow + white;
-        
-        % check for errors
-        if total ~= nscale && total ~= 0
-            error('Color values not computed properly. Must sum to Nscale');
-        end
-        t_gr(1, trial) = (green - red) / nscale;
-        t_yb(1, trial) = (yellow - blue) / nscale;
+        t_gr(1, trial) = gr;
+        t_yb(1, trial) = yb;
     end
     
     gr = mean(t_gr);
