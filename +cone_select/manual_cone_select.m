@@ -7,6 +7,7 @@ function [img_map, offsets_manual] = manual_cone_select(img_crop, ...
     while Redo
  
         h = figure();
+        pause(0.05);
         hold on;
         imshow(img_crop,'InitialMagnification', 500, 'Border', 'Tight')
         colormap(gray); 

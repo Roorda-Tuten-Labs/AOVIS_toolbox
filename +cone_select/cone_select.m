@@ -1,24 +1,24 @@
-function [offsets_x_y, X_cross_loc, Y_cross_loc] = cone_select(tca_offsets,...
-    cone_selection_method, folder_name, subject)
+function [offsets_x_y, X_cross_loc, Y_cross_loc, CFG] = cone_select(tca_offsets,...
+    CFG, folder_name)
 % Select cones either automatically [not working] or manually. This is
 % called by main routine.
 %
 % USAGE
 % [offsets_x_y, X_cross_loc, Y_cross_loc] = cone_select(tca_offsets,...
-%    cone_selection_method, folder_name, subject)            
+%    CFG, folder_name)            
 %
 % 
 %
 
 %open movie
 %find the most recent movie saved in the subject initials folder.
-[filename, path] = uigetfile('*.*',...
+[filename, videopath] = uigetfile('*.*',...
                     'Pick Stabilized Movie or SumFrame to analyze',...
                  folder_name);
 datetime_format = strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':','');
 if strcmp(filename(end-3:end),'.tif')
     % if loading in an already stabilized image.
-    img_s = im2double(imread([path, filename], 'tif'));
+    img_s = im2double(imread([videopath, filename], 'tif'));
     % xy locations stored at end of the file name.
     X_cross_loc = str2num(filename(end-10:end-8));
     Y_cross_loc = str2num(filename(end-6:end-4));
@@ -26,10 +26,10 @@ if strcmp(filename(end-3:end),'.tif')
 elseif strcmp(filename(end-3:end),'.avi')
     % otherwise find crosses fresh
     [X_cross_loc, Y_cross_loc, framenums_withcross] = vid.find_cross(...
-        [path, filename]);
+        [videopath, filename]);
     if ~isnan(X_cross_loc) && ~isnan(Y_cross_loc)
         % then if crosses are found, produce stabilized movie (sumnorm)
-        img_s = vid.sumframe_from_stabilized_movie(path, filename, ...
+        img_s = vid.sumframe_from_stabilized_movie(videopath, filename, ...
             framenums_withcross, X_cross_loc, Y_cross_loc);
     else
         offsets_x_y = NaN;
@@ -95,41 +95,51 @@ if strcmpi(choice,'YES')
 end
 
 % Find cones with either auto or manual method
-if strcmpi(cone_selection_method,'auto')
-    % !!
-    % !! Not sure that this is even working. It is never used !!
-    % !!       
-    [img_map, offset_cropped] = cone_select.auto_cone_select(img_crop,...
-        rect_position);
- 
-elseif strcmpi(cone_selection_method,'manual')
+%if strcmpi(CFG.cone_selection_method,'manual')
     
-    fighandle = [];
-    try
-        fighandle = cone_mosaic.add_cone_types_to_selection_img(subject, img_s, ...
-            [X_cross_loc, Y_cross_loc]);    
-        % save the ouput plot as an svg file
-        savename = [path, (filename(1:end-4)), 'target_loc_' datetime_format];
-        plots.save_fig(savename, fighandle, [], 'svg');
-    catch
-        disp('Warning: Could not run add_cone_types_to_selection_img')
-    end
-    
-    % This is the routine typically used.
-    [img_map, offset_cropped] = cone_select.manual_cone_select(img_crop,...
-        rect_position, rect_position_old);    
-    
-    if ~isempty(fighandle)
-        close(fighandle)
-    end
+fighandle = [];
+try
+    fighandle = cone_mosaic.add_cone_types_to_selection_img(CFG.initials, img_s, ...
+        [X_cross_loc, Y_cross_loc]);    
+    % save the ouput plot as an svg file
+    savename = [videopath, (filename(1:end-4)), 'target_loc_' datetime_format];
+    plots.save_fig(savename, fighandle, [], 'svg');
+catch
+    disp('Warning: Could not run add_cone_types_to_selection_img')
 end
 
+% This is the only routine used.
+[img_map, offset_cropped] = cone_select.manual_cone_select(img_crop,...
+    rect_position, rect_position_old);    
+
+if ~isempty(fighandle)
+    close(fighandle)
+end
+
+% else %strcmpi(CFG.cone_selection_method,'auto')
+%     % !!
+%     % !! This does not work. It is never used !!
+%     % !!       
+%     error('Auto method is not implemented. Please redo and select manual.')
+%     %[img_map, offset_cropped] = cone_select.auto_cone_select(img_crop,...
+%     %    rect_position);
+%      
+% end
+
 % Selected cones
-selected_cones_filename = [path, (filename(1:end-4)), 'selected_cones_' ...
+selected_cones_filename = [videopath, (filename(1:end-4)), 'selected_cones_' ...
     datetime_format '.png'];
 
 imwrite(img_map, selected_cones_filename, 'png');
 
 offsets_x_y = img.inverse_image_crop(img_s, ROI_search, fliplr(offset_cropped));
 
+%%% Save offsets
+% check for dir, name and save offsets for later
+offset_filename = fullfile(videopath, [CFG.initials, '_offsets_',...
+                   strrep(strrep(strrep(datestr(now),'-',''),...
+                   ' ','x'),':',''), '.mat']);       
+CFG.last_offset_filename = offset_filename;
 
+save(offset_filename,'offsets_x_y', 'X_cross_loc', 'Y_cross_loc', ...
+     'tca_offsets');

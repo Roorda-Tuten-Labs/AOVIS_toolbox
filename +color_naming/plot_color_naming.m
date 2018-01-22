@@ -129,11 +129,14 @@ else
         % select out individual cone's data
         cone = temp(temp(:, 1) == loc_index, 3:end);
         
+        % n trials for each cone
         ntrials = size(cone, 1);
 
         % remove rows with all zeros
-        cone_trials = length(cone);
-        cone = cone(any(cone, 2), :);
+        cone = util.remove_zero_rows(cone);
+        
+        % remove rows with all NAN (new way of inputing not seen)
+        cone = util.remove_nan_rows(cone);
 
         if single_plot
             title_text = '';
@@ -147,7 +150,7 @@ else
                 FoS = thresholds(loc_index);
                 title_text = ['50% FoS: ' num2str(round(FoS, 2))];
             else
-                FoS = round(size(cone, 1) / cone_trials , 3);
+                FoS = round(size(cone, 1) / ntrials , 3);
                 title_text = ['#', num2str(loc_index) '; FoS: ' ...
                     num2str(FoS)];
             end
