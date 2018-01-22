@@ -53,8 +53,15 @@ if exist(temptest,'file')==0
     error('Script halted: dftregistration.m is missing');
 end
 
-[files, pathname]=uigetfile('*.avi','Select avi file(s) for TCA computation','MultiSelect', 'on');  % file selection dialog
+% remember path of current directory and then try to switch to video_folder
+orig_dir = pwd();
+if exist('D:\Video_Folder', 'dir') > 0
+    cd('D:\Video_Folder');
+end
 
+[files, pathname]=uigetfile('*.avi',...
+    'Select avi file(s) for TCA computation',...
+    'MultiSelect', 'on');  % file selection dialog
 if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
     
     cd(pathname);           % do everything in video folder
@@ -148,8 +155,14 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
                 error('Problem with compute_tca_core');
             end
         end
-        
-        plotTCA(tca_comp,matname,nf,sub);
+        try
+            plotTCA(tca_comp,matname,nf,sub);
+        catch ME
+            cd(orig_dir);
+            error(['Plot TCA did not work. Most likely the cross was' ...
+                ' not found. Check to see if there were too many saturated'...
+                ' pixels and/or try recording another video.'])
+        end
         
     end
     
@@ -159,11 +172,14 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
     end
     disp(' ');
     
+    cd(orig_dir);
+    
 else % 'Cancel' case
     disp(' ')
     disp(' --> TCA function cancelled')
     disp(' ')
     disp(' ')
+    cd(orig_dir);
     return
 end
 
@@ -250,7 +266,7 @@ if ~skipframe % do the following only if cross was detected
     
     meanG = mean(G(:)); 
     G(19:23, 128) = meanG;
-    G(19, 126:30) = meanG;
+    %G(19, 126:30) = meanG;
     
     meanR = mean(R(:)); 
     R(19:23, 128) = meanR; 
