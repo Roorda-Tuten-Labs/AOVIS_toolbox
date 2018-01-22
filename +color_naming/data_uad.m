@@ -130,7 +130,7 @@ function [x, y] = data_uad(dat, names, arcsine_transform, ...
     total = red + green + blue + yellow + white;
     
     % check for errors
-    if total ~= nscale && total ~= 0
+    if ~all(total == nscale)
         error('Color values not computed properly. Must sum to Nscale');
     end    
     
