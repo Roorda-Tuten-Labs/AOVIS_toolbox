@@ -40,7 +40,7 @@ function plot_uad(dat, title_text, markersize, fontsize, format_axes)
         t_cone = dat(trial, :);        
 
         % convert to UAD
-        [gr, yb] = color_naming.data_uad(t_cone);
+        [yb, gr] = color_naming.data_uad(t_cone);
         
         t_gr(1, trial) = gr;
         t_yb(1, trial) = yb;
