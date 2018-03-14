@@ -242,7 +242,7 @@ if ~skipframe % do the following only if cross was detected
             Ry=locy-60+0; Rx=locx-127;
         otherwise
             disp('Channel with cross is invalid.')
-    end;
+    end
     
     % extract regions of frame for TCA calculation
     stimheight=125;
