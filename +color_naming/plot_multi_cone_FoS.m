@@ -33,5 +33,5 @@ set(gca,'xtick', 1:3:length(IDs))
 if save_plots
     videofolder = exp_data.videofolder(15:end);
     savename = fullfile(videofolder, 'multi_cone_FoS');
-    plots.save_fig(savename, fig1, 1, 'eps');
+    plots.save_fig(savename, fig1, 1, 'pdf');
 end      
