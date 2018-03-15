@@ -73,6 +73,13 @@ function mosaic = load_locs(subject)
         dat = load(fullfile(basedir, 'LMS_cones.mat'));
         mosaic = dat.LMS_cones;        
         
+    elseif strcmpi(subject(1:5), '20075')
+        subj = '20075L';
+        basedir = fullfile(fileparts(mfilename('fullpath')), 'dat', subj);
+        dat = load(fullfile(basedir, 'LMS_cones.mat'));
+        mosaic = dat.LMS_cones;        
+                
     else                
-        error('Only mosaics currently available are 20076 and 20053')
+        error(['Only mosaics currently available are:',...
+            ' 2053, 20075, 20076 and 20092'])
     end
