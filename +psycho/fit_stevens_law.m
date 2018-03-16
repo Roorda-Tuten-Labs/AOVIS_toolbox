@@ -9,9 +9,9 @@ function [bestparams, chi, SE, correl_mat, h] = fit_stevens_law(x, y, ...
         add_to_plot = 0;
     end
     
-    % error function: chi-square: Sum ((expected - data) / sqrt(expected))
+    % error function: chi-square: Sum ((expected - data) / var(expected))
     error_func = @(params) sum(((y - psycho.stevens_law(x, params, 1)) ...
-        .^ 2) ./ sqrt(std(y)));
+        .^ 2) ./ var(y));
 
     % use lsqnonlin to find the best fit.
     options.Algorithm = 'levenberg-marquardt';
