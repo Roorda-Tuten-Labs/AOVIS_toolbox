@@ -13,12 +13,12 @@ if nargin < 2
     % If not given, just load default primaries
     primaries_path = 'lacie';
 end
-primaries = get_norm_primaries(primaries_path);
+primaries = colorimetry.get_norm_primaries(primaries_path);
 
 minLambda = min(primaries(:, 1));
 maxLambda = max(primaries(:, 1));
 
-[cones, ~] = get_fundamentals('stockman2', 1, [minLambda ...
+[cones, ~] = colorimetry.get_fundamentals('stockman2', 1, [minLambda ...
                     maxLambda]);
 cones = 10 .^ cones;
 

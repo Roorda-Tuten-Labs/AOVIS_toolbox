@@ -25,7 +25,10 @@ function dprime = d_prime(x, y, Nresample)
 
     DoF = Nx + Ny - 2;    
     
-    dprime = compute_d(x, y);
+    [dprime, z_score] = compute_d(x, y);
+    
+    % two-tailed p value
+    p_val = 1 - (normcdf(abs(z_score), 0, 1));
     
     % resample x and y distributions to get 95% CI    
     resample_dprime = zeros(Nresample, 1);
@@ -45,16 +48,16 @@ function dprime = d_prime(x, y, Nresample)
     
     resample_dprime = sort(resample_dprime);
     lower_CI = resample_dprime(floor(Nresample * 0.025));
-    upper_CI = resample_dprime(Nresample - ceil(Nresample * 0.025));
-    
+    upper_CI = resample_dprime(Nresample - ceil(Nresample * 0.025));    
     
     % print the output
     util.pprint(dprime, 4, 'd-prime:')
     util.pprint(DoF, 4, 'DoF:')
     disp(['95% CI: ' num2str(lower_CI) ' - ' num2str(upper_CI)]) 
+    util.pprint(p_val, 4, 'p-val:');
     
     
-    function dprime = compute_d(x_0, y_0)
+    function [dprime, z_score] = compute_d(x_0, y_0)
         % d-prime analysis
         meanX = mean(x_0);
         meanY = mean(y_0);
@@ -73,6 +76,8 @@ function dprime = d_prime(x, y, Nresample)
         % nanvar(hue_angles(m_index, 1))));    
 
         % effect size: d prime or Cohen's d
-        dprime = abs(meanX - meanY) / xySD;    
+        dprime = abs(meanX - meanY) / xySD;
+        N = mean([Nx0 Ny0]);
+        z_score = abs(meanX - meanY) / (xySD / sqrt(N));
     end
 end

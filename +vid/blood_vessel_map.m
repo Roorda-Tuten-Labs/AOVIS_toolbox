@@ -15,25 +15,25 @@ vid_width = size(vidFrames(1).cdata, 2);
 
 nframes = size(vidFrames, 2);
 vid_mat = zeros(vid_height, vid_width, nframes);
-division_mat = zeros(vid_height, vid_height, nframes);
+division_mat = zeros(vid_height, vid_height, nframes - 1);
 
 for frame = 1:nframes
     
-    vid_mat(:, :, frame) = vidFrames(frame).cdata;
+    vid_mat(:, :, frame) = vidFrames(frame).cdata;    
     if frame > 1
-        division_mat(:, :, frame) = ...
+        division_mat(:, :, frame - 1) = ...
             vidFrames(frame - 1).cdata(:, :) ./ ...
             vidFrames(frame).cdata(:, :);
     end
 end
 mean_img = mean(division_mat, 3);
-std_img = std(division_mat, [], 3);
+std_img = std(division_mat(214:614, 214:614, :), [], 3);
 
 figure;
 imshow(mean_img, [0 max(mean_img(:))]);
 
 figure
-imshow(std_img);%, [0 max(std_img(:))]);
+imshow(std_img, [0 max(std_img(:))]);
 
 name = fullfile(pname, ['mean_' fname '.tif']);
 imwrite(mean_img, name, 'tif', 'Compression', 'none');

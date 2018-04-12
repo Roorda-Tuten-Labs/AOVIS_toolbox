@@ -55,17 +55,18 @@ function [x, y] = data_uad(dat, names, arcsine_transform, ...
         max_sat_val = 6;
     end
     
-    if nargin < 4
-        % if the variable is not passed, make an educated guess about
-        % whether or not saturation was scaled independently.
+    % color vector from given trial
+    [~, nscale] = size(dat);
         
-        % color vector from given trial
-        [~, nscale] = size(dat);
+    if nargin < 4 || isempty(independent_saturation)
+        % if the variable is not passed, make an educated guess about
+        % whether or not saturation was scaled independently.        
         
         % i.e. is even in length (independent sat judgment)
         if mod(nscale, 2) == 0            
             nscale = nscale - 1;
             independent_saturation = 1;
+            max_sat_val = 6;
         else 
             independent_saturation = 0;
         end
@@ -130,7 +131,7 @@ function [x, y] = data_uad(dat, names, arcsine_transform, ...
     total = red + green + blue + yellow + white;
     
     % check for errors
-    if ~all(total == nscale)
+    if ~all(total == nscale) && ~arcsine_transform
         error('Color values not computed properly. Must sum to Nscale');
     end    
     

@@ -28,9 +28,21 @@ cone_spacing = cone_spacing_mm * (1 / 0.28) * 60; % in arcmin
 %center of the image: should be 256 if 512x512 image
 center = data.imsize / 2; 
     
+try
+    % get the cones from a subject
+    cones = cone_mosaic.load_locs(data.subject);
+catch
+    if ~strcmp(data.subject, 'model')
+        warn(['Cone mosaic for ' data.subject ' could not be loaded.' ...
+            ' Make sure that the mosaic is known to cone_mosaic.load_locs']);
+    else
+        cones = [];
+    end
+end
+    
 %hard-coded array of x and y locations of cones at this eccentricity 
 % (8 pixel spacing at 1.5 degrees and 420 ppd)
-if strcmp(data.subject, 'model')
+if isempty(cones)
     if data.test_ecc == 1.5 && data.scaling == 420 && strcmp(data.subject, 'model')  
         xi = [256 252 260 248 264 252 260 256 256 240 272 244 268 264 248 244 ...
             268 248 264 240 272 240 272]';
@@ -47,16 +59,15 @@ if strcmp(data.subject, 'model')
         yi = y * cone_spacing / 60 * data.scaling + center;
     end
 
-% get real mosaic file!
-elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076') || ...
-    strcmp(data.subject, '20053')
-
-    % get the cones from a subject
-    cones = cone_mosaic.load_locs(data.subject);
+% use real mosaic file!
+else
     
-    % data for 10001 & 20076 were collected at a pix/deg of 420, need to
+    % data for 10001, 20053 & 20076 were collected at a pix/deg of 420, need to
     % convert the locations into new coordinate space.
-    cones(:, 1:2) = cones(:, 1:2) * (data.scaling / 420);
+    if strcmp(data.subject, '10001') || strcmp(data.subject, '20053') ||...
+            strcmp(data.subject, '20076')
+        cones(:, 1:2) = cones(:, 1:2) * (data.scaling / 420);
+    end
     
     % select out a center cone of interest
     x_cone = cones(data.center_cone_index, 1);
@@ -74,9 +85,6 @@ elseif strcmp(data.subject, '10001') || strcmp(data.subject, '20076') || ...
     xi = [x_cone; xi];
     yi = [y_cone; yi];
 
-else
-    error('subject name not understood');
-    
 end
 
 % center the patch of cones to avoid artifacts at edge of the image.
