@@ -9,8 +9,9 @@ if nargin < 2
     find_ncones = input('how many cones would you like to add?');
 end
 
+fdir = fileparts(which('cone_mosaic.add_identified_cones'));
+im = imread(fullfile(fdir, 'cone_identify', subject, 'ref.tif'));
 
-im = imread(fullfile('cone_identify', subject, 'ref.tif'));
 im = im(:, :, 1);
 [cones_x, cones_y] = img.find_cones(7, im, 'auto', 0.55, 1);
 cones = [cones_x, cones_y];
