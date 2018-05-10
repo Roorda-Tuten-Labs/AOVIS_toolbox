@@ -9,7 +9,7 @@ function [cones_in_new_coords, nn_cone_coords] = register_cones(ref, ...
     %
     % INPUT
     % ref               reference image.
-    % ref_cone_coords   coordinates of cones of interest in reference
+    % ref_cone_coords   x,y coordinates of cones of interest in reference
     %                   image. matrix should be nx2, where n=number of
     %                   cones.
     % new_img           the image to register with reference.

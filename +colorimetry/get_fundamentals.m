@@ -37,26 +37,32 @@ if strcmpi(fund_type, 'stockman2') || strcmpi(fund_type, 'stockman')
     fname = 'ss2_10e_5';
     [lms, wavelengths] = load_fundamentals(fname, resolution, ...
                                                    min_max_wvlen);
+    % return values in linear space by default                                           
+    lms = 10 .^ lms;
 
 elseif strcmpi(fund_type, 'stockman10')
     fname = 'ss10e_5';
     [lms, wavelengths] = load_fundamentals(fname, resolution, ...
                                                    min_max_wvlen);
+    % return values in linear space by default                                           
+    lms = 10 .^ lms;
 
 elseif strcmpi(fund_type, 'konig')
     [lms, wavelengths] = konig_fundamentals(resolution, min_max_wvlen);
 
 elseif strcmpi(fund_type, 'neitz')
-    res = abs(diff(min_max_wvlen)) / resolution;
-    S_sens = neitz(420, 0.0, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
-                   res);
-    M_sens = neitz(530, 0.0, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
-                   res);
-    L_sens = neitz(559, 0.0, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
-                   res);
-    
-    wavelengths = min_max_wvlen(1):resolution:min_max_wvlen(2)';
-    
+    % return neitz template (action spectra of photopigment) in linear
+    % (anti-log) space. Optical densities were chosen to best match the
+    % stockman fundamentals by eye. Increasing OD will widen the
+    % sensitivity.
+    S_sens = colorimetry.neitz(420, 0.45, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
+                   resolution);
+    M_sens = colorimetry.neitz(530, 0.3, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
+                   resolution);
+    L_sens = colorimetry.neitz(559, 0.35, 'alog', min_max_wvlen(1), min_max_wvlen(2), ...
+                   resolution);    
+    wavelengths = (min_max_wvlen(1):resolution:min_max_wvlen(2));     
+        
     % convert to energy: make into function
     if ~in_quanta
        L_sens = L_sens .* wavelengths;       
@@ -67,6 +73,20 @@ elseif strcmpi(fund_type, 'neitz')
        S_sens = S_sens ./ max(S_sens);       
     end
     lms = [L_sens; M_sens; S_sens]';
+       
+    % now include the influence of macular pigment and lens filters  
+    age = 32;
+    macpig = colorimetry.macpigment(wavelengths);
+    lens = colorimetry.vanNorren(age, wavelengths);   
+    lms(:, 1) = lms(:, 1) ./ (10 .^ (macpig + lens))';
+    lms(:, 2) = lms(:, 2) ./ (10 .^ (macpig + lens))';
+    lms(:, 3) = lms(:, 3) ./ (10 .^ (macpig + lens))';
+    
+    % renormalize
+    lms(:, 1) = lms(:, 1) ./ max(lms(:, 1));
+    lms(:, 2) = lms(:, 2) ./ max(lms(:, 2));
+    lms(:, 3) = lms(:, 3) ./ max(lms(:, 3));
+
 end
 
 % Convert to quanta if desired
