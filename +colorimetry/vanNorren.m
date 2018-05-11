@@ -2,11 +2,17 @@ function [media] = vanNorren(age, spectrum, field_size)
 
     format long;
 
-    if nargin < 3, field_size = 'large'; end
-    if nargin < 2, spectrum = 380:1:780; end
-    if nargin < 1, age = 32; end
+    if nargin < 3
+        field_size = 'large';
+    end
+    if nargin < 2
+        spectrum = 380:1:780; 
+    end
+    if nargin < 1
+        age = 32; 
+    end
 
-    if field_size == 'large'
+    if strcmp(field_size, 'large')
         dRL = 0.225;
     else % small
         dRL = 0.446;

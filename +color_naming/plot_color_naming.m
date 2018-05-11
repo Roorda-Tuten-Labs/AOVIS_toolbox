@@ -133,10 +133,10 @@ else
         ntrials = size(cone, 1);
 
         % remove rows with all zeros
-        cone = util.remove_zero_rows(cone);
+        cone = array.remove_zero_rows(cone);
         
         % remove rows with all NAN (new way of inputing not seen)
-        cone = util.remove_nan_rows(cone);
+        cone = array.remove_nan_rows(cone);
 
         if single_plot
             title_text = '';

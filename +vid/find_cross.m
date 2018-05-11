@@ -99,7 +99,7 @@ while hasFrame(reader)
     xcorr = normxcorr2f(ir_cross, currentframe);
     
     % find the position of highest correlation
-    [corr, Yr, Xr] = util.max2D_RS(xcorr);
+    [corr, Yr, Xr] = array.max2D_RS(xcorr);
 
     % check if corr was above threshold
     if corr > xcorr_threshold

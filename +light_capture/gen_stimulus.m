@@ -23,7 +23,7 @@ function params = gen_stimulus(params)
         delivery_blur(end,:) = []; 
 
         %convolve stimulus with "trial blur"
-        params.stim_im_orig = util.convolve(stim_im_orig,delivery_blur); 
+        params.stim_im_orig = array.convolve(stim_im_orig,delivery_blur); 
     end
 
 end

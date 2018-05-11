@@ -23,7 +23,7 @@ function save_fig(save_name, fig, transparent, file_type)
     
     % make sure save dir exists
     dirname = fileparts(save_name);
-    util.check_for_dir(dirname);
+    array.check_for_dir(dirname);
     
     % set background to transparent
     if transparent
