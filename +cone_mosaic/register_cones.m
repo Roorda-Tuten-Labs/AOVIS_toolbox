@@ -110,7 +110,7 @@ function [cones_in_new_coords, nn_cone_coords] = register_cones(ref, ...
                 nn_coords(cc, 4) = ref_ind;
             end
         end
-        nn_coords = util.remove_zero_rows(nn_coords);
+        nn_coords = array.remove_zero_rows(nn_coords);
     end
     
 end

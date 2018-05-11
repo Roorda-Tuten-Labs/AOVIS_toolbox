@@ -55,12 +55,12 @@ function [pval, chi2stat, DoF, SE, chi_sims] = chi_square_test(observed, correct
     input_data = observed;
     
     % test if matrix has zero rows or columns
-    observed = util.remove_zero_cols(observed);
+    observed = array.remove_zero_cols(observed);
     if size(observed, 2) ~= size(observed, 2) 
         error('Matrix contained columns with only zeros.')
     end
     
-    observed = util.remove_zero_rows(observed);
+    observed = array.remove_zero_rows(observed);
     if size(observed, 1) ~= size(observed, 1)
         error('Matrix contained rows with only zeros.')
     end

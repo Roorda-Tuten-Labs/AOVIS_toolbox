@@ -12,7 +12,7 @@ delivery_blur(end,:) = [];
 
 % first test: convolve from Austin 1997
 t = cputime;
-austin_result = util.convolve(stim_im, delivery_blur);
+austin_result = array.convolve(stim_im, delivery_blur);
 austin_time = cputime - t
 
 % second test: native matlab conv2 function
