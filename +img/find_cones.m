@@ -38,7 +38,7 @@ if strcmpi(method, 'auto')
 
     cone = double(exp(-(conex.^2 + coney.^2) / (cone_size / 2).^2 ));
 
-    xcorr = util.normxcorr2f(cone, img);
+    xcorr = array.normxcorr2f(cone, img);
 
     [x,y] = find(xcorr > xcorr_threshold);
 
