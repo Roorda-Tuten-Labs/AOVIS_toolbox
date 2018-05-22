@@ -96,7 +96,7 @@ while hasFrame(reader)
     currentframe = currentframe .* (currentframe==cross_pixel_val);
 
     % do the cross correlation
-    xcorr = normxcorr2f(ir_cross, currentframe);
+    xcorr = array.normxcorr2f(ir_cross, currentframe);
     
     % find the position of highest correlation
     [corr, Yr, Xr] = array.max2D_RS(xcorr);
