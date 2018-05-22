@@ -1,5 +1,5 @@
-function handle = add_cone_types_to_selection_img(subject, selection_img, ...
-    xy_cross_loc)
+function [handle, nn_cone_coords, xy_cross_loc] = ...
+    add_cone_types_to_selection_img(subject, selection_img, xy_cross_loc)
     % Add previously identified cone locations (w/ spectrial ID) to a new
     % image.
     %
@@ -15,7 +15,9 @@ function handle = add_cone_types_to_selection_img(subject, selection_img, ...
     %                   the cones of interest.
     %
     % OUTPUT
-    % handle            figure handle.
+    % handle                figure handle.
+    % nn_cone_coords        best estimate of cones locations.
+    % cones_in_new_coords   
     %
     
     if nargin < 3
@@ -39,15 +41,18 @@ function handle = add_cone_types_to_selection_img(subject, selection_img, ...
 
     % crop the image down
     %buffered_img = img.zero_buffer(selection_img, size(ref));
-    if size(selection_img, 1) > size(ref, 1) || size(selection_img, 2) > size(ref, 2)
+    if size(selection_img, 1) > size(ref, 1) || size(selection_img, 2) > ...
+            size(ref, 2)
         center = floor(size(selection_img) ./ 2);
         refsize = size(ref);
         croprect = [(center(2) - floor(refsize(2) / 2)), ...
                (center(1) - floor(refsize(1) / 2)),...
                refsize(2) - 1, refsize(1) - 1];
 
-        xy_cross_loc(1) =  xy_cross_loc(1) - (center(2) - floor(refsize(2) / 2));
-        xy_cross_loc(2) =  xy_cross_loc(2) - (center(1) - floor(refsize(1) / 2));
+        xy_cross_loc(1) =  xy_cross_loc(1) - (center(2) - ...
+            floor(refsize(2) / 2));
+        xy_cross_loc(2) =  xy_cross_loc(2) - (center(1) - ...
+            floor(refsize(1) / 2));
 
         % cut the image down to speed up search   
         img_crop = imcrop(selection_img, croprect);

@@ -20,15 +20,25 @@ if isfield(AllData, 'coneids')
     ncones = length(unique(AllData.coneids));
     loc_ids = AllData.coneids;    
     pairs_flag = 0;
+    temp = [temp, AllData.intensities, AllData.answer];
     
 elseif isfield(AllData, 'location_ids')
     temp = AllData.combination_id;
     ncones = length(unique(AllData.combination_id));
     loc_ids = AllData.combination_id;
     pairs_flag = 1;
+    temp = [temp, AllData.intensities, AllData.answer];
+    
+elseif isfield(AllData, 'intensity_ids')
+    
+    temp = AllData.intensity_ids;
+    ncones = length(unique(AllData.intensity_ids));
+    AllData.num_locations = ncones;
+    loc_ids = AllData.intensity_ids;
+    pairs_flag = 0;
+    temp = [temp, AllData.intensity_ids, AllData.answer];    
 end
     
-temp = [temp, AllData.intensities, AllData.answer];
 
 % video folder where plots will be saved. first 14 chars are "Video Folder:"
 videofolder = AllData.videofolder(15:end);

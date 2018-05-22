@@ -2,7 +2,7 @@ function [img] = sumframe_from_stabilized_movie(path, filename, ...
     frames_to_exclude, X_cross_loc, Y_cross_loc)
 
     %AVIdetails=aviinfo([path,filename]); warning off all
-    readerobj = VideoReader([path,filename]);
+    readerobj = VideoReader(fullfile(path, filename));
     vidFrames = read(readerobj);
     %startframe = 1; 
     %endframe = readerobj.NumberOfFrames; 
@@ -24,9 +24,10 @@ function [img] = sumframe_from_stabilized_movie(path, filename, ...
 %             fprintf('Dropped frame# %g from movie %s\n', framenum, a(movienum).name);
         end
     end
-    name = [path '\sumnorm_' filename(1:end-4) '_' ...
+    name = fullfile(path, ['sumnorm_' filename(1:end-4) '_' ...
         strrep(strrep(strrep(datestr(now),'-',''),' ','x'),':','') '_',...
-        num2str(floor(X_cross_loc)),'_', num2str(floor(Y_cross_loc)) '.tif'];
+        num2str(floor(X_cross_loc)),'_',...
+        num2str(floor(Y_cross_loc)) '.tif']);
     
     sumframenew = sumframe./sumframebinary;
     
