@@ -66,63 +66,63 @@ if AllData.Nscale == 1
         title(['#', num2str(loc_index) '; N seen: ' num2str(sum(cone < 6))]); 
         if save_plots
             savename = fullfile(videofolder, 'color_naming');
-            plots.save_fig(savename, fig1, 1, 'eps');
+            plots.save_fig(savename, fig1, 1, 'pdf');
         end        
     end
 else
-    
-    intensities = unique(AllData.intensities);    
-    nintensities = length(intensities);
-    if sum(intensities > 0) > 2     
-        fig1 = figure;
-        clf;
-        hold on;
-        FoS_data = zeros(ncones, nintensities);
-        for c = 1:ncones
-            cone = AllData.brightness_rating(loc_ids == c);
-            stim_intensities = AllData.intensities(loc_ids == c);
-            for inten = 1:nintensities
-                intensity = intensities(inten);
-                intensity_trials = stim_intensities == intensity;
-                seen = sum(cone(intensity_trials) > 0);
-                trials = sum(intensity_trials);
-                FoS_data(c, inten) = seen / trials;
+    if isfield(AllData, 'intensities');
+        intensities = unique(AllData.intensities);    
+        nintensities = length(intensities);
+        if sum(intensities > 0) > 2     
+            fig1 = figure;
+            clf;
+            hold on;
+            FoS_data = zeros(ncones, nintensities);
+            for c = 1:ncones
+                cone = AllData.brightness_rating(loc_ids == c);
+                stim_intensities = AllData.intensities(loc_ids == c);
+                for inten = 1:nintensities
+                    intensity = intensities(inten);
+                    intensity_trials = stim_intensities == intensity;
+                    seen = sum(cone(intensity_trials) > 0);
+                    trials = sum(intensity_trials);
+                    FoS_data(c, inten) = seen / trials;
+                end
             end
+            % 
+            blankFoS = mean(FoS_data(:, 1));
+            % threshold estimates
+            thresholds = zeros(ncones, 1);
+            for c = 1:ncones
+                % use the mean of all blanks to avoid issues with low number of
+                %  trials
+                coneFoS = [blankFoS FoS_data(c, 2:end)];
+
+                plot(intensities, coneFoS, 'ko', 'color', 'k');
+
+                % fit a psychometric function
+                results.intensity = intensities';
+                results.response = coneFoS;
+                pInit.b = 4;
+                pInit.t = 0.3;        
+                pBest = stats.fit_psychometric_func(results, pInit, 'k', [], ...
+                    [], 'weibull');
+
+                text(pBest.t, 0.5, num2str(c), 'FontSize', 16);
+
+                thresholds(c) = pBest.t;
+            end
+
+            plots.nice_axes('stimulus intensity (a.u.)', ...
+                'frequency of seeing', 14, [], 1);
+
+            if save_plots
+                savename = fullfile(videofolder, 'FoS_plot');
+                plots.save_fig(savename, fig1, 1, 'pdf');
+            end        
+
         end
-        % 
-        blankFoS = mean(FoS_data(:, 1));
-        % threshold estimates
-        thresholds = zeros(ncones, 1);
-        for c = 1:ncones
-            % use the mean of all blanks to avoid issues with low number of
-            %  trials
-            coneFoS = [blankFoS FoS_data(c, 2:end)];
-
-            plot(intensities, coneFoS, 'ko', 'color', 'k');
-
-            % fit a psychometric function
-            results.intensity = intensities';
-            results.response = coneFoS;
-            pInit.b = 4;
-            pInit.t = 0.3;        
-            pBest = stats.fit_psychometric_func(results, pInit, 'k', [], ...
-                [], 'weibull');
-            
-            text(pBest.t, 0.5, num2str(c), 'FontSize', 16);
-
-            thresholds(c) = pBest.t;
-        end
-        
-        plots.nice_axes('stimulus intensity (a.u.)', ...
-            'frequency of seeing', 14, [], 1);
-        
-        if save_plots
-            savename = fullfile(videofolder, 'FoS_plot');
-            plots.save_fig(savename, fig1, 1, 'eps');
-        end        
-        
     end
-    
     fig2 = figure;
     % plot uad diagram here for each cone
     if pairs_flag
