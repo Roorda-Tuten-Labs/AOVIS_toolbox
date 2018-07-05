@@ -40,13 +40,11 @@ elseif isfield(AllData, 'intensity_ids')
 end
     
 
-% video folder where plots will be saved. first 14 chars are "Video Folder:"
-videofolder = AllData.videofolder(15:end);
+% video folder where plots will be saved."
+videofolder = AllData.videofolder;
 
 % sort rows so that organized by cone ID. (i.e. cone#1, cone#2 ...);
 sortrows(temp,1);
-
-ntrials = AllData.ntrials;% size(AllData.answer, 1) / AllData.num_locations;
 
 % need to add not seen category
 cnames = {'n.s.', AllData.cnames{:}};
@@ -70,7 +68,7 @@ if AllData.Nscale == 1
         end        
     end
 else
-    if isfield(AllData, 'intensities');
+    if isfield(AllData, 'intensities')
         intensities = unique(AllData.intensities);    
         nintensities = length(intensities);
         if sum(intensities > 0) > 2     
@@ -105,7 +103,7 @@ else
                 results.response = coneFoS;
                 pInit.b = 4;
                 pInit.t = 0.3;        
-                pBest = stats.fit_psychometric_func(results, pInit, 'k', [], ...
+                pBest = psycho.fit_psychometric_func(results, pInit, 'k', [], ...
                     [], 'weibull');
 
                 text(pBest.t, 0.5, num2str(c), 'FontSize', 16);
