@@ -1,4 +1,4 @@
-function [X, Y, max_val] = find_E(filename, E_size_pix, ...
+function [X, Y, frames_w_E, max_val] = find_E(filename, E_size_pix, ...
     orientation, xcorr_threshold, print_output, show_error_dlg)
 % Find the center of a tumbling E stimulus in a video frame by frame
 %
@@ -22,6 +22,7 @@ function [X, Y, max_val] = find_E(filename, E_size_pix, ...
 %                       values for each frame where the E center was found.
 % Y_E_loc:          location of E center in Y. Same as above.
 % frames_w_E:       array containing frame numbers that contained an E.
+% max_val:          maximum correlation value between image and stimulus.
 
 
 import util.*
@@ -92,7 +93,7 @@ while hasFrame(reader)
         Y(n, 1)  = Yr;
         X(n, 1)  = Xr;
         max_val(n,1) = corr;
-        frame_flag(n, 1) = 1; % If X&Y exist, set flag to 1 for that frame
+        frames_w_E(n, 1) = frameN;
         n = n+1; 
     end
     
@@ -112,7 +113,7 @@ else
     X = nan;
     Y = nan;
     max_val = corr;
-    frame_flag(n, 1) = 0; % If X&Y do not exist, set flag to 0 for that frame;
+    frames_w_E(n, 1) = frameN;
     if show_error_dlg
         errordlg('IR E loc not found', 'Record another movie.');
     end
