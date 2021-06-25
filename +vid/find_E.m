@@ -52,6 +52,9 @@ scale = E_size_pix;
 stimE = imresize(basicE, scale, 'nearest');
 stimE = 1-stimE;
 
+% rotate filter E to match presentation stimulus
+stimE = imrotate(stimE, orientation);
+
 try
     % create video reader object
     reader = VideoReader(filename);
@@ -78,9 +81,6 @@ while hasFrame(reader)
     
     % invert the image
     currentframe = 1 - currentframe;
-
-    % rotate filter E to match presentation stimulus
-    stimE = imrotate(stimE, orientation);
     
     % do the cross correlation, calls script to find largest values in each
     % row & column
