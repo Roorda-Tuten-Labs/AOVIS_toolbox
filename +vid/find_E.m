@@ -3,7 +3,7 @@ function [X, Y, frames_w_E, max_val] = find_E(filename, E_size_pix, ...
 % Find the center of a tumbling E stimulus in a video frame by frame
 %
 % USAGE
-% [X_cross_loc, Y_cross_loc, frames_w_E] = find_E(filename, E_size_pix, ...
+% [X, Y, frames_w_E, max_val] = find_E(filename, E_size_pix, ...
 %    orientation, xcorr_threshold, print_output, show_error_dlg)
 %    
 %
@@ -18,9 +18,9 @@ function [X, Y, frames_w_E, max_val] = find_E(filename, E_size_pix, ...
 %                           for the user or not
 % 
 % OUTPUT
-% X_E_loc:          location of E center in X, this will be a vector with 
+% X:          location of E center in X, this will be a vector with 
 %                       values for each frame where the E center was found.
-% Y_E_loc:          location of E center in Y. Same as above.
+% Y:          location of E center in Y. Same as above.
 % frames_w_E:       array containing frame numbers that contained an E.
 % max_val:          maximum correlation value between image and stimulus.
 
