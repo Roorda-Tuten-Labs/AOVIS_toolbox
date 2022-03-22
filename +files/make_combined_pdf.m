@@ -18,7 +18,7 @@ function make_combined_pdf(directory, save_name)
     for ii = 1:length(tmp)
         filenames{ii} = fullfile(directory, tmp(ii).name); %#ok
     end
-    array.append_pdfs(save_name, filenames{:});
+    files.append_pdfs(save_name, filenames{:});
 
     %open(save_name);
     
