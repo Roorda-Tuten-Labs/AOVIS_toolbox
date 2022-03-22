@@ -9,7 +9,6 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 %    cross_channel_or_val)
 %
 % INPUT
-<<<<<<< HEAD
 % filename:         name of video file to read.
 % cross_size_pix:   size of the cross in pixels to use in cross
 %                   correlation.
@@ -25,7 +24,6 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 % show_error_dlg:   choose to show an error dialogue box with information
 %                   for the user or not.
 %
-=======
 % filename:             name of video file to read.
 % cross_size_pix:       size of the cross in pixels to use in cross
 %                       correlation.
@@ -49,7 +47,6 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 % show_error_dlg:       choose to show an error dialogue box with information
 %                       for the user or not.
 %   
->>>>>>> master
 % OUTPUT
 % X_cross_loc:          location of cross in X. If return_mean_only==0, this
 %                       will be a vector with values for each frame where the
@@ -82,12 +79,11 @@ if nargin < 7
 end
 
 % select channel with ir cross and set appropriate cross_pixel_val
-<<<<<<< HEAD
-if strcmpi(cross_channel, 'ir');
+if strcmpi(cross_channel_or_val, 'ir')
         cross_pixel_val = 255/255;
-elseif strcmpi(cross_channel, 'red');
+elseif strcmpi(cross_channel_or_val, 'red')
         cross_pixel_val = 253/255;
-elseif strcmpi(cross_channel, 'green');
+elseif strcmpi(cross_channel_or_val, 'green')
         cross_pixel_val = 251/255;
 else
     cross_pixel_val = cross_channel_or_val./255; % Search for user-defined cross intensity

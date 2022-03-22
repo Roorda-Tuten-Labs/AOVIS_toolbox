@@ -38,13 +38,13 @@ function image_adder(varargin)
 % Revision history/notes: 
 % 10-17-07              austin roorda wrote the original
 %                       version of this code as "movie_normalized"
-% 3-14-18               brian schmidt updtaed with work with modern Matlab
+% 3-14-18               brian schmidt updated to work with modern Matlab
 %                       and incorporated into the AOVIS_toolbox
 % 5-1-21                wst updated to accepting starting directory and to
 %                       filter what gets displayed by uigetfile.
 % 6-21-21               wst added ability to accept both .avi and .tif
-%                       files; also switched inputParser scheme with
-%                       key-value pairs
+%                       files; also switched to inputParser scheme which
+%                       uses key-value pairs for inputs
 %
 % Example usage:
 %
