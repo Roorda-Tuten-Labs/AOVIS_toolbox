@@ -40,8 +40,8 @@ elseif isfield(AllData, 'intensity_ids')
 end
     
 
-% video folder where plots will be saved. first 14 chars are "Video Folder:"
-videofolder = AllData.videofolder(15:end);
+% video folder where plots will be saved.
+videofolder = AllData.videofolder;
 
 % sort rows so that organized by cone ID. (i.e. cone#1, cone#2 ...);
 sortrows(temp,1);

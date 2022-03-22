@@ -16,9 +16,9 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 % print_output:     0 or 1. Decide whether to print results
 % return_mean_only: 0 or 1. this routine will find the mean by excluding
 %                   values that are greater than 1 STD from the mean.
-% cross_channel:    the crosses from each channel are encoded with a unique 
-%                   value. we select the cross pixel value for the channel 
-%                   of interest. this will be used below to binarize the 
+% cross_channel:    the crosses from each channel are encoded with a unique
+%                   value. we select the cross pixel value for the channel
+%                   of interest. this will be used below to binarize the
 %                   image and improve the detection algorithm. Default =
 %                   ir.
 % show_error_dlg:   choose to show an error dialogue box with information
@@ -57,11 +57,11 @@ end
 
 % select channel with ir cross and set appropriate cross_pixel_val
 if strcmpi(cross_channel, 'ir');
-        cross_pixel_val = 255/255;
+    cross_pixel_val = 255/255; 
 elseif strcmpi(cross_channel, 'red');
-        cross_pixel_val = 253/255;
+    cross_pixel_val = 253/255;
 elseif strcmpi(cross_channel, 'green');
-        cross_pixel_val = 251/255;
+    cross_pixel_val = 251/255;
 else
     error('cross_channel must be set to ir, red or green')
 end
@@ -83,7 +83,7 @@ catch ME
 end
 n = 1;
 frameN = 1;
-while hasFrame(reader)  
+while hasFrame(reader)
     % select the current frame
     currentframe = readFrame(reader);
     
@@ -94,22 +94,22 @@ while hasFrame(reader)
     % largely eliminate confusion with bright cones that otherwise might
     % look to the cross correlation like a cross
     currentframe = currentframe .* (currentframe==cross_pixel_val);
-
+    
     % do the cross correlation
     xcorr = array.normxcorr2f(ir_cross, currentframe);
     
     % find the position of highest correlation
     [corr, Yr, Xr] = array.max2D_RS(xcorr);
-
+    
     % check if corr was above threshold
     if corr > xcorr_threshold
         Y(n, 1)  = Yr;
         X(n, 1)  = Xr;
         %max_val = corr(frameN, 1);
         frames_w_cross(n, 1) = frameN;
-        n = n+1; 
+        n = n+1;
     end
-
+    
     % increment frame number
     frameN = frameN + 1;
     
@@ -120,27 +120,52 @@ if exist('X', 'var') && exist('Y', 'var')
         disp(X); disp(std(X))
         disp(Y); disp(std(Y))
     end
-
+    
     if return_mean_only
         if exist('X', 'var') && std(X) < 10 && std(Y) < 10
             % compute mean of XY position from cross locations that fall within
             % one STD of the mean.
             X_cross_loc = round(mean(X(find((X <= (mean(X)+std(X) / 2)) & ...
                 (X >= (mean(X) - std(X) / 2))))));
-
+            
             Y_cross_loc = round(mean(Y(find((Y <= (mean(Y) + std(Y) / 2)) & ...
                 (Y >=(mean(Y) - std(Y) / 2))))));
-
+            
+            if isnan(X_cross_loc) || isnan(Y_cross_loc) 
+                medianButton = questdlg('Use median cross locations?', 'Median', ...
+                    'Yes', 'No', 'Yes');
+                switch medianButton
+                    case 'No'
+                        X_cross_loc = nan;
+                        Y_cross_loc = nan;
+                        frames_w_cross = nan;
+                        if show_error_dlg
+                            errordlg('IR cross may not be reliable', 'Record another movie.');
+                        end
+                    case 'Yes'
+                        X_cross_loc = median(X);
+                        Y_cross_loc = median(Y);
+                end
+                
+            end
         else
             % case where cross was found, but the STD was too high.
-            X_cross_loc = nan;
-            Y_cross_loc = nan;
-            frames_w_cross = nan;          
-            if show_error_dlg
-                errordlg('IR cross not reliable', 'Record another movie.');
+            medianButton = questdlg('Use median cross locations?', 'Median', ...
+                'Yes', 'No', 'Yes');
+            switch medianButton
+                case 'No'
+                    X_cross_loc = nan;
+                    Y_cross_loc = nan;
+                    frames_w_cross = nan;
+                    if show_error_dlg
+                        errordlg('IR cross not reliable', 'Record another movie.');
+                    end
+                case 'Yes'
+                    X_cross_loc = median(X);
+                    Y_cross_loc = median(Y);
             end
         end
-
+        
     else
         X_cross_loc = X;
         Y_cross_loc = Y;
