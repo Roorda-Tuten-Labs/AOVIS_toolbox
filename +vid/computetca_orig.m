@@ -1,4 +1,4 @@
-function computetca(sub)
+function computetca_orig(sub)
 % TCA computes and plots x and y offsets from interleaved videos recorded
 % with AOSLO IV when the 'TCA' experiment has been used for stimulus
 % presentation in AOMControl. The results are stored in tca_comp and saved
