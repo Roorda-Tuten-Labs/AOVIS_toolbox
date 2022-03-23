@@ -47,6 +47,10 @@ end
 [filenames, path] = uigetfile(searchString, 'Select video(s)', ...
     'MultiSelect', 'on', startPath);
 
+if ~iscell(filenames)
+    filenames = {filenames};
+end
+
 nummovies = length(filenames);
 
 for movienum = 1:nummovies
@@ -81,7 +85,8 @@ for movienum = 1:nummovies
     sumframenew = sumframe ./ sumframebinary;
     
     % save file
-    name = fullfile(path, ['sumnorm_' filenames{movienum} '.tif']);
+    fnstring = filenames{movienum};
+    name = fullfile(path, ['sumnorm_' fnstring(1:end-4) '.tif']);
     imwrite(sumframenew / max(max(sumframenew)), name, 'tif',...
         'Compression', 'none');
     
