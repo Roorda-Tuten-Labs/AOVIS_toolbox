@@ -1,6 +1,6 @@
 function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
     cross_size_pix, xcorr_threshold, print_output, return_mean_only, ...
-    cross_channel, show_error_dlg)
+    cross_channel_or_val, show_error_dlg)
 % Find cross in a video
 %
 % USAGE
@@ -60,7 +60,7 @@ function [X_cross_loc, Y_cross_loc, frames_w_cross] = find_cross(filename, ...
 import util.*
 
 if nargin < 2
-    cross_size_pix = 17;
+    cross_size_pix = 11;
 end
 if nargin < 3
     xcorr_threshold = 0.7;
@@ -72,7 +72,7 @@ if nargin < 5
     return_mean_only = true;
 end
 if nargin < 6
-    cross_channel = 'ir';
+    cross_channel_or_val = 'ir';
 end
 if nargin < 7
     show_error_dlg = 1;

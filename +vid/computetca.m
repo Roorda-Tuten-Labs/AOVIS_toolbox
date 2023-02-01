@@ -1,4 +1,4 @@
-function computetca(sub)
+function status = computetca(sub, filename)
 % TCA computes and plots x and y offsets from interleaved videos recorded
 % with AOSLO IV when the 'TCA' experiment has been used for stimulus
 % presentation in AOMControl. The results are stored in tca_comp and saved
@@ -34,7 +34,10 @@ function computetca(sub)
 % and slow scanners.
 import img.dftregistration
 
-if nargin==0; %checks for subfield option
+if ~exist('sub', 'var')
+    sub=1;
+elseif isa(sub, 'char') %this is filename
+    filename = sub;
     sub=1;
 end
 
@@ -59,9 +62,16 @@ if exist('D:\Video_Folder', 'dir') > 0
     cd('D:\Video_Folder');
 end
 
-[files, pathname]=uigetfile('*.avi',...
+if ~exist('filename', 'var')
+    [files, pathname]=uigetfile('*.avi',...
     'Select avi file(s) for TCA computation',...
     'MultiSelect', 'on');  % file selection dialog
+else
+    [pathname, files] = fileparts(filename);
+    files = [files, '.avi'];
+end
+
+
 if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
     
     cd(pathname);           % do everything in video folder
@@ -69,8 +79,7 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
     nfiles=size(files,2);   % determine number of files in selection
     nmats=0;
     idash = find(pathname==filesep());
-    prefix = pathname(idash(end-1)+1:end-1);
-    
+    prefix = pathname(idash(end-1)+1:end-1);    
     
     for nf = 1:nfiles
         vname = files{nf};  % set current filename
@@ -91,9 +100,9 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
     
     
     % main loop for number of videos in selection
-    for nf = 1:nfiles
-        LOCX=[];
-        LOCY=[];
+    for nf = 1:nfiles        
+        LOCX=256;
+        LOCY=256;
         
         vname = files{nf};  % set current filename
         matname = [vname(1:end-4),'_TCA.mat'];  % generate filename for .mat file to store
@@ -107,23 +116,22 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
             end
             
         else   % if .mat file is not present do the full calculation
-                       
-            % create a video reader object
-            readerobj = VideoReader(vname);
-            %nframes = readerobj.NumFrames;
-            % Above field will be lost in future releases. Below should
-            % work in that case.
-            nframes = readerobj.Duration * readerobj.FrameRate;
-            if sub==1
-                tca_comp=zeros(2,2,nframes);
-            else
-                tca_comp=zeros(6,2,nframes);
-            end
-            
             try
                 h = waitbar(0,'1','Name',['Computing TCA in ',vname,' ...'],...
                     'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
                 setappdata(h,'canceling',0)
+
+				% create a video reader object
+				readerobj = VideoReader(vname);
+				%nframes = readerobj.NumFrames;
+				% Above field will be lost in future releases. Below should
+				% work in that case.
+				nframes = readerobj.Duration * readerobj.FrameRate;
+				if sub==1
+					tca_comp=zeros(2,2,nframes);
+				else
+					tca_comp=zeros(6,2,nframes);
+				end
 
                 % Skip the first frame.
                 readFrame(readerobj);
@@ -140,28 +148,35 @@ if ~(isequal(files,0) || isequal(pathname,0)) % Checks if cancelled
                     tca_comp(:,:,f)=compute_tca_core(t1,'ir',0,'ir',sub, f);  
                     waitbar(f/nframes,h,sprintf('Frame %2.0f of %2.0f',f,nframes))
                     f = f + 1;
-                end;
+                end
                 delete(h);
                 if killfunc
                     disp(' ');disp(' ');disp(' ')
                     disp(' --> TCA computation cancelled')
                     disp(' ');disp(' ');
+                    status = [' --> TCA computation cancelled'];
                     return;
-                end;
+                end
                 save(matname,'tca_comp','LOCX','LOCY');     % save result to .mat file
                 
             catch ME
                 delete(h);
-                error('Problem with compute_tca_core');
+				cd (orig_dir);
+                status = ['Problem with compute_tca_core'];
+                disp(' --- Problem with compute_tca_core --- ');
+                return;
             end
         end
         try
-            plotTCA(tca_comp,matname,nf,sub);
+            status = plotTCA(tca_comp,matname,nf,sub);
         catch ME
             cd(orig_dir);
             error(['Plot TCA did not work. Most likely the cross was' ...
                 ' not found. Check to see if there were too many saturated'...
                 ' pixels and/or try recording another video.'])
+            status = ['Plot TCA did not work. Most likely the cross was' ...
+                ' not found. Check to see if there were too many saturated'...
+                ' pixels and/or try recording another video.'];
         end
         
     end
@@ -187,6 +202,7 @@ end
 function y = compute_tca_core(frame,crossChannel,showTCA,corrChannel,sub, nframe)
 import img.dftregistration
 global LOCX LOCY;
+locx=LOCX; locy = LOCY; %added by Austin - 2-22-22
 skipframe=0;
 frame=double(frame);
 frame=frame/max(frame(:));
@@ -197,56 +213,80 @@ else
 end
     
 
-% construct cross filter and apply to frame
-crossFilter=zeros(11); 
-crossFilter(:,6)=1; 
-crossFilter(6,:)=1;
+% % construct cross filter and apply to frame
+% crossFilter=zeros(11); 
+% crossFilter(:,6)=1; 
+% crossFilter(6,:)=1;
+% 
+% % crossFilter=zeros(17); crossFilter(:,9)=1; crossFilter(9,:)=1; %depends on cross size
+% 
+% r = imfilter(frame, crossFilter); 
+% r=r/max(r(:));  % normalize 0 to 1
+% bw = im2bw(r,0.99); % binarize by thresholding
 
-% crossFilter=zeros(17); crossFilter(:,9)=1; crossFilter(9,:)=1; %depends on cross size
 
-r = imfilter(frame, crossFilter); 
-r=r/max(r(:));  % normalize 0 to 1
-bw = im2bw(r,0.9); % binarize by thresholding
 
-% locate cross's center
-if size(bw(bw==1),1)==1 %only if frame contains cross
-    if isempty(LOCX) % store locations only if not found before
-        
-        [locy, locx]=ind2sub([size(bw,1) size(bw,2)],find(bw==max(bw(:))));
-        LOCX=locx; LOCY=locy; % locx,locy is position of cross center; x=column
-    else
-        locx=LOCX; locy=LOCY;
-    end
-else
-    skipframe=1;
-end
+% % locate cross's center
+% if size(bw(bw==1),1)==1 %only if frame contains cross
+%     if isempty(LOCX) % store locations only if not found before
+%         
+%         [locy, locx]=ind2sub([size(bw,1) size(bw,2)],find(bw==max(bw(:))));
+
+
+% AEB changes 9-5-2019
+% cross_pixel_val = 0.9960;
+% currentframe = im2double(frame);
+% cross_size_pix = 11; % generate a cross
+% ir_cross = zeros(cross_size_pix, cross_size_pix);
+% center_cross = ceil(cross_size_pix / 2);
+% ir_cross(center_cross,:)= cross_pixel_val;
+% ir_cross(:, center_cross) = cross_pixel_val;
+% 
+% %currentframe = currentframe .* (currentframe==cross_pixel_val);
+% xcorr = array.normxcorr2f(ir_cross, currentframe);
+% [corr, Yr, Xr] = array.max2D_RS(xcorr);
+% cross_corr_thresh = 0.65;
+% 
+% if corr >= cross_corr_thresh% only if frame contains cross
+%     if isempty(LOCX) % store locations only if not found before
+%         
+%         locy = Yr; locx = Xr;
+% % AEB 9-5-2019 changes end here. 
+% 
+%         LOCX=locx; LOCY=locy; % locx,locy is position of cross center; x=column
+%     else
+%         locx=LOCX; locy=LOCY;
+%     end
+% else
+%     skipframe=1;
+% end
 
 if ~skipframe % do the following only if cross was detected
-    
+
     % assign offsets appropriate for cross's position
     switch lower(crossChannel)
-        case {'g','green'}
-            %    disp('Cross centered in Green channel');
-            Ry=locy-60+0;  Rx=locx-127;
-            Gy=locy-60+1;  Gx=locx-127;
-            IRy=locy-60+2; IRx=locx-127;
-        case {'r','red'}
-            %    disp('Cross centered in Red channel');
-            Ry=locy-60-1;  Rx=locx-127;
-            Gy=locy-60+0;  Gx=locx-127;
-            IRy=locy-60+1; IRx=locx-127;
+%         case {'g','green'}
+%             %    disp('Cross centered in Green channel');
+%             Ry=locy-60+0;  Rx=locx-127;
+%             Gy=locy-60+1;  Gx=locx-127;
+%             IRy=locy-60+2; IRx=locx-127;
+%         case {'r','red'}
+%             %    disp('Cross centered in Red channel');
+%             Ry=locy-60-1;  Rx=locx-127;
+%             Gy=locy-60+0;  Gx=locx-127;
+%             IRy=locy-60+1; IRx=locx-127;
         case {'ir','infrared'}
             %     disp('Cross centered in IR channel');
-            IRy=locy-60-2;  IRx=locx-127;
-            Gy=locy-60-1;  Gx=locx-127;
-            Ry=locy-60+0; Rx=locx-127;
+            IRy=locy-60;  IRx=locx-127;
+            Gy=locy-60-2;  Gx=locx-127;
+            Ry=locy-60-1; Rx=locx-127;
         otherwise
             disp('Channel with cross is invalid.')
     end
     
     % extract regions of frame for TCA calculation
     stimheight=125;
-    R=frame(Ry:3:Ry+stimheight, Rx:Rx+255);
+    R=frame(Ry:3:Ry+stimheight, Rx:Rx+255); % 
     G=frame(Gy:3:Gy+stimheight, Gx:Gx+255);
     IR=frame(IRy:3:IRy+stimheight, IRx:IRx+255);
     
@@ -263,6 +303,7 @@ if ~skipframe % do the following only if cross was detected
     % remove cross artifact  NOTE now assumes cross in IR channel !!!!!!!!
     meanIR = mean(IR(:)); 
     IR(20:24, 128) = meanIR;
+    IR(21, 122:133) = meanIR;
     
     meanG = mean(G(:)); 
     G(19:23, 128) = meanG;
@@ -270,7 +311,7 @@ if ~skipframe % do the following only if cross was detected
     
     meanR = mean(R(:)); 
     R(19:23, 128) = meanR; 
-    R(21, 122:133) = meanR;
+    
 
     % Plot a frame of each channel to see what you are correlating (sanity
     % check).
@@ -379,7 +420,7 @@ end;
 
 
 
-function plotTCA(tca_comp,matname,plotsi,sub)
+function result = plotTCA(tca_comp,matname,plotsi,sub)
 
 % read data from result matrix
 nframes = size(squeeze(tca_comp(1,1,:)),1);
@@ -469,195 +510,193 @@ plot(nanmedian(rx),nanmedian(ry),'o','Color',cr)
 plot(cxr,cyr,'x','Color',cr)
 plot(mcxr,mcyr,'.','Color',cr)
 
-if plotsi==1; 
-    display(' RX      RY      GX      GY  '); 
+if plotsi==1;
+    display(' RX      RY      GX      GY  ');
 end;  % output cluster fits coordinates
 display([' ',num2str(mcxr),'  ', num2str(mcyr),'  ', num2str(mcxg),'  ', num2str(mcyg)])
-
+result = sprintf(' RX RY GX GY \n %2.3f %2.3f %2.3f %2.3f ', mcxr, mcyr, mcxg, mcyg);
 
 if sub==2
     
+    % read data from result matrix
+    nframes = size(squeeze(tca_comp(1,1,:)),1);
+    gx=squeeze(tca_comp(3,1,:));
+    gy=squeeze(tca_comp(3,2,:));
+    rx=squeeze(tca_comp(4,1,:));
+    ry=squeeze(tca_comp(4,2,:));
     
-% read data from result matrix
-nframes = size(squeeze(tca_comp(1,1,:)),1);
-gx=squeeze(tca_comp(3,1,:));
-gy=squeeze(tca_comp(3,2,:));
-rx=squeeze(tca_comp(4,1,:));
-ry=squeeze(tca_comp(4,2,:));
-
-% do slope analysis to find clusters
-n=size(gx,1);
-mink=5; %determines how many STD windows are averaged
-maxk=10;
-samplerange=3; %
-
-% calculate STDs for ordered offset values for different window sizes
-for k=mink:maxk
-    slidew=k;
-    nslides=n-slidew;
-    [sortgx isgx] = sort(gx);
-    [sortgy isgy] = sort(gy);
-    [sortrx isrx] = sort(rx);
-    [sortry isry] = sort(ry);
-    for j=1:nslides
-        sxg(k-mink+1,j)=std(sortgx(j:j+slidew));
-        syg(k-mink+1,j)=std(sortgy(j:j+slidew));
-        sxr(k-mink+1,j)=std(sortrx(j:j+slidew));
-        syr(k-mink+1,j)=std(sortry(j:j+slidew));
+    % do slope analysis to find clusters
+    n=size(gx,1);
+    mink=5; %determines how many STD windows are averaged
+    maxk=10;
+    samplerange=3; %
+    
+    % calculate STDs for ordered offset values for different window sizes
+    for k=mink:maxk
+        slidew=k;
+        nslides=n-slidew;
+        [sortgx isgx] = sort(gx);
+        [sortgy isgy] = sort(gy);
+        [sortrx isrx] = sort(rx);
+        [sortry isry] = sort(ry);
+        for j=1:nslides
+            sxg(k-mink+1,j)=std(sortgx(j:j+slidew));
+            syg(k-mink+1,j)=std(sortgy(j:j+slidew));
+            sxr(k-mink+1,j)=std(sortrx(j:j+slidew));
+            syr(k-mink+1,j)=std(sortry(j:j+slidew));
+        end
     end
-end
-
-b = mean(sxg);
-minb=find(b==min(b(1:end-maxk)));
-minb=minb(round(size(minb,2)/2));
-cxg =sortgx(minb);
-cyg = gy(isgx(minb));
-
-samplegx=intersect(find(gx>=cxg-samplerange),find(gx<=cxg+samplerange));
-samplegy=intersect(find(gy>=cyg-samplerange),find(gy<=cyg+samplerange));
-
-mcxg=median(gx(samplegx));
-mcyg=median(gy(samplegy));
-
-% b = mean(syg);
-% minb=find(b==min(b));
-% minb=minb(round(size(minb,2)/2));
-% cyg=sortgy(minb);
-
-b = mean(sxr);
-minb=find(b==min(b(1:end-maxk)));
-minb=minb(round(size(minb,2)/2));
-cxr=sortrx(minb);
-cyr = ry(isrx(minb));
-
-samplerx=intersect(find(rx>=cxr-samplerange),find(rx<=cxr+samplerange));
-samplery=intersect(find(ry>=cyr-samplerange),find(ry<=cyr+samplerange));
-
-mcxr=median(rx(samplerx));
-mcyr=median(ry(samplery));
-
-cr=[1 0 0];
-cr2=[0.7 0 0];
-cr3=[1 0.75 0.75];
-cr4=[1 0.5 0.5];
-cg=[0 0.7 0];
-cg2=[0 0.5 0];
-cg3=[0.75 1 0.75];
-cg4=[0.5 1 0.5];
-cd1=[0.5 0.5 0.5];
-cd2=[0.2 0.2 0.2];
-
-figure;hold on
-plot(gx,gy,'.','Color',cg3);
-plot(rx,ry,'.','Color',cr3);
-axis equal; grid on;
-axis square;
-axis([-30 30 -30 30])
-xlabel('row pixels'); ylabel('col pixels');
-title([matname,' upper half'],'Interpreter','none');
-
-plot(nanmedian(gx),nanmedian(gy),'o','Color',cg)
-plot(cxg,cyg,'x','Color',cg)
-plot(mcxg,mcyg,'.','Color',cg)
-
-legend('IR/G','IR/R','Median','Centroid simple', 'Centroid 2 step');
-
-plot(nanmedian(rx),nanmedian(ry),'o','Color',cr)
-plot(cxr,cyr,'x','Color',cr)
-plot(mcxr,mcyr,'.','Color',cr)
-
-display([' ',num2str(mcxr),'  ', num2str(mcyr),'  ', num2str(mcxg),'  ', num2str(mcyg)])
-
-
-
-% read data from result matrix
-nframes = size(squeeze(tca_comp(1,1,:)),1);
-gx=squeeze(tca_comp(5,1,:));
-gy=squeeze(tca_comp(5,2,:));
-rx=squeeze(tca_comp(6,1,:));
-ry=squeeze(tca_comp(6,2,:));
-
-% do slope analysis to find clusters
-n=size(gx,1);
-mink=5; %determines how many STD windows are averaged
-maxk=10;
-samplerange=3; %
-
-% calculate STDs for ordered offset values for different window sizes
-for k=mink:maxk
-    slidew=k;
-    nslides=n-slidew;
-    [sortgx isgx] = sort(gx);
-    [sortgy isgy] = sort(gy);
-    [sortrx isrx] = sort(rx);
-    [sortry isry] = sort(ry);
-    for j=1:nslides
-        sxg(k-mink+1,j)=std(sortgx(j:j+slidew));
-        syg(k-mink+1,j)=std(sortgy(j:j+slidew));
-        sxr(k-mink+1,j)=std(sortrx(j:j+slidew));
-        syr(k-mink+1,j)=std(sortry(j:j+slidew));
+    
+    b = mean(sxg);
+    minb=find(b==min(b(1:end-maxk)));
+    minb=minb(round(size(minb,2)/2));
+    cxg =sortgx(minb);
+    cyg = gy(isgx(minb));
+    
+    samplegx=intersect(find(gx>=cxg-samplerange),find(gx<=cxg+samplerange));
+    samplegy=intersect(find(gy>=cyg-samplerange),find(gy<=cyg+samplerange));
+    
+    mcxg=median(gx(samplegx));
+    mcyg=median(gy(samplegy));
+    
+    % b = mean(syg);
+    % minb=find(b==min(b));
+    % minb=minb(round(size(minb,2)/2));
+    % cyg=sortgy(minb);
+    
+    b = mean(sxr);
+    minb=find(b==min(b(1:end-maxk)));
+    minb=minb(round(size(minb,2)/2));
+    cxr=sortrx(minb);
+    cyr = ry(isrx(minb));
+    
+    samplerx=intersect(find(rx>=cxr-samplerange),find(rx<=cxr+samplerange));
+    samplery=intersect(find(ry>=cyr-samplerange),find(ry<=cyr+samplerange));
+    
+    mcxr=median(rx(samplerx));
+    mcyr=median(ry(samplery));
+    
+    cr=[1 0 0];
+    cr2=[0.7 0 0];
+    cr3=[1 0.75 0.75];
+    cr4=[1 0.5 0.5];
+    cg=[0 0.7 0];
+    cg2=[0 0.5 0];
+    cg3=[0.75 1 0.75];
+    cg4=[0.5 1 0.5];
+    cd1=[0.5 0.5 0.5];
+    cd2=[0.2 0.2 0.2];
+    
+    figure;hold on
+    plot(gx,gy,'.','Color',cg3);
+    plot(rx,ry,'.','Color',cr3);
+    axis equal; grid on;
+    axis square;
+    axis([-30 30 -30 30])
+    xlabel('row pixels'); ylabel('col pixels');
+    title([matname,' upper half'],'Interpreter','none');
+    
+    plot(nanmedian(gx),nanmedian(gy),'o','Color',cg)
+    plot(cxg,cyg,'x','Color',cg)
+    plot(mcxg,mcyg,'.','Color',cg)
+    
+    legend('IR/G','IR/R','Median','Centroid simple', 'Centroid 2 step');
+    
+    plot(nanmedian(rx),nanmedian(ry),'o','Color',cr)
+    plot(cxr,cyr,'x','Color',cr)
+    plot(mcxr,mcyr,'.','Color',cr)
+    
+    display([' ',num2str(mcxr),'  ', num2str(mcyr),'  ', num2str(mcxg),'  ', num2str(mcyg)])
+       
+    % read data from result matrix
+    nframes = size(squeeze(tca_comp(1,1,:)),1);
+    gx=squeeze(tca_comp(5,1,:));
+    gy=squeeze(tca_comp(5,2,:));
+    rx=squeeze(tca_comp(6,1,:));
+    ry=squeeze(tca_comp(6,2,:));
+    
+    % do slope analysis to find clusters
+    n=size(gx,1);
+    mink=5; %determines how many STD windows are averaged
+    maxk=10;
+    samplerange=3; %
+    
+    % calculate STDs for ordered offset values for different window sizes
+    for k=mink:maxk
+        slidew=k;
+        nslides=n-slidew;
+        [sortgx isgx] = sort(gx);
+        [sortgy isgy] = sort(gy);
+        [sortrx isrx] = sort(rx);
+        [sortry isry] = sort(ry);
+        for j=1:nslides
+            sxg(k-mink+1,j)=std(sortgx(j:j+slidew));
+            syg(k-mink+1,j)=std(sortgy(j:j+slidew));
+            sxr(k-mink+1,j)=std(sortrx(j:j+slidew));
+            syr(k-mink+1,j)=std(sortry(j:j+slidew));
+        end
     end
-end
-
-b = mean(sxg);
-minb=find(b==min(b(1:end-maxk)));
-minb=minb(round(size(minb,2)/2));
-cxg =sortgx(minb);
-cyg = gy(isgx(minb));
-
-samplegx=intersect(find(gx>=cxg-samplerange),find(gx<=cxg+samplerange));
-samplegy=intersect(find(gy>=cyg-samplerange),find(gy<=cyg+samplerange));
-
-mcxg=median(gx(samplegx));
-mcyg=median(gy(samplegy));
-
-% b = mean(syg);
-% minb=find(b==min(b));
-% minb=minb(round(size(minb,2)/2));
-% cyg=sortgy(minb);
-
-b = mean(sxr);
-minb=find(b==min(b(1:end-maxk)));
-minb=minb(round(size(minb,2)/2));
-cxr=sortrx(minb);
-cyr = ry(isrx(minb));
-
-samplerx=intersect(find(rx>=cxr-samplerange),find(rx<=cxr+samplerange));
-samplery=intersect(find(ry>=cyr-samplerange),find(ry<=cyr+samplerange));
-
-mcxr=median(rx(samplerx));
-mcyr=median(ry(samplery));
-
-cr=[1 0 0];
-cr2=[0.7 0 0];
-cr3=[1 0.75 0.75];
-cr4=[1 0.5 0.5];
-cg=[0 0.7 0];
-cg2=[0 0.5 0];
-cg3=[0.75 1 0.75];
-cg4=[0.5 1 0.5];
-cd1=[0.5 0.5 0.5];
-cd2=[0.2 0.2 0.2];
-
-figure;hold on
-plot(gx,gy,'.','Color',cg3);
-plot(rx,ry,'.','Color',cr3);
-axis equal; grid on;
-axis square;
-axis([-30 30 -30 30])
-xlabel('row pixels'); ylabel('col pixels');
-title([matname,' lower half'],'Interpreter','none');
-
-plot(nanmedian(gx),nanmedian(gy),'o','Color',cg)
-plot(cxg,cyg,'x','Color',cg)
-plot(mcxg,mcyg,'.','Color',cg)
-
-legend('IR/G','IR/R','Median','Centroid simple', 'Centroid 2 step');
-
-plot(nanmedian(rx),nanmedian(ry),'o','Color',cr)
-plot(cxr,cyr,'x','Color',cr)
-plot(mcxr,mcyr,'.','Color',cr)
-
-display([' ',num2str(mcxr),'  ', num2str(mcyr),'  ', num2str(mcxg),'  ', num2str(mcyg)])
-
+    
+    b = mean(sxg);
+    minb=find(b==min(b(1:end-maxk)));
+    minb=minb(round(size(minb,2)/2));
+    cxg =sortgx(minb);
+    cyg = gy(isgx(minb));
+    
+    samplegx=intersect(find(gx>=cxg-samplerange),find(gx<=cxg+samplerange));
+    samplegy=intersect(find(gy>=cyg-samplerange),find(gy<=cyg+samplerange));
+    
+    mcxg=median(gx(samplegx));
+    mcyg=median(gy(samplegy));
+    
+    % b = mean(syg);
+    % minb=find(b==min(b));
+    % minb=minb(round(size(minb,2)/2));
+    % cyg=sortgy(minb);
+    
+    b = mean(sxr);
+    minb=find(b==min(b(1:end-maxk)));
+    minb=minb(round(size(minb,2)/2));
+    cxr=sortrx(minb);
+    cyr = ry(isrx(minb));
+    
+    samplerx=intersect(find(rx>=cxr-samplerange),find(rx<=cxr+samplerange));
+    samplery=intersect(find(ry>=cyr-samplerange),find(ry<=cyr+samplerange));
+    
+    mcxr=median(rx(samplerx));
+    mcyr=median(ry(samplery));
+    
+    cr=[1 0 0];
+    cr2=[0.7 0 0];
+    cr3=[1 0.75 0.75];
+    cr4=[1 0.5 0.5];
+    cg=[0 0.7 0];
+    cg2=[0 0.5 0];
+    cg3=[0.75 1 0.75];
+    cg4=[0.5 1 0.5];
+    cd1=[0.5 0.5 0.5];
+    cd2=[0.2 0.2 0.2];
+    
+    figure;hold on
+    plot(gx,gy,'.','Color',cg3);
+    plot(rx,ry,'.','Color',cr3);
+    axis equal; grid on;
+    axis square;
+    axis([-30 30 -30 30])
+    xlabel('row pixels'); ylabel('col pixels');
+    title([matname,' lower half'],'Interpreter','none');
+    
+    plot(nanmedian(gx),nanmedian(gy),'o','Color',cg)
+    plot(cxg,cyg,'x','Color',cg)
+    plot(mcxg,mcyg,'.','Color',cg)
+    
+    legend('IR/G','IR/R','Median','Centroid simple', 'Centroid 2 step');
+    
+    plot(nanmedian(rx),nanmedian(ry),'o','Color',cr)
+    plot(cxr,cyr,'x','Color',cr)
+    plot(mcxr,mcyr,'.','Color',cr)
+    
+    display([' ',num2str(mcxr),'  ', num2str(mcyr),'  ', num2str(mcxg),'  ', num2str(mcyg)])
+    result = sprintf(' RX RY GX GY \n %2.3f %2.3f %2.3f %2.3f ', mcxr, mcyr, mcxg, mcyg);
+   
 end
