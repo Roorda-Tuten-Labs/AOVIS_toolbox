@@ -1,6 +1,6 @@
-subject = '20076';
+subject = '20076R';
 
-cones = get_all_cone_locations(subject);
+cones = light_capture.get_all_cone_locations(subject);
 figure;
 plot(cones(:, 1), cones(:, 2), 'k+')
 
@@ -20,7 +20,7 @@ mean(dist(:, 2:7))
 mean(mean(dist(:, 2:7)))
 
 % get the cones from a subject
-cones = get_all_cone_locations('10001');
+cones = light_capture.get_all_cone_locations(subject);
 % select out a center cone of interest
 c_ind = 107;
 x_mean = cones(c_ind, 1);

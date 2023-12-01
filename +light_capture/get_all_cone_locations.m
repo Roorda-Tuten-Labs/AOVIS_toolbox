@@ -1,10 +1,10 @@
 function locs = get_all_cone_locations(subject)
     if nargin < 1
-        subject = '10001';
+        subject = '10001R';
     end
 
     % get location of all cones
-    dat = load(['dat/' subject '/LMS_cones.mat']);
+    dat = load(['+cone_mosaic/dat/' subject '/LMS_cones.mat']);
     fnames = fieldnames(dat); %LMS_cones_10001R;
     locs = dat.(fnames{1}); 
     
